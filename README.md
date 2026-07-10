@@ -1,0 +1,170 @@
+# Portfolio FZAC - Fortaleza Construcciones
+
+Portfolio web institucional y comercial de Fortaleza Construcciones. La web muestra obras, trabajos varios, eventos, servicios, galerias visuales por proyecto y canales de contacto para clientes de Rosario, Santa Fe y alrededores.
+
+El proyecto queda administrable desde un panel privado para que una persona no tecnica pueda cargar obras, imagenes, videos, titulos, textos y nuevos items del portfolio sin tocar codigo.
+
+## Que se realizo
+
+- Se migro la capa de datos a Supabase.
+- Se agrego Prisma como ORM del backend contra Postgres de Supabase.
+- Se implemento Supabase Auth para el acceso privado.
+- Se implemento Supabase Storage para imagenes mediante backend y service role.
+- Se eliminaron configuraciones del proveedor anterior.
+- Se mantuvo el panel admin y se agrego CRUD backend para obras, categorias, textos e imagenes.
+- Se conserva el fallback local del portfolio cuando backend/Supabase no responde.
+- Se mantiene el registro limitado al email administrador autorizado.
+- Se mantiene la proteccion de la ruta admin con sesion Supabase.
+- Se mantiene el backend Express con Helmet, CORS, rate limits y validaciones.
+
+## Tecnologias
+
+- React 18
+- Vite
+- React Router
+- Supabase Auth
+- Supabase Storage
+- Supabase Postgres
+- Prisma
+- Node.js
+- Express
+- Helmet
+- express-rate-limit
+- JWT Supabase
+- Vercel o hosting estatico para frontend
+
+## Estructura
+
+```text
+fzac_work/
+  frontend/
+    src/
+      components/
+      data/
+      pages/
+      services/
+      styles/
+      supabase/
+  backend/
+    api/
+    config/
+    controllers/
+    db/
+    middleware/
+    models/
+    prisma/
+    routes/
+  vercel.json
+  README.md
+```
+
+## Variables de entorno
+
+Frontend: copiar `frontend/.env.example` a `frontend/.env` y completar:
+
+```env
+VITE_API_URL=http://localhost:4000/api
+VITE_SUPABASE_URL=https://[PROJECT_REF].supabase.co
+VITE_SUPABASE_ANON_KEY=[ANON_KEY]
+```
+
+Backend: copiar `backend/.env.example` a `backend/.env` y completar:
+
+```env
+DATABASE_URL="postgresql://..."
+DIRECT_URL="postgresql://..."
+SUPABASE_URL="https://[PROJECT_REF].supabase.co"
+SUPABASE_ANON_KEY="[ANON_KEY]"
+SUPABASE_SERVICE_ROLE_KEY="[SERVICE_ROLE_KEY]"
+SUPABASE_STORAGE_BUCKET=crud-images
+MAX_UPLOAD_SIZE_MB=10
+ALLOWED_UPLOAD_MIME_TYPES=image/jpeg,image/png,image/webp,image/gif
+JWT_SECRET="jwt_secret_de_supabase"
+AUTH_REQUIRED=true
+```
+
+No se deben publicar credenciales reales ni service role keys.
+
+## Como correr backend
+
+```bash
+cd backend
+npm install
+npm run prisma:generate
+npx prisma db execute --file prisma/migrations/20260707123000_admin_crud_supabase/migration.sql --schema prisma/schema.prisma
+npm run prisma:seed
+npm run dev
+```
+
+La migracion incluida es aditiva: crea o completa `admin_profiles`, `categories`, `works`, `work_images` y `site_texts` sin borrar tablas internas de Supabase Auth.
+
+## Como correr frontend
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Build:
+
+```bash
+npm run build
+```
+
+## Endpoints principales
+
+- `GET /health`
+- `POST /api/auth/register`
+- `POST /api/auth/login`
+- `GET /api/fzac/obras`
+- `POST /api/fzac/obras`
+- `PUT /api/fzac/obras/:id`
+- `DELETE /api/fzac/obras/:id`
+- `GET /api/fzac/trabajos`
+- `GET /api/fzac/eventos`
+- `POST /api/contactos`
+- `GET /api/contactos`
+- `PATCH /api/contactos/:id`
+- `GET /api/login-logs`
+- `GET /api/site-settings/main`
+- `POST /api/admin/uploads`
+- `GET /api/admin/works`
+- `POST /api/admin/works`
+- `PUT /api/admin/works/:id`
+- `DELETE /api/admin/works/:id`
+- `GET /api/admin/categories`
+- `POST /api/admin/categories`
+- `PUT /api/admin/categories/:id`
+- `DELETE /api/admin/categories/:id`
+- `GET /api/admin/site-texts`
+- `POST /api/admin/site-texts`
+- `PUT /api/admin/site-texts/:id`
+- `DELETE /api/admin/site-texts/:id`
+- `GET /api/admin/work-images`
+- `POST /api/admin/work-images`
+- `PUT /api/admin/work-images/:id`
+- `DELETE /api/admin/work-images/:id`
+
+Las rutas de escritura validan JWT de Supabase y el email administrador.
+
+## Seguridad
+
+- `/admin` queda protegido con Supabase Auth.
+- El backend valida JWT con `JWT_SECRET` de Supabase.
+- Solo el email administrador puede operar rutas privadas.
+- El registro admin del backend usa service role y restringe el email permitido.
+- Supabase Storage sube imagenes desde el backend con `SUPABASE_SERVICE_ROLE_KEY`; el frontend nunca recibe esa key.
+- La base guarda imagenes en `work_images` como `image_url` e `image_path`.
+- Helmet, CORS y rate limiting siguen activos en Express.
+- Para DDoS volumetrico se recomienda CDN/WAF, por ejemplo Cloudflare, y politicas RLS/Storage ajustadas en Supabase.
+
+## Supabase Storage
+
+Crear un bucket para el CRUD, por defecto:
+
+```text
+crud-images
+```
+
+El backend intenta crear el bucket como publico si no existe. Las imagenes cargadas desde admin se suben a `/api/admin/uploads` con `multipart/form-data` y se guardan luego en `work_images`.
