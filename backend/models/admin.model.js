@@ -76,12 +76,16 @@ function imageInputToData(input, section, sortOrder = 0) {
 }
 
 function collectWorkImages(payload = {}) {
+  const before = toArray(payload.beforeImages || payload.imagenesAntes);
+  const process = toArray(payload.processImages || payload.imagenesProceso);
+  const final = toArray(payload.finalImages || payload.imagenesFinal);
+  const hasStages = before.length || process.length || final.length;
   const groups = [
     ['cover', toArray(payload.coverImage || payload.cover || payload.portada)],
-    ['gallery', toArray(payload.images || payload.imagenes)],
-    ['before', toArray(payload.beforeImages || payload.imagenesAntes)],
-    ['process', toArray(payload.processImages || payload.imagenesProceso)],
-    ['final', toArray(payload.finalImages || payload.imagenesFinal)],
+    ['gallery', hasStages ? [] : toArray(payload.images || payload.imagenes)],
+    ['before', before],
+    ['process', process],
+    ['final', final],
   ];
 
   const images = [];
@@ -147,10 +151,19 @@ export function workToApi(work) {
     ubicacion: work.location || '',
     address: work.address || '',
     direccion: work.address || '',
-    year: '',
-    anio: '',
+    year: work.year || '',
+    anio: work.year || '',
     status: work.status || 'draft',
     estado: work.status || 'draft',
+    progress: Number(work.progress || 0),
+    avance: Number(work.progress || 0),
+    proceso: work.processText || '',
+    finalizacion: work.completionText || '',
+    video: work.video || '',
+    galeriaVideo: toArray(work.videoGallery),
+    sucursales: toArray(work.branches),
+    stages: toArray(work.stages),
+    puntos: toArray(work.points),
     order: work.displayOrder || 0,
     destacado: Boolean(work.isFeatured),
     portada: cover?.imageUrl || '',
@@ -243,7 +256,16 @@ function workData(payload = {}, category, authorId = null) {
     client: clean(payload.client || payload.tipo),
     location: clean(payload.location || payload.ubicacion),
     address: clean(payload.address || payload.direccion),
+    year: clean(payload.year || payload.anio),
     status,
+    progress: Math.max(0, Math.min(100, toInt(payload.progress ?? payload.avance, 0))),
+    processText: clean(payload.processText || payload.proceso),
+    completionText: clean(payload.completionText || payload.finalizacion),
+    video: clean(payload.video) || null,
+    videoGallery: toArray(payload.videoGallery || payload.galeriaVideo),
+    branches: toArray(payload.branches || payload.sucursales),
+    stages: toArray(payload.stages || payload.etapas),
+    points: toArray(payload.points || payload.puntos),
     displayOrder: toInt(payload.displayOrder || payload.order, 0),
     isFeatured: toBool(payload.isFeatured ?? payload.destacado),
     categoryId: category?.id || null,
@@ -324,6 +346,27 @@ export async function deleteWork(id) {
   if (!existing) throw new Error('Obra no encontrada.');
   await prisma.work.delete({ where: { id: existing.id } });
   return { id: existing.id };
+}
+
+export async function syncPortfolioCatalog(catalog = [], userEmail = '') {
+  const items = Array.isArray(catalog) ? catalog : [];
+  const existingRows = await prisma.work.findMany({ select: { slug: true } });
+  const existingSlugs = new Set(existingRows.map((item) => item.slug));
+  const created = [];
+
+  for (const item of items) {
+    const slug = slugify(item?.slug || item?.nombre);
+    if (!slug || existingSlugs.has(slug)) continue;
+    const work = await createWork({ ...item, slug }, userEmail, null);
+    existingSlugs.add(slug);
+    created.push(work);
+  }
+
+  return {
+    created: created.length,
+    total: existingSlugs.size,
+    items: created,
+  };
 }
 
 export async function listCategories() {

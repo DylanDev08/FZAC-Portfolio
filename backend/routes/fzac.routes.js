@@ -5,6 +5,7 @@ import {
   createObraController,
   updateObraController,
   deleteObraController,
+  listPortfolioWorks,
 } from '../controllers/fzac.controller.js';
 import { makeContentController } from '../controllers/content.controller.js';
 import { authMiddleware } from '../middleware/auth.js';
@@ -39,6 +40,7 @@ export function validatePayload(req, res, next) {
 
 router.get('/', listObras);
 router.get('/obras', listObras);
+router.get('/works', listPortfolioWorks);
 router.get('/obras/:id', getObra);
 router.post('/obras', adminActionLimiter, authMiddleware, sanitizeBody, validatePayload, createObraController);
 router.put('/obras/:id', adminActionLimiter, authMiddleware, sanitizeBody, validatePayload, updateObraController);

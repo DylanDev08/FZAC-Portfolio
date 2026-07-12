@@ -4159,6 +4159,123 @@ a[href*="wa.me"] {
   cursor: pointer;
 }
 
+/* Editor visual de galerias */
+.admin-upload-preview {
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+}
+
+.admin-upload-preview__item {
+  display: grid;
+  grid-template-rows: 128px auto auto auto;
+  gap: 8px;
+  aspect-ratio: auto;
+  padding: 8px;
+  overflow: visible;
+  border-radius: 8px;
+}
+
+.admin-upload-preview__item img,
+.admin-upload-preview__item video {
+  height: 128px;
+  border-radius: 6px;
+}
+
+.admin-upload-preview__actions {
+  display: grid;
+  grid-template-columns: repeat(3, 32px);
+  gap: 6px;
+}
+
+.admin-upload-preview__item .admin-upload-preview__actions button {
+  position: static;
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  min-height: 32px;
+  padding: 0;
+  border-radius: 6px;
+  background: rgba(240,190,93,.92);
+}
+
+.admin-upload-preview__item .admin-upload-preview__actions button:disabled {
+  opacity: .35;
+  cursor: not-allowed;
+}
+
+.admin-upload-preview__item .admin-upload-preview__actions .is-danger,
+.admin-icon-danger {
+  color: #fff;
+  background: #8d2f2f;
+}
+
+.admin-upload-preview__stage,
+.admin-upload-preview__alt {
+  width: 100%;
+  min-width: 0;
+  min-height: 36px;
+  padding: 7px 9px;
+  border: 1px solid rgba(240,190,93,.2);
+  border-radius: 6px;
+  color: var(--color-text);
+  background: #171512;
+}
+
+.admin-branches-editor {
+  display: grid;
+  gap: 16px;
+  padding: 22px;
+  border: 1px solid rgba(240,190,93,.18);
+  border-radius: 8px;
+  background: rgba(255,255,255,.02);
+}
+
+.admin-branches-editor__head,
+.admin-branch-card__head,
+.admin-card__header-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.admin-branches-editor__head h3 {
+  margin: 5px 0;
+}
+
+.admin-branches-editor__head p {
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
+.admin-branch-card {
+  display: grid;
+  gap: 16px;
+  padding: 18px;
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 8px;
+  background: rgba(0,0,0,.22);
+}
+
+.admin-icon-danger {
+  display: inline-grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+@media (max-width: 760px) {
+  .admin-upload-preview { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .admin-branches-editor, .admin-branch-card { padding: 14px; }
+}
+
+@media (max-width: 440px) {
+  .admin-upload-preview { grid-template-columns: 1fr; }
+}
+
 .admin-item__thumb,
 .reference-card img,
 .project-card__image img {

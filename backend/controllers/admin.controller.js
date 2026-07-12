@@ -12,11 +12,13 @@ import {
   listSiteTexts,
   listWorkImages,
   listWorks,
+  syncPortfolioCatalog,
   updateCategory,
   updateSiteText,
   updateWork,
   updateWorkImage,
 } from '../models/admin.model.js';
+import { fallbackProjects } from '../../frontend/src/data/projects.js';
 import { uploadImageToStorage } from '../services/upload.service.js';
 import { parseMultipartForm } from '../utils/multipart.js';
 
@@ -95,6 +97,16 @@ export async function deleteWorkController(req, res) {
     const data = await deleteWork(req.params.id);
     console.info(`[admin] work deleted id=${data.id}`);
     return ok(res, 200, data);
+  } catch (error) {
+    return fail(res, error, 400);
+  }
+}
+
+export async function syncWorksController(req, res) {
+  try {
+    const data = await syncPortfolioCatalog(fallbackProjects, req.user?.email);
+    console.info(`[admin] portfolio catalog synchronized created=${data.created} total=${data.total}`);
+    return ok(res, data.created ? 201 : 200, data);
   } catch (error) {
     return fail(res, error, 400);
   }

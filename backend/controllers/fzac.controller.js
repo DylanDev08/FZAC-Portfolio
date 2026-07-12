@@ -5,6 +5,17 @@ import {
   updateObra,
   deleteObra,
 } from '../models/fzac.model.js';
+import { listWorks } from '../models/admin.model.js';
+
+export async function listPortfolioWorks(_req, res) {
+  try {
+    const works = await listWorks();
+    const visible = works.filter((work) => !['draft', 'archived'].includes(work.status));
+    res.json({ ok: true, data: visible });
+  } catch (error) {
+    res.status(500).json({ ok: false, error: error.message });
+  }
+}
 
 export async function listObras(req, res) {
   try {

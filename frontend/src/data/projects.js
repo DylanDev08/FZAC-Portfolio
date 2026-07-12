@@ -6,8 +6,8 @@ const obra = (path) => `/assets/img/obras/${path}`;
 
 const makeGallery = ({ portada, inicio = [], proceso = [], final = [], extra = [] }) => {
   const cover = portada || inicio[0] || proceso[0] || final[0] || extra[0] || '';
-  const imagenesAntes = unique([cover, ...inicio]);
-  const imagenesProceso = unique(proceso);
+  const imagenesAntes = unique(inicio.filter((src) => src !== cover));
+  const imagenesProceso = unique(proceso.filter((src) => src !== cover));
   const imagenesFinal = unique(final.filter((src) => src !== cover));
   const imagenes = unique([cover, ...inicio, ...proceso, ...final, ...extra]);
 
@@ -49,15 +49,15 @@ const slidersJujuy = makeGallery({
 
 const slidersRosas = makeGallery({
   portada: obra('sliders-rosas/sliders-rosas-final-01.jpg'),
-  inicio: [
-    obra('sliders-rosas/sliders-rosas-inicio-01.jpg'),
+  proceso: [
     obra('sliders-rosas/sliders-rosas-inicio-02.jpg'),
     obra('sliders-rosas/sliders-rosas-inicio-03.jpg'),
+    obra('sliders-rosas/sliders-rosas-inicio-01.jpg'),
+    obra('sliders-rosas/sliders-rosas-final-04.jpg'),
   ],
   final: [
     obra('sliders-rosas/sliders-rosas-final-02.jpg'),
     obra('sliders-rosas/sliders-rosas-final-03.webp'),
-    obra('sliders-rosas/sliders-rosas-final-04.jpg'),
   ],
 });
 
@@ -77,8 +77,8 @@ const slidersFunes = makeGallery({
 
 const marvelPellegrini = makeGallery({
   portada: obra('marvel-pellegrini/marvel-pellegrini-02.jpg'),
+  proceso: [obra('marvel-pellegrini/05.jpg')],
   final: [
-    obra('marvel-pellegrini/05.jpg'),
     obra('marvel-pellegrini/04.jpg'),
     obra('marvel-pellegrini/09.jpg'),
     obra('marvel-pellegrini/10.jpg'),
@@ -87,12 +87,14 @@ const marvelPellegrini = makeGallery({
 
 const marvelRondeau = makeGallery({
   portada: obra('marvel-rondeau/marvel-rondeau-final-01.jpg'),
-  final: [
-    obra('marvel-rondeau/marvel-rondeau-final-02.jpg'),
-    obra('marvel-rondeau/marvel-rondeau-final-03.webp'),
+  proceso: [
     obra('marvel-rondeau/marvel-rondeau-inicio-01.jpg'),
     obra('marvel-rondeau/marvel-rondeau-inicio-02.jpg'),
     obra('marvel-rondeau/marvel-rondeau-inicio-03.jpg'),
+    obra('marvel-rondeau/marvel-rondeau-final-02.jpg'),
+  ],
+  final: [
+    obra('marvel-rondeau/marvel-rondeau-final-03.webp'),
   ],
 });
 
@@ -148,10 +150,12 @@ const burgerFlorida = makeGallery({
 });
 
 const armstrong = makeGallery({
-  portada: obra('armstrong/01.jpg'),
-  final: [
+  portada: obra('armstrong/05.jpg'),
+  proceso: [
+    obra('armstrong/01.jpg'),
     obra('armstrong/02.jpg'),
-    obra('armstrong/05.jpg'),
+  ],
+  final: [
     obra('armstrong/08.jpg'),
     obra('armstrong/09.jpg'),
     obra('armstrong/11.jpg'),

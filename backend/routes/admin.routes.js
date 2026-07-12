@@ -13,6 +13,7 @@ import {
   listSiteTextsController,
   listWorkImagesController,
   listWorksController,
+  syncWorksController,
   updateCategoryController,
   updateSiteTextController,
   updateWorkController,
@@ -36,6 +37,7 @@ router.use(authMiddleware);
 router.post('/uploads', adminActionLimiter, uploadController);
 
 router.get('/works', listWorksController);
+router.post('/works/sync-catalog', adminActionLimiter, syncWorksController);
 router.get('/works/:id', getWorkController);
 router.post('/works', adminActionLimiter, validateAdminPayload, createWorkController);
 router.put('/works/:id', adminActionLimiter, validateAdminPayload, updateWorkController);

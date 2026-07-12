@@ -1,3 +1,5 @@
+import { ensureSupabaseReady } from '../supabase/config.js';
+
 const DEFAULT_API_URL = 'http://localhost:4000/api';
 const LOCAL_API_CANDIDATES = [4000, 4001, 4002, 4003, 4004, 4005].map((port) => `http://localhost:${port}/api`);
 const TOKEN_KEY = 'fzac_token';
@@ -12,6 +14,55 @@ const CONFIGURED_API_URL = String(
 export const API_URL = CONFIGURED_API_URL || DEFAULT_API_URL;
 
 let resolvedApiUrlPromise = null;
+
+async function resolveAuthToken(forceRefresh = false) {
+  const storedToken = localStorage.getItem(TOKEN_KEY) || '';
+
+  try {
+    const client = await ensureSupabaseReady();
+    let { data, error } = await client.auth.getSession();
+    if (error) throw error;
+
+    const expiresSoon = Number(data.session?.expires_at || 0) * 1000 < Date.now() + 60_000;
+    if (data.session && (forceRefresh || expiresSoon)) {
+      const refreshed = await client.auth.refreshSession();
+      if (refreshed.error) throw refreshed.error;
+      data = refreshed.data;
+    }
+
+    const token = data.session?.access_token || '';
+    if (token) {
+      localStorage.setItem(TOKEN_KEY, token);
+      return token;
+    }
+
+    if (forceRefresh) {
+      localStorage.removeItem(TOKEN_KEY);
+      return '';
+    }
+  } catch (error) {
+    if (forceRefresh) {
+      localStorage.removeItem(TOKEN_KEY);
+      throw new Error('La sesión de administrador venció. Iniciá sesión nuevamente.');
+    }
+  }
+
+  return storedToken;
+}
+
+async function fetchWithAuthRetry(url, init, auth) {
+  let response = await fetch(url, init);
+  if (!auth || response.status !== 401) return response;
+
+  const token = await resolveAuthToken(true);
+  if (!token) return response;
+
+  response = await fetch(url, {
+    ...init,
+    headers: { ...init.headers, Authorization: `Bearer ${token}` },
+  });
+  return response;
+}
 
 async function hasPublicConfig(apiUrl) {
   const controller = new AbortController();
@@ -68,16 +119,16 @@ export async function apiRequest(path, options = {}) {
   }
 
   if (auth) {
-    const token = localStorage.getItem(TOKEN_KEY);
+    const token = await resolveAuthToken();
     if (token) requestHeaders.Authorization = `Bearer ${token}`;
   }
 
   const apiUrl = await resolveApiUrl();
-  const response = await fetch(`${apiUrl}${path}`, {
+  const response = await fetchWithAuthRetry(`${apiUrl}${path}`, {
     method,
     headers: requestHeaders,
     body: body === undefined ? undefined : JSON.stringify(body),
-  });
+  }, auth);
 
   const payload = await response.json().catch(() => ({}));
   const responsePayload = {
@@ -108,16 +159,16 @@ export async function uploadFormRequest(path, formData, options = {}) {
   };
 
   if (auth) {
-    const token = localStorage.getItem(TOKEN_KEY);
+    const token = await resolveAuthToken();
     if (token) requestHeaders.Authorization = `Bearer ${token}`;
   }
 
   const apiUrl = await resolveApiUrl();
-  const response = await fetch(`${apiUrl}${path}`, {
+  const response = await fetchWithAuthRetry(`${apiUrl}${path}`, {
     method,
     headers: requestHeaders,
     body: formData,
-  });
+  }, auth);
 
   const payload = await response.json().catch(() => ({}));
   const responsePayload = {

@@ -9,6 +9,7 @@
     "start": "node server.js",
     "prisma:generate": "prisma generate",
     "prisma:push": "prisma db push",
+    "prisma:deploy:portfolio": "prisma db execute --file prisma/migrations/20260710143000_complete_portfolio_crud/migration.sql --schema prisma/schema.prisma",
     "prisma:migrate": "prisma migrate dev",
     "prisma:seed": "prisma db seed"
   },

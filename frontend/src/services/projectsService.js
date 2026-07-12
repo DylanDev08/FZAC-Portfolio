@@ -4,32 +4,9 @@ import { normalizeDate, slugify } from './utils.js';
 
 export async function getProjects() {
   try {
-    const payload = await apiRequest('/fzac/obras');
+    const payload = await apiRequest('/fzac/works');
     const remoteProjects = unwrapData(payload).map((item) => normalizeProject(item));
-
-    const merged = new Map();
-    fallbackProjects.map(normalizeProject).forEach((project) => merged.set(project.slug, project));
-    const lockedLocalMediaSlugs = new Set(['sliders-hamburger', 'sliders-jujuy', 'sliders-rosas', 'sliders-funes', 'slider', 'sliders', 'marvel', 'burger-house', 'armstrong', 'amstrong', 'fichines', 'flama']);
-
-    remoteProjects.forEach((project) => {
-      const local = merged.get(project.slug);
-      const useLocalMedia = lockedLocalMediaSlugs.has(project.slug) && local;
-
-      merged.set(project.slug, {
-        ...(local || {}),
-        ...project,
-        portada: useLocalMedia ? local.portada : (project.portada || local?.portada || ''),
-        imagenes: useLocalMedia ? (local.imagenes || []) : (project.imagenes?.length ? project.imagenes : (local?.imagenes || [])),
-        imagenesAntes: useLocalMedia ? (local.imagenesAntes || []) : (project.imagenesAntes?.length ? project.imagenesAntes : (local?.imagenesAntes || [])),
-        imagenesProceso: useLocalMedia ? (local.imagenesProceso || []) : (project.imagenesProceso?.length ? project.imagenesProceso : (local?.imagenesProceso || [])),
-        imagenesFinal: useLocalMedia ? (local.imagenesFinal || []) : (project.imagenesFinal?.length ? project.imagenesFinal : (local?.imagenesFinal || [])),
-        video: useLocalMedia ? (local.video || '') : (project.video || local?.video || ''),
-        galeriaVideo: useLocalMedia ? (local.galeriaVideo || []) : (project.galeriaVideo?.length ? project.galeriaVideo : (local?.galeriaVideo || [])),
-        sucursales: useLocalMedia ? (local.sucursales || []) : (project.sucursales?.length ? project.sucursales : (local?.sucursales || [])),
-      });
-    });
-
-    return orderProjects([...merged.values()]);
+    return remoteProjects.length ? orderProjects(remoteProjects) : orderProjects(fallbackProjects.map(normalizeProject));
   } catch (error) {
     console.warn('[FZAC] Backend/Supabase no disponible. Usando obras locales.', error.message);
     return fallbackProjects;
@@ -39,6 +16,11 @@ export async function getProjects() {
 export async function getAdminProjects() {
   const payload = await apiRequest('/admin/works', { auth: true });
   return unwrapData(payload).map((item) => normalizeProject(item));
+}
+
+export async function syncProjectCatalog() {
+  const response = await apiRequest('/admin/works/sync-catalog', { method: 'POST', auth: true });
+  return { status: response.status, ...unwrapData(response) };
 }
 
 export async function saveProject(project) {
@@ -82,7 +64,16 @@ export function normalizeProject(project) {
     imagenesProceso: Array.isArray(project.imagenesProceso) ? project.imagenesProceso.filter(Boolean) : [],
     imagenesFinal: Array.isArray(project.imagenesFinal) ? project.imagenesFinal.filter(Boolean) : [],
     galeriaVideo: Array.isArray(project.galeriaVideo) ? project.galeriaVideo.filter(Boolean) : [],
-    sucursales: Array.isArray(project.sucursales) ? project.sucursales.filter(Boolean) : [],
+    sucursales: Array.isArray(project.sucursales)
+      ? project.sucursales.filter(Boolean).map((branch) => ({
+          ...branch,
+          portada: branch.portada || branch.imagenes?.[0] || '',
+          imagenes: Array.isArray(branch.imagenes) ? branch.imagenes.filter(Boolean) : [],
+          imagenesAntes: Array.isArray(branch.imagenesAntes) ? branch.imagenesAntes.filter(Boolean) : [],
+          imagenesProceso: Array.isArray(branch.imagenesProceso) ? branch.imagenesProceso.filter(Boolean) : [],
+          imagenesFinal: Array.isArray(branch.imagenesFinal) ? branch.imagenesFinal.filter(Boolean) : [],
+        }))
+      : [],
     stages: Array.isArray(project.stages)
       ? project.stages.filter(Boolean)
       : Array.isArray(project.etapas)

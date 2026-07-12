@@ -1,5 +1,7 @@
 import { prisma } from '../db/prisma.js';
 import { env } from '../config/env.js';
+import { syncPortfolioCatalog } from '../models/admin.model.js';
+import { fallbackProjects } from '../../frontend/src/data/projects.js';
 
 function slugify(value = '') {
   return String(value)
@@ -68,6 +70,9 @@ async function main() {
       create: text,
     });
   }
+
+  const catalog = await syncPortfolioCatalog(fallbackProjects, env.adminEmails[0]);
+  console.log(`[seed] Portfolio administrable sincronizado. Obras nuevas: ${catalog.created}. Total: ${catalog.total}.`);
 
   console.log('[seed] Categorías, textos iniciales y admin sincronizados.');
 }

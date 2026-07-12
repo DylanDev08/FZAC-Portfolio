@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { deleteProject, getAdminProjects, saveProject } from '../services/projectsService.js';
+import { ArrowLeft, ArrowRight, Plus, Trash2 } from 'lucide-react';
+import { deleteProject, getAdminProjects, saveProject, syncProjectCatalog } from '../services/projectsService.js';
 import { logout } from '../services/authService.js';
 import { slugify } from '../services/utils.js';
 import { COLLECTIONS, deleteContentItem, getAdminEventos, getAdminTrabajos, saveContentItem } from '../services/contentService.js';
@@ -31,6 +32,7 @@ const EMPTY = {
   video: '',
   videos: [],
   galeriaVideo: [],
+  sucursales: [],
   stages: [],
   puntos: [],
   destacado: false,
@@ -94,6 +96,13 @@ const ESTADOS = [
   ['por-comenzar', 'Por comenzar'],
 ];
 
+const IMAGE_STAGE_OPTIONS = [
+  { value: 'imagenes', label: 'Galeria general' },
+  { value: 'imagenesAntes', label: 'Antes' },
+  { value: 'imagenesProceso', label: 'En proceso' },
+  { value: 'imagenesFinal', label: 'Finalizada' },
+];
+
 const TIPOS_OBRA = [
   'Local gastronómico',
   'Local de juegos',
@@ -134,6 +143,21 @@ function arrToText(value) {
   return Array.isArray(value) ? value.map(assetUrl).filter(Boolean).join('\n') : String(value || '');
 }
 
+function moveArrayItem(items, index, direction) {
+  const list = toArray(items);
+  const nextIndex = index + direction;
+  if (nextIndex < 0 || nextIndex >= list.length) return list;
+  const next = [...list];
+  [next[index], next[nextIndex]] = [next[nextIndex], next[index]];
+  return next;
+}
+
+function editableImage(item) {
+  if (typeof item === 'object' && item) return { ...item };
+  const url = assetUrl(item);
+  return { url, imageUrl: url, image_url: url, imagePath: url, image_path: url, alt: '' };
+}
+
 function getOptions(kind) {
   if (kind === 'eventos') return TIPOS_EVENTO;
   if (kind === 'trabajos') return TIPOS_TRABAJO;
@@ -141,20 +165,38 @@ function getOptions(kind) {
 }
 
 function normalizeForForm(item = {}) {
+  const workImages = Array.isArray(item.workImages) ? item.workImages : [];
+  const bySection = (section, fallback) => {
+    const matches = workImages.filter((image) => image.section === section);
+    return matches.length ? matches : (Array.isArray(fallback) ? fallback : []);
+  };
+  const branches = (Array.isArray(item.sucursales) ? item.sucursales : []).map((branch) => {
+    const stagedUrls = new Set([
+      branch.portada,
+      ...toArray(branch.imagenesAntes),
+      ...toArray(branch.imagenesProceso),
+      ...toArray(branch.imagenesFinal),
+    ].map(assetUrl).filter(Boolean));
+    return {
+      ...branch,
+      imagenes: toArray(branch.imagenes).filter((image) => !stagedUrls.has(assetUrl(image))),
+    };
+  });
   return {
     ...EMPTY,
     ...item,
     titulo: item.titulo || item.nombre || '',
     nombre: item.nombre || item.titulo || '',
     anio: item.anio || item.año || '',
-    imagenes: Array.isArray(item.imagenes) ? item.imagenes : [],
-    imagenesAntes: Array.isArray(item.imagenesAntes) ? item.imagenesAntes : [],
-    imagenesProceso: Array.isArray(item.imagenesProceso) ? item.imagenesProceso : [],
-    imagenesFinal: Array.isArray(item.imagenesFinal) ? item.imagenesFinal : [],
+    imagenes: bySection('gallery', item.imagenes),
+    imagenesAntes: bySection('before', item.imagenesAntes),
+    imagenesProceso: bySection('process', item.imagenesProceso),
+    imagenesFinal: bySection('final', item.imagenesFinal),
     videos: Array.isArray(item.videos) ? item.videos : [],
     galeriaVideo: Array.isArray(item.galeriaVideo) ? item.galeriaVideo : [],
     stages: Array.isArray(item.stages) ? item.stages : [],
     puntos: Array.isArray(item.puntos) ? item.puntos : [],
+    sucursales: branches,
   };
 }
 
@@ -234,6 +276,11 @@ function FileInput({
   previewItems = [],
   previewType = 'image',
   onRemovePreview,
+  onMovePreview,
+  onEditPreview,
+  stageValue = '',
+  stageOptions = [],
+  onStageChange,
 }) {
   const previews = Array.isArray(previewItems) ? previewItems.filter(Boolean) : [];
 
@@ -252,7 +299,7 @@ function FileInput({
       {help && <small>{help}</small>}
       <em>Hacé clic para seleccionar desde tu equipo</em>
       {previews.length > 0 && (
-        <div className="admin-upload-preview" onClick={(event) => event.preventDefault()}>
+        <div className="admin-upload-preview">
           {previews.map((item, index) => {
             const src = assetUrl(item);
             if (!src) return null;
@@ -261,8 +308,16 @@ function FileInput({
               {previewType === 'video'
                 ? <video src={src} preload="metadata" muted />
                 : <img src={src} alt={`${label} ${index + 1}`} loading="lazy" />}
+              <span className="admin-upload-preview__actions">
+              {onMovePreview && (
+                <>
+                  <button type="button" onClick={(event) => { event.preventDefault(); event.stopPropagation(); onMovePreview(index, -1); }} disabled={index === 0} title="Mover a la izquierda" aria-label="Mover a la izquierda"><ArrowLeft size={15} /></button>
+                  <button type="button" onClick={(event) => { event.preventDefault(); event.stopPropagation(); onMovePreview(index, 1); }} disabled={index === previews.length - 1} title="Mover a la derecha" aria-label="Mover a la derecha"><ArrowRight size={15} /></button>
+                </>
+              )}
               {onRemovePreview && (
                 <button
+                  className="is-danger"
                   type="button"
                   onClick={(event) => {
                     event.preventDefault();
@@ -270,14 +325,99 @@ function FileInput({
                     onRemovePreview(index);
                   }}
                 >
-                  Quitar
+                  <Trash2 size={15} />
                 </button>
+              )}
+              </span>
+              {stageOptions.length > 0 && onStageChange && (
+                <select className="admin-upload-preview__stage" value={stageValue} onClick={(event) => event.stopPropagation()} onChange={(event) => onStageChange(index, event.target.value)} aria-label="Etapa de la foto">
+                  {stageOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+                </select>
+              )}
+              {previewType === 'image' && onEditPreview && (
+                <input className="admin-upload-preview__alt" value={item?.alt || ''} onClick={(event) => event.stopPropagation()} onChange={(event) => onEditPreview(index, { alt: event.target.value })} placeholder="Descripcion de la foto" aria-label="Descripcion de la foto" />
               )}
             </span>
           ); })}
         </div>
       )}
     </label>
+  );
+}
+
+function BranchGalleryEditor({ form, setForm, onUpload, uploading }) {
+  const branches = Array.isArray(form.sucursales) ? form.sucursales : [];
+  const setBranches = (next) => setForm((prev) => ({ ...prev, sucursales: next }));
+  const updateBranch = (index, changes) => setBranches(branches.map((branch, branchIndex) => branchIndex === index ? { ...branch, ...changes } : branch));
+  const updateMedia = (branchIndex, key, updater) => {
+    const branch = branches[branchIndex] || {};
+    const current = toArray(branch[key]);
+    updateBranch(branchIndex, { [key]: updater(current) });
+  };
+  const transferMedia = (branchIndex, fromKey, imageIndex, toKey) => {
+    if (fromKey === toKey) return;
+    const branch = branches[branchIndex] || {};
+    const source = toArray(branch[fromKey]);
+    const selected = source[imageIndex];
+    if (!selected) return;
+    updateBranch(branchIndex, {
+      [fromKey]: source.filter((_, index) => index !== imageIndex),
+      [toKey]: [...toArray(branch[toKey]), selected],
+    });
+  };
+  const addBranch = () => setBranches([...branches, {
+    id: '', nombre: `Sucursal ${branches.length + 1}`, direccion: '', portada: '', imagenes: [], imagenesAntes: [], imagenesProceso: [], imagenesFinal: [],
+  }]);
+
+  return (
+    <section className="admin-branches-editor">
+      <div className="admin-branches-editor__head">
+        <div><span className="eyebrow">Sucursales</span><h3>Galerias por local</h3><p>Editá cada dirección y ordená sus fotos sin salir de la obra.</p></div>
+        <button className="btn btn--ghost" type="button" onClick={addBranch}><Plus size={17} /> Agregar sucursal</button>
+      </div>
+
+      {branches.map((branch, branchIndex) => (
+        <article className="admin-branch-card" key={branch.id || `${branch.nombre}-${branchIndex}`}>
+          <div className="admin-branch-card__head">
+            <strong>{branch.nombre || `Sucursal ${branchIndex + 1}`}</strong>
+            <button className="admin-icon-danger" type="button" onClick={() => {
+              if (window.confirm('¿Eliminar esta sucursal y su galería?')) setBranches(branches.filter((_, index) => index !== branchIndex));
+            }} title="Eliminar sucursal" aria-label="Eliminar sucursal"><Trash2 size={17} /></button>
+          </div>
+          <div className="admin-form__grid">
+            <Field label="Nombre del local" value={branch.nombre} onChange={(value) => updateBranch(branchIndex, { nombre: value })} placeholder="Ej. Pellegrini" />
+            <Field label="Dirección" value={branch.direccion} onChange={(value) => updateBranch(branchIndex, { direccion: value })} placeholder="Calle, número, ciudad" />
+          </div>
+          <div className="admin-upload-grid admin-upload-grid--branches">
+            <FileInput
+              label="Portada del local"
+              accept="image/*,.jpg,.jpeg,.jfif,.png,.webp,.gif,.avif,.heic,.heif,.bmp,.tif,.tiff"
+              disabled={uploading || !isStorageUploadReady}
+              previewItems={branch.portada ? [branch.portada] : []}
+              onRemovePreview={() => updateBranch(branchIndex, { portada: '' })}
+              onChange={(files) => onUpload({ branchIndex, target: 'portada' }, files)}
+            />
+            {IMAGE_STAGE_OPTIONS.map(({ value: key, label }) => (
+              <FileInput
+                key={key}
+                label={label}
+                accept="image/*,.jpg,.jpeg,.jfif,.png,.webp,.gif,.avif,.heic,.heif,.bmp,.tif,.tiff"
+                multiple
+                disabled={uploading || !isStorageUploadReady}
+                previewItems={branch[key]}
+                onRemovePreview={(index) => updateMedia(branchIndex, key, (items) => items.filter((_, itemIndex) => itemIndex !== index))}
+                onMovePreview={(index, direction) => updateMedia(branchIndex, key, (items) => moveArrayItem(items, index, direction))}
+                onEditPreview={(index, changes) => updateMedia(branchIndex, key, (items) => items.map((item, itemIndex) => itemIndex === index ? { ...editableImage(item), ...changes } : item))}
+                stageValue={key}
+                stageOptions={IMAGE_STAGE_OPTIONS}
+                onStageChange={(index, target) => transferMedia(branchIndex, key, index, target)}
+                onChange={(files) => onUpload({ branchIndex, target: key }, files)}
+              />
+            ))}
+          </div>
+        </article>
+      ))}
+    </section>
   );
 }
 
@@ -294,6 +434,24 @@ function ContentForm({ kind, form, setForm, onSubmit, onClear, onUpload, uploadi
   });
 
   const removeFrom = (key, index) => set(key, toArray(form[key]).filter((_, i) => i !== index));
+  const moveIn = (key, index, direction) => set(key, moveArrayItem(form[key], index, direction));
+  const editIn = (key, index, changes) => setForm((prev) => ({
+    ...prev,
+    [key]: toArray(prev[key]).map((item, itemIndex) => itemIndex === index ? { ...editableImage(item), ...changes } : item),
+  }));
+  const transferFrom = (fromKey, index, toKey) => {
+    if (fromKey === toKey) return;
+    setForm((prev) => {
+      const source = toArray(prev[fromKey]);
+      const selected = source[index];
+      if (!selected) return prev;
+      return {
+        ...prev,
+        [fromKey]: source.filter((_, itemIndex) => itemIndex !== index),
+        [toKey]: [...toArray(prev[toKey]), selected],
+      };
+    });
+  };
 
   return (
     <article className="admin-card admin-card--form">
@@ -376,6 +534,11 @@ function ContentForm({ kind, form, setForm, onSubmit, onClear, onUpload, uploadi
               disabled={uploading || !isStorageUploadReady}
               previewItems={form.imagenes}
               onRemovePreview={(index) => removeFrom('imagenes', index)}
+              onMovePreview={(index, direction) => moveIn('imagenes', index, direction)}
+              onEditPreview={(index, changes) => editIn('imagenes', index, changes)}
+              stageValue="imagenes"
+              stageOptions={isObra ? IMAGE_STAGE_OPTIONS : []}
+              onStageChange={(index, target) => transferFrom('imagenes', index, target)}
               onChange={(files) => onUpload('imagenes', files)}
             />
             {isObra && (
@@ -388,6 +551,11 @@ function ContentForm({ kind, form, setForm, onSubmit, onClear, onUpload, uploadi
                   disabled={uploading || !isStorageUploadReady}
                   previewItems={form.imagenesAntes}
                   onRemovePreview={(index) => removeFrom('imagenesAntes', index)}
+                  onMovePreview={(index, direction) => moveIn('imagenesAntes', index, direction)}
+                  onEditPreview={(index, changes) => editIn('imagenesAntes', index, changes)}
+                  stageValue="imagenesAntes"
+                  stageOptions={IMAGE_STAGE_OPTIONS}
+                  onStageChange={(index, target) => transferFrom('imagenesAntes', index, target)}
                   onChange={(files) => onUpload('imagenesAntes', files)}
                 />
                 <FileInput
@@ -398,6 +566,11 @@ function ContentForm({ kind, form, setForm, onSubmit, onClear, onUpload, uploadi
                   disabled={uploading || !isStorageUploadReady}
                   previewItems={form.imagenesProceso}
                   onRemovePreview={(index) => removeFrom('imagenesProceso', index)}
+                  onMovePreview={(index, direction) => moveIn('imagenesProceso', index, direction)}
+                  onEditPreview={(index, changes) => editIn('imagenesProceso', index, changes)}
+                  stageValue="imagenesProceso"
+                  stageOptions={IMAGE_STAGE_OPTIONS}
+                  onStageChange={(index, target) => transferFrom('imagenesProceso', index, target)}
                   onChange={(files) => onUpload('imagenesProceso', files)}
                 />
                 <FileInput
@@ -408,6 +581,11 @@ function ContentForm({ kind, form, setForm, onSubmit, onClear, onUpload, uploadi
                   disabled={uploading || !isStorageUploadReady}
                   previewItems={form.imagenesFinal}
                   onRemovePreview={(index) => removeFrom('imagenesFinal', index)}
+                  onMovePreview={(index, direction) => moveIn('imagenesFinal', index, direction)}
+                  onEditPreview={(index, changes) => editIn('imagenesFinal', index, changes)}
+                  stageValue="imagenesFinal"
+                  stageOptions={IMAGE_STAGE_OPTIONS}
+                  onStageChange={(index, target) => transferFrom('imagenesFinal', index, target)}
                   onChange={(files) => onUpload('imagenesFinal', files)}
                 />
               </>
@@ -431,10 +609,12 @@ function ContentForm({ kind, form, setForm, onSubmit, onClear, onUpload, uploadi
           </details>
         </div>
 
+        {isObra && <BranchGalleryEditor form={form} setForm={setForm} onUpload={onUpload} uploading={uploading} />}
+
         {form.portada && (
           <div className="admin-cover-preview">
             <span>Portada actual</span>
-            <img src={form.portada} alt="Portada actual" loading="lazy" />
+            <img src={assetUrl(form.portada)} alt="Portada actual" loading="lazy" />
           </div>
         )}
 
@@ -707,6 +887,32 @@ export default function Admin() {
       setUploading(true);
       notify('Subiendo archivos...');
 
+      if (typeof target === 'object' && Number.isInteger(target.branchIndex)) {
+        const branch = toArray(form.sucursales)[target.branchIndex] || {};
+        const branchSlug = slugify(branch.nombre || `sucursal-${target.branchIndex + 1}`);
+        const branchFolder = `${folder}/sucursales/${branchSlug}`;
+
+        if (target.target === 'portada') {
+          const uploaded = await uploadAsset(files[0], `${branchFolder}/portada`);
+          setForm((prev) => ({
+            ...prev,
+            sucursales: toArray(prev.sucursales).map((item, index) => index === target.branchIndex ? { ...item, portada: uploaded.url } : item),
+          }));
+          notify(`Status ${uploaded.status}: portada de la sucursal cargada. Guardá la obra para publicarla.`);
+          return;
+        }
+
+        const uploaded = await uploadManyAssets(files, `${branchFolder}/${target.target}`);
+        setForm((prev) => ({
+          ...prev,
+          sucursales: toArray(prev.sucursales).map((item, index) => index === target.branchIndex
+            ? { ...item, [target.target]: [...toArray(item[target.target]), ...uploaded.items] }
+            : item),
+        }));
+        notify(`Status ${uploaded.status}: ${uploaded.urls.length} foto(s) cargada(s) en la sucursal. Guardá la obra para publicarlas.`);
+        return;
+      }
+
       if (target === 'portada') {
         const uploaded = await uploadAsset(files[0], `${folder}/portada`);
         setForm((prev) => ({ ...prev, portada: uploaded.url }));
@@ -804,6 +1010,16 @@ export default function Admin() {
     }
   }
 
+  async function syncCatalog() {
+    try {
+      const result = await syncProjectCatalog();
+      notify(`Status ${result.status}: catálogo sincronizado. ${result.created || 0} obra(s) agregada(s).`);
+      await refresh();
+    } catch (error) {
+      notify(`Status ${error.status || 400}: ${error.message || 'No se pudo sincronizar el catálogo.'}`);
+    }
+  }
+
   async function handleLogout() {
     await logout();
     navigate('/login');
@@ -865,7 +1081,10 @@ export default function Admin() {
             <article className="admin-card">
               <div className="admin-card__header admin-card__header--row">
                 <div><span className="eyebrow">{RESOURCE_CONFIG[tab].label}</span><h2>Contenido cargado</h2></div>
-                <button className="btn btn--primary" type="button" onClick={() => openNew(tab)}>Nuevo</button>
+                <div className="admin-card__header-actions">
+                  {tab === 'obras' && <button className="btn btn--ghost" type="button" onClick={syncCatalog}>Sincronizar obras actuales</button>}
+                  <button className="btn btn--primary" type="button" onClick={() => openNew(tab)}>Nuevo</button>
+                </div>
               </div>
               <ContentList title={RESOURCE_CONFIG[tab].label} items={items[tab]} kind={tab} onEdit={editItem} onDelete={removeItem} />
             </article>

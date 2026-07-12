@@ -71,14 +71,14 @@ VITE_SUPABASE_ANON_KEY=[ANON_KEY]
 Backend: copiar `backend/.env.example` a `backend/.env` y completar:
 
 ```env
-DATABASE_URL="postgresql://..."
+DATABASE_URL="postgresql://...?pgbouncer=true&connection_limit=1"
 DIRECT_URL="postgresql://..."
 SUPABASE_URL="https://[PROJECT_REF].supabase.co"
 SUPABASE_ANON_KEY="[ANON_KEY]"
 SUPABASE_SERVICE_ROLE_KEY="[SERVICE_ROLE_KEY]"
 SUPABASE_STORAGE_BUCKET=crud-images
-MAX_UPLOAD_SIZE_MB=10
-ALLOWED_UPLOAD_MIME_TYPES=image/jpeg,image/png,image/webp,image/gif
+MAX_UPLOAD_SIZE_MB=25
+ALLOWED_UPLOAD_MIME_TYPES=image/jpeg,image/png,image/webp,image/gif,image/avif,image/heic,image/heif,image/bmp,image/tiff
 JWT_SECRET="jwt_secret_de_supabase"
 AUTH_REQUIRED=true
 ```
@@ -92,11 +92,14 @@ cd backend
 npm install
 npm run prisma:generate
 npx prisma db execute --file prisma/migrations/20260707123000_admin_crud_supabase/migration.sql --schema prisma/schema.prisma
+npx prisma db execute --file prisma/migrations/20260710143000_complete_portfolio_crud/migration.sql --schema prisma/schema.prisma
 npm run prisma:seed
 npm run dev
 ```
 
-La migracion incluida es aditiva: crea o completa `admin_profiles`, `categories`, `works`, `work_images` y `site_texts` sin borrar tablas internas de Supabase Auth.
+Las migraciones son aditivas: crean o completan `admin_profiles`, `categories`, `works`, `work_images` y `site_texts` sin borrar tablas internas de Supabase Auth. Se usa `db execute` porque el esquema `public` de Supabase puede contener referencias administradas hacia `auth`; no se debe ejecutar `db push --accept-data-loss`.
+
+El seed incorpora solamente las obras del portfolio que falten. No pisa obras ya editadas desde el panel.
 
 ## Como correr frontend
 
@@ -129,7 +132,9 @@ npm run build
 - `GET /api/login-logs`
 - `GET /api/site-settings/main`
 - `POST /api/admin/uploads`
+- `GET /api/fzac/works`
 - `GET /api/admin/works`
+- `POST /api/admin/works/sync-catalog`
 - `POST /api/admin/works`
 - `PUT /api/admin/works/:id`
 - `DELETE /api/admin/works/:id`
@@ -148,10 +153,20 @@ npm run build
 
 Las rutas de escritura validan JWT de Supabase y el email administrador.
 
+## Control de galerias
+
+- El portfolio y el panel leen la misma coleccion `works/work_images`.
+- La secuencia publica es portada, antes, proceso y resultado final.
+- El admin puede subir, reordenar, cambiar de etapa, describir y eliminar cada foto.
+- Las obras agrupadas permiten editar nombre, direccion, portada y galeria de cada sucursal.
+- El boton `Sincronizar obras actuales` agrega fichas locales faltantes sin sobrescribir cambios existentes.
+
 ## Seguridad
 
 - `/admin` queda protegido con Supabase Auth.
 - El backend valida JWT con `JWT_SECRET` de Supabase.
+- El frontend renueva la sesion de Supabase antes de cada operacion privada y reintenta una vez ante un `401`.
+- Prisma reutiliza una unica instancia y limita a una conexion por proceso sobre el pooler de Supabase.
 - Solo el email administrador puede operar rutas privadas.
 - El registro admin del backend usa service role y restringe el email permitido.
 - Supabase Storage sube imagenes desde el backend con `SUPABASE_SERVICE_ROLE_KEY`; el frontend nunca recibe esa key.

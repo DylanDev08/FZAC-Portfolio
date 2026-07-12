@@ -7,101 +7,101 @@ datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
-  schemas   = ["public", "auth"]
+  schemas   = ["public"]
 }
 
 model Obra {
-  id               String   @id
-  slug             String   @unique
-  nombre           String
-  titulo           String?
-  tipo             String?
-  categoria        String?
-  direccion        String?
-  ubicacion        String?
-  anio             String?
-  estado           String   @default("finalizada")
-  avance           Int      @default(100)
-  descripcion      String   @default("")
-  proceso          String   @default("")
-  finalizacion     String   @default("")
-  portada          String?
-  imagenes         Json     @default("[]")
-  imagenesAntes    Json     @default("[]") @map("imagenes_antes")
-  imagenesProceso  Json     @default("[]") @map("imagenes_proceso")
-  imagenesFinal    Json     @default("[]") @map("imagenes_final")
-  video            String?
-  videos           Json     @default("[]")
-  galeriaVideo     Json     @default("[]") @map("galeria_video")
-  sucursales       Json     @default("[]")
-  stages           Json     @default("[]")
-  puntos           Json     @default("[]")
-  destacado        Boolean  @default(false)
-  displayOrder     Int      @default(0) @map("display_order")
-  createdAt        DateTime @default(now()) @map("created_at")
-  updatedAt        DateTime @updatedAt @map("updated_at")
+  id              String   @id
+  slug            String   @unique
+  nombre          String
+  titulo          String?
+  tipo            String?
+  categoria       String?
+  direccion       String?
+  ubicacion       String?
+  anio            String?
+  estado          String   @default("finalizada")
+  avance          Int      @default(100)
+  descripcion     String   @default("")
+  proceso         String   @default("")
+  finalizacion    String   @default("")
+  portada         String?
+  imagenes        Json     @default("[]")
+  imagenesAntes   Json     @default("[]") @map("imagenes_antes")
+  imagenesProceso Json     @default("[]") @map("imagenes_proceso")
+  imagenesFinal   Json     @default("[]") @map("imagenes_final")
+  video           String?
+  videos          Json     @default("[]")
+  galeriaVideo    Json     @default("[]") @map("galeria_video")
+  sucursales      Json     @default("[]")
+  stages          Json     @default("[]")
+  puntos          Json     @default("[]")
+  destacado       Boolean  @default(false)
+  displayOrder    Int      @default(0) @map("display_order")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
 
   @@map("obras")
   @@schema("public")
 }
 
 model Trabajo {
-  id               String   @id
-  slug             String   @unique
-  nombre           String
-  titulo           String?
-  tipo             String?
-  categoria        String?
-  direccion        String?
-  ubicacion        String?
-  anio             String?
-  descripcion      String   @default("")
-  portada          String?
-  imagenes         Json     @default("[]")
-  imagenesAntes    Json     @default("[]") @map("imagenes_antes")
-  imagenesProceso  Json     @default("[]") @map("imagenes_proceso")
-  imagenesFinal    Json     @default("[]") @map("imagenes_final")
-  video            String?
-  videos           Json     @default("[]")
-  galeriaVideo     Json     @default("[]") @map("galeria_video")
-  secciones        Json     @default("[]")
-  stages           Json     @default("[]")
-  puntos           Json     @default("[]")
-  destacado        Boolean  @default(false)
-  displayOrder     Int      @default(0) @map("display_order")
-  createdAt        DateTime @default(now()) @map("created_at")
-  updatedAt        DateTime @updatedAt @map("updated_at")
+  id              String   @id
+  slug            String   @unique
+  nombre          String
+  titulo          String?
+  tipo            String?
+  categoria       String?
+  direccion       String?
+  ubicacion       String?
+  anio            String?
+  descripcion     String   @default("")
+  portada         String?
+  imagenes        Json     @default("[]")
+  imagenesAntes   Json     @default("[]") @map("imagenes_antes")
+  imagenesProceso Json     @default("[]") @map("imagenes_proceso")
+  imagenesFinal   Json     @default("[]") @map("imagenes_final")
+  video           String?
+  videos          Json     @default("[]")
+  galeriaVideo    Json     @default("[]") @map("galeria_video")
+  secciones       Json     @default("[]")
+  stages          Json     @default("[]")
+  puntos          Json     @default("[]")
+  destacado       Boolean  @default(false)
+  displayOrder    Int      @default(0) @map("display_order")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
 
   @@map("trabajos")
   @@schema("public")
 }
 
 model Evento {
-  id               String   @id
-  slug             String   @unique
-  nombre           String
-  titulo           String?
-  tipo             String?
-  categoria        String?
-  direccion        String?
-  ubicacion        String?
-  anio             String?
-  descripcion      String   @default("")
-  portada          String?
-  imagenes         Json     @default("[]")
-  imagenesAntes    Json     @default("[]") @map("imagenes_antes")
-  imagenesProceso  Json     @default("[]") @map("imagenes_proceso")
-  imagenesFinal    Json     @default("[]") @map("imagenes_final")
-  video            String?
-  videos           Json     @default("[]")
-  galeriaVideo     Json     @default("[]") @map("galeria_video")
-  secciones        Json     @default("[]")
-  stages           Json     @default("[]")
-  puntos           Json     @default("[]")
-  destacado        Boolean  @default(false)
-  displayOrder     Int      @default(0) @map("display_order")
-  createdAt        DateTime @default(now()) @map("created_at")
-  updatedAt        DateTime @updatedAt @map("updated_at")
+  id              String   @id
+  slug            String   @unique
+  nombre          String
+  titulo          String?
+  tipo            String?
+  categoria       String?
+  direccion       String?
+  ubicacion       String?
+  anio            String?
+  descripcion     String   @default("")
+  portada         String?
+  imagenes        Json     @default("[]")
+  imagenesAntes   Json     @default("[]") @map("imagenes_antes")
+  imagenesProceso Json     @default("[]") @map("imagenes_proceso")
+  imagenesFinal   Json     @default("[]") @map("imagenes_final")
+  video           String?
+  videos          Json     @default("[]")
+  galeriaVideo    Json     @default("[]") @map("galeria_video")
+  secciones       Json     @default("[]")
+  stages          Json     @default("[]")
+  puntos          Json     @default("[]")
+  destacado       Boolean  @default(false)
+  displayOrder    Int      @default(0) @map("display_order")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
 
   @@map("eventos")
   @@schema("public")
@@ -173,25 +173,34 @@ model Category {
 }
 
 model Work {
-  id           String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  slug         String      @unique
-  title        String
-  summary      String      @default("") @map("short_description")
-  body         String      @default("") @map("description")
-  client       String?     @map("client_name")
-  location     String?
-  address      String?
-  status       String      @default("draft")
-  coverImageUrl  String?   @map("cover_image_url")
-  coverImagePath String?   @map("cover_image_path")
-  displayOrder Int         @default(0) @map("sort_order")
-  isFeatured   Boolean     @default(false) @map("featured")
-  categoryId   String?     @map("category_id") @db.Uuid
-  authorId     String?     @map("created_by") @db.Uuid
-  createdAt    DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt    DateTime    @updatedAt @map("updated_at")
-  category     Category?   @relation(fields: [categoryId], references: [id], onDelete: SetNull)
-  images       WorkImage[]
+  id             String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  slug           String      @unique
+  title          String
+  summary        String      @default("") @map("short_description")
+  body           String      @default("") @map("description")
+  client         String?     @map("client_name")
+  location       String?
+  address        String?
+  year           String?
+  status         String      @default("draft")
+  progress       Int         @default(0)
+  processText    String      @default("") @map("process_text") @db.Text
+  completionText String      @default("") @map("completion_text") @db.Text
+  video          String?
+  videoGallery   Json        @default("[]") @map("video_gallery")
+  branches       Json        @default("[]")
+  stages         Json        @default("[]")
+  points         Json        @default("[]")
+  coverImageUrl  String?     @map("cover_image_url")
+  coverImagePath String?     @map("cover_image_path")
+  displayOrder   Int         @default(0) @map("sort_order")
+  isFeatured     Boolean     @default(false) @map("featured")
+  categoryId     String?     @map("category_id") @db.Uuid
+  authorId       String?     @map("created_by") @db.Uuid
+  createdAt      DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime    @updatedAt @map("updated_at")
+  category       Category?   @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  images         WorkImage[]
 
   @@map("works")
   @@schema("public")
