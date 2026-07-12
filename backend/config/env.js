@@ -54,6 +54,11 @@ function uniqueEmailList(items) {
   return [...new Set(items)];
 }
 
+function vercelOrigin(hostname) {
+  const cleanHostname = String(hostname || '').trim().replace(/^https?:\/\//i, '').replace(/\/$/, '');
+  return cleanHostname ? `https://${cleanHostname}` : '';
+}
+
 const configuredAdminEmails = process.env.ADMIN_EMAILS
   ? emailListFromValue(process.env.ADMIN_EMAILS)
   : uniqueEmailList([
@@ -89,6 +94,9 @@ const uploadMimeTypes = uniqueEmailList([
 const configuredCorsOrigins = uniqueEmailList([
   ...listFromEnv('CORS_ORIGINS'),
   process.env.CLIENT_URL,
+  vercelOrigin(process.env.VERCEL_URL),
+  vercelOrigin(process.env.VERCEL_BRANCH_URL),
+  vercelOrigin(process.env.VERCEL_PROJECT_PRODUCTION_URL),
 ]);
 
 export const env = {

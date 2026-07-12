@@ -70,6 +70,8 @@ VITE_SUPABASE_STORAGE_BUCKET=crud-images
 VITE_ADMIN_EMAILS=fortalezaconstruccionesrosario@gmail.com,materialezfzacecommerce@gmail.com,dylansalcedo333@gmail.com
 ```
 
+En Vercel multi-servicio `VITE_API_URL` puede omitirse o configurarse como `/api`; el frontend usa automaticamente el backend del mismo dominio. La URL local se conserva solamente para desarrollo.
+
 Backend: copiar `backend/.env.example` a `backend/.env` y completar:
 
 ```env
@@ -211,18 +213,19 @@ El backend registra nombre, MIME, bytes, folder, bucket y path. Nunca registra k
 
 ## Deploy
 
-### Frontend Vercel
+### Vercel multi-servicio
 
-- Crear un proyecto usando la raiz del repositorio y el `vercel.json` principal.
-- Configurar las variables `VITE_*` con la URL publica del backend.
-- Ejecutar `npm run build` desde `frontend` para validar antes del deploy.
-
-### Backend Vercel
-
-- Crear un segundo proyecto Vercel con Root Directory `backend`.
-- El archivo `backend/vercel.json` envia `/api/*` y `/health` a la funcion Express.
-- Cargar todas las variables del backend, incluyendo `CORS_ORIGINS` con el dominio final del frontend.
+- Crear un solo proyecto Vercel usando la raiz del repositorio, sin seleccionar `frontend` ni `backend` como Root Directory.
+- El `vercel.json` principal declara los servicios `frontend` (Vite) y `backend` (Express).
+- `/api/*` y `/health` se envian al backend; las demas rutas se envian al frontend.
+- `frontend/vercel.json` resuelve las rutas de React Router hacia `index.html`.
+- `backend/vercel.json` resuelve las rutas de Express hacia `api/index.js`.
+- Cargar las variables `VITE_*` en el servicio frontend y las variables de Prisma/Supabase en el servicio backend.
+- No configurar `SUPABASE_SERVICE_ROLE_KEY`, `DATABASE_URL`, `DIRECT_URL` ni `JWT_SECRET` en frontend.
+- Vercel aporta automaticamente sus dominios de preview al CORS; para dominios personalizados agregar `CLIENT_URL` y `CORS_ORIGINS`.
 - Ejecutar localmente `npm run prisma:deploy:portfolio` y `npm run prisma:seed` antes del primer deploy.
+
+El deploy se realiza desde la raiz del repositorio. No hacen falta dos proyectos Vercel separados.
 
 Para cargas cercanas a 25MB se recomienda Render, Railway o un servidor Node persistente: las funciones serverless de Vercel pueden imponer un límite de request inferior aunque la aplicación permita 25MB.
 

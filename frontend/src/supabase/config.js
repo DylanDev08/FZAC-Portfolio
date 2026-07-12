@@ -24,6 +24,7 @@ function getConfiguredApiUrl() {
 function getApiUrlCandidates() {
   const configured = getConfiguredApiUrl();
   if (configured) return [configured];
+  if ((import.meta.env || {}).PROD) return ['/api'];
 
   return [4000, 4001, 4002, 4003, 4004, 4005].map((port) => `http://localhost:${port}/api`);
 }

@@ -1,9 +1,9 @@
 import { ensureSupabaseReady } from '../supabase/config.js';
 
-const DEFAULT_API_URL = 'http://localhost:4000/api';
+const viteEnv = import.meta.env || {};
+const DEFAULT_API_URL = viteEnv.PROD ? '/api' : 'http://localhost:4000/api';
 const LOCAL_API_CANDIDATES = [4000, 4001, 4002, 4003, 4004, 4005].map((port) => `http://localhost:${port}/api`);
 const TOKEN_KEY = 'fzac_token';
-const viteEnv = import.meta.env || {};
 
 const CONFIGURED_API_URL = String(
   viteEnv.VITE_API_URL
@@ -81,6 +81,7 @@ async function hasPublicConfig(apiUrl) {
 
 async function resolveApiUrl() {
   if (CONFIGURED_API_URL) return CONFIGURED_API_URL;
+  if (viteEnv.PROD) return '/api';
   if (resolvedApiUrlPromise) return resolvedApiUrlPromise;
 
   resolvedApiUrlPromise = (async () => {

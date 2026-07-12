@@ -7,6 +7,7 @@
   "scripts": {
     "dev": "node server.js",
     "start": "node server.js",
+    "vercel-build": "prisma generate",
     "prisma:generate": "prisma generate",
     "prisma:deploy:portfolio": "prisma db execute --file prisma/migrations/20260707123000_admin_crud_supabase/migration.sql --schema prisma/direct-schema.prisma && prisma db execute --file prisma/migrations/20260710143000_complete_portfolio_crud/migration.sql --schema prisma/direct-schema.prisma",
     "prisma:seed": "prisma db seed",

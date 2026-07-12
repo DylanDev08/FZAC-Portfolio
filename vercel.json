@@ -1,8 +1,14 @@
 {
-  "framework": "vite",
-  "installCommand": "cd frontend && npm install --no-audit --no-fund",
-  "buildCommand": "cd frontend && npm run build",
-  "outputDirectory": "frontend/dist",
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "services": {
+    "frontend": {
+      "root": "frontend",
+      "framework": "vite"
+    },
+    "backend": {
+      "root": "backend"
+    }
+  },
   "redirects": [
     { "source": "/obra/sliders-jujuy", "destination": "/obra/sliders-hamburger", "permanent": true },
     { "source": "/obra/sliders-rosas", "destination": "/obra/sliders-hamburger", "permanent": true },
@@ -33,8 +39,25 @@
   ],
   "rewrites": [
     {
+      "source": "/health",
+      "destination": {
+        "type": "service",
+        "service": "backend"
+      }
+    },
+    {
+      "source": "/api/(.*)?",
+      "destination": {
+        "type": "service",
+        "service": "backend"
+      }
+    },
+    {
       "source": "/(.*)",
-      "destination": "/index.html"
+      "destination": {
+        "type": "service",
+        "service": "frontend"
+      }
     }
   ]
 }
