@@ -5,6 +5,7 @@ import EventCard from '../components/EventCard.jsx';
 import Seo from '../components/Seo.jsx';
 import { getProjects } from '../services/projectsService.js';
 import { getTrabajos, getEventos } from '../services/contentService.js';
+import { DEFAULT_SITE_TEXTS, getPublicSiteTexts } from '../services/siteTextService.js';
 
 const services = [
   { title: 'Steel Framing', tag: 'Construcción en seco', text: 'Estructuras livianas con perfiles galvanizados para viviendas, locales y ampliaciones con ejecución rápida y precisa.', points: ['Menor carga húmeda', 'Montaje limpio', 'Alta precisión'], workHash: 'construccion-en-seco' },
@@ -29,12 +30,14 @@ export default function Home() {
   const [projects, setProjects] = useState([]);
   const [trabajos, setTrabajos] = useState([]);
   const [eventos, setEventos] = useState([]);
+  const [siteTexts, setSiteTexts] = useState(DEFAULT_SITE_TEXTS);
   useEffect(() => {
-    Promise.all([getProjects(), getTrabajos(), getEventos()])
-      .then(([projectList, trabajosList, eventosList]) => {
+    Promise.all([getProjects(), getTrabajos(), getEventos(), getPublicSiteTexts()])
+      .then(([projectList, trabajosList, eventosList, nextSiteTexts]) => {
         setProjects(projectList);
         setTrabajos(trabajosList);
         setEventos(eventosList);
+        setSiteTexts(nextSiteTexts);
       })
       .catch(() => {
         setProjects([]);
@@ -78,8 +81,8 @@ export default function Home() {
         <div className="container hero-section__container">
           <div className="hero-copy reveal is-visible">
             <span className="eyebrow">Fortaleza Construcciones</span>
-            <h1>Soluciones constructivas con criterio técnico, presencia y terminación profesional</h1>
-            <p>Desarrollamos obras comerciales y residenciales, integrando planificación, ejecución y control de obra.</p>
+            <h1>{siteTexts['home.hero.title']}</h1>
+            <p>{siteTexts['home.hero.subtitle']}</p>
             <div className="hero-actions">
               <a href="/proyectos" className="btn btn--primary">Ver obras</a>
               <a href="#contacto" className="btn btn--ghost">Solicitar presupuesto</a>

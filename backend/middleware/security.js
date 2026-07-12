@@ -33,7 +33,7 @@ export function sanitizeBody(req, res, next) {
     return res.status(400).json({ ok: false, status: 400, error: 'El cuerpo debe ser un objeto válido' });
   }
 
-  const forbidden = /select|union|drop|insert|delete|from|where|script|<|>/i;
+  const forbidden = /<\s*script|javascript\s*:|onerror\s*=|onload\s*=/i;
   for (const [key, value] of Object.entries(req.body)) {
     if (typeof value === 'string' && forbidden.test(value)) {
       return res.status(400).json({ ok: false, status: 400, error: `Entrada sospechosa en el campo ${key}` });

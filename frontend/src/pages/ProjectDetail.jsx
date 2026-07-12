@@ -10,15 +10,17 @@ export default function ProjectDetail() {
   const { slug } = useParams();
   const canonicalSlug = getCanonicalProjectSlug(slug);
   const [project, setProject] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [currentVideo, setCurrentVideo] = useState('');
   const [lightbox, setLightbox] = useState(null);
 
   useEffect(() => {
+    setLoading(true);
     getProjects().then((list) => {
       const selected = list.find((item) => item.slug === canonicalSlug) || null;
       setProject(selected);
       setCurrentVideo(selected?.video || selected?.galeriaVideo?.[0] || '');
-    }).catch(() => setProject(null));
+    }).catch(() => setProject(null)).finally(() => setLoading(false));
   }, [canonicalSlug]);
 
   const videos = useMemo(() => {
@@ -69,7 +71,8 @@ export default function ProjectDetail() {
       <main className="page-hero">
         <div className="container">
           <span className="eyebrow">Obra</span>
-          <h1>Cargando proyecto...</h1>
+          <h1>{loading ? 'Cargando proyecto...' : 'Obra no encontrada'}</h1>
+          {!loading && <p>La obra solicitada no está publicada o la dirección cambió. <Link to="/proyectos">Volver al portfolio</Link>.</p>}
         </div>
       </main>
     );

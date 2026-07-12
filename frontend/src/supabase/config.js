@@ -30,6 +30,7 @@ function getApiUrlCandidates() {
 
 const DEFAULT_ADMIN_EMAILS = [
   'fortalezaconstruccionesrosario@gmail.com',
+  'materialezfzacecommerce@gmail.com',
   'dylansalcedo333@gmail.com',
 ];
 

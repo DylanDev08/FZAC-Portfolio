@@ -13,6 +13,7 @@ export default function Projects() {
   const [estado, setEstado] = useState('all');
   const [tipo, setTipo] = useState('all');
   const [search, setSearch] = useState('');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     Promise.all([getProjects(), getTrabajos()])
@@ -23,7 +24,8 @@ export default function Projects() {
       .catch(() => {
         setProjects([]);
         setTrabajos([]);
-      });
+      })
+      .finally(() => setLoading(false));
   }, []);
 
   const tipos = useMemo(() => getProjectTypes(projects), [projects]);
@@ -62,7 +64,11 @@ export default function Projects() {
             tipos={tipos}
           />
 
-          {showGroupedSections ? (
+          {loading ? (
+            <div className="portfolio-grid" aria-label="Cargando obras">
+              {[1, 2, 3].map((item) => <div className="project-card-skeleton" key={item} aria-hidden="true" />)}
+            </div>
+          ) : showGroupedSections ? (
             <div className="obra-status-sections">
               {groupedProjects.map((group) => (
                 <section className="obra-status-section" key={group.key}>
@@ -83,7 +89,7 @@ export default function Projects() {
             </div>
           )}
 
-          {!filtered.length && <div className="empty-state"><h3>No hay obras con ese filtro.</h3><p>Probá con otra categoría o búsqueda.</p></div>}
+          {!loading && !filtered.length && <div className="empty-state"><h3>No hay obras con ese filtro.</h3><p>Probá con otra categoría o búsqueda.</p></div>}
         </div>
       </section>
 
@@ -97,7 +103,7 @@ export default function Projects() {
           <div className="reference-grid">
             {trabajos.map((item) => (
               <Link className="reference-card" key={item.id} to={`/trabajos/${item.slug || item.id}`}>
-                <img src={item.portada} alt={item.nombre} loading="lazy" />
+                <img src={item.portada || '/assets/img/logo/fzac-logo.jpg'} alt={item.nombre} loading="lazy" decoding="async" onError={(event) => { event.currentTarget.src = '/assets/img/logo/fzac-logo.jpg'; }} />
                 <div>
                   <span>{item.tipo}</span>
                   <h3>{item.nombre}</h3>

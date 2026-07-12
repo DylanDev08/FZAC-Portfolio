@@ -202,6 +202,7 @@ model Work {
   category       Category?   @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   images         WorkImage[]
 
+  @@index([status, displayOrder], map: "works_status_sort_order_idx")
   @@map("works")
   @@schema("public")
 }
@@ -218,6 +219,7 @@ model WorkImage {
   work      Work     @relation(fields: [workId], references: [id], onDelete: Cascade)
 
   @@index([workId])
+  @@index([workId, section, sortOrder], map: "work_images_work_stage_sort_idx")
   @@map("work_images")
   @@schema("public")
 }

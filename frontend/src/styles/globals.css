@@ -972,6 +972,24 @@ textarea {
   }
 }
 
+.project-card-skeleton {
+  min-height: 430px;
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 8px;
+  background: linear-gradient(90deg, rgba(255,255,255,.035) 25%, rgba(255,255,255,.075) 50%, rgba(255,255,255,.035) 75%);
+  background-size: 220% 100%;
+  animation: fzac-skeleton 1.25s ease-in-out infinite;
+}
+
+@keyframes fzac-skeleton {
+  from { background-position: 100% 0; }
+  to { background-position: -100% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .project-card-skeleton { animation: none; }
+}
+
 @media (max-width: 860px) {
   .desktop-nav {
     display: none;

@@ -11,3 +11,6 @@ ALTER TABLE "works" ADD COLUMN IF NOT EXISTS "points" JSONB NOT NULL DEFAULT '[]
 ALTER TABLE "works" DROP CONSTRAINT IF EXISTS "works_status_check";
 ALTER TABLE "works" ADD CONSTRAINT "works_status_check"
   CHECK ("status" IN ('draft', 'published', 'archived', 'finalizada', 'construyendo', 'por-comenzar'));
+
+CREATE INDEX IF NOT EXISTS "works_status_sort_order_idx" ON "works"("status", "sort_order");
+CREATE INDEX IF NOT EXISTS "work_images_work_stage_sort_idx" ON "work_images"("work_id", "stage", "sort_order");

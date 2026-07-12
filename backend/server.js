@@ -1,24 +1,19 @@
-import { createApp } from './api/app.js';
-import { env } from './config/env.js';
+import { createApp } from './app.js';
+import { env, validateEnvironment } from './config/env.js';
 
 const app = createApp();
-const initialPort = env.port;
+const { missing } = validateEnvironment();
+if (missing.length) console.warn(`[config] Variables opcionales durante desarrollo sin completar: ${missing.join(', ')}`);
 
-function startServer(port, attemptsLeft = 5) {
-  const server = app.listen(port, () => {
-    console.log(`Backend FZAC corriendo en http://localhost:${port}`);
-  });
+const server = app.listen(env.port, () => {
+  console.log(`Backend FZAC corriendo en http://localhost:${env.port}`);
+});
 
-  server.on('error', (error) => {
-    if (error.code === 'EADDRINUSE' && attemptsLeft > 0) {
-      console.warn(`Puerto ${port} ocupado. Probando ${port + 1}...`);
-      server.close(() => startServer(port + 1, attemptsLeft - 1));
-      return;
-    }
-
-    console.error('No se pudo iniciar el servidor:', error);
-    process.exit(1);
-  });
-}
-
-startServer(initialPort);
+server.on('error', (error) => {
+  if (error.code === 'EADDRINUSE') {
+    console.error(`El puerto ${env.port} ya está ocupado. Cerrá la instancia anterior del backend y volvé a iniciar.`);
+  } else {
+    console.error('No se pudo iniciar el servidor:', error.message);
+  }
+  process.exit(1);
+});

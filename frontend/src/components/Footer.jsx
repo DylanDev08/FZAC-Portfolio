@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { DEFAULT_SITE_TEXTS, getPublicSiteTexts } from '../services/siteTextService.js';
 
 const ecommerceUrl = '';
 const adtechUrl = 'https://www.instagram.com/adtech.ros/';
@@ -13,6 +14,12 @@ const adtechServices = [
 ];
 
 export default function Footer() {
+  const [terms, setTerms] = useState(DEFAULT_SITE_TEXTS['footer.terms']);
+
+  useEffect(() => {
+    getPublicSiteTexts().then((texts) => setTerms(texts['footer.terms']));
+  }, []);
+
   return (
     <footer className="site-footer site-footer--clean">
       <div className="container site-footer__container site-footer__container--balanced">
@@ -62,11 +69,7 @@ export default function Footer() {
         <section className="site-footer__column site-footer__legal" aria-label="Términos y condiciones">
           <span className="site-footer__label">Términos</span>
           <h4>Portfolio institucional</h4>
-          <p>
-            Este sitio expone obras, servicios, referencias visuales, canales de contacto y material
-            institucional de Fortaleza Construcciones. El contenido se publica con fines informativos
-            y comerciales.
-          </p>
+          <p>{terms}</p>
           <p className="site-footer__author">Autor: Fortaleza Construcciones.</p>
         </section>
       </div>

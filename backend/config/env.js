@@ -39,6 +39,7 @@ loadLocalEnv();
 
 const DEFAULT_ADMIN_EMAILS = [
   'fortalezaconstruccionesrosario@gmail.com',
+  'materialezfzacecommerce@gmail.com',
   'dylansalcedo333@gmail.com',
 ];
 
@@ -85,6 +86,11 @@ const uploadMimeTypes = uniqueEmailList([
   ...DEFAULT_PHOTO_MIME_TYPES,
 ]);
 
+const configuredCorsOrigins = uniqueEmailList([
+  ...listFromEnv('CORS_ORIGINS'),
+  process.env.CLIENT_URL,
+]);
+
 export const env = {
   port: numberFromEnv('PORT', 4000),
   authRequired: process.env.AUTH_REQUIRED !== 'false',
@@ -98,12 +104,30 @@ export const env = {
   supabaseStorageBucket: String(process.env.SUPABASE_STORAGE_BUCKET || 'crud-images'),
   maxUploadSizeMb: Math.max(numberFromEnv('MAX_UPLOAD_SIZE_MB', 25), 25),
   allowedUploadMimeTypes: uploadMimeTypes,
-  corsOrigins: listFromEnv('CORS_ORIGINS'),
+  corsOrigins: configuredCorsOrigins,
   jsonLimit: String(process.env.JSON_LIMIT || '2mb'),
   generalRateLimit: numberFromEnv('RATE_LIMIT_MAX', 100),
-  adminRateLimit: numberFromEnv('ADMIN_RATE_LIMIT_MAX', 30),
+  adminRateLimit: numberFromEnv('ADMIN_RATE_LIMIT_MAX', 120),
   loginRateLimit: numberFromEnv('LOGIN_RATE_LIMIT_MAX', 8),
 };
+
+export function validateEnvironment() {
+  const required = [
+    'DATABASE_URL',
+    'DIRECT_URL',
+    'SUPABASE_URL',
+    'SUPABASE_ANON_KEY',
+    'SUPABASE_SERVICE_ROLE_KEY',
+    'JWT_SECRET',
+  ];
+  const missing = required.filter((key) => !String(process.env[key] || '').trim());
+
+  if (process.env.NODE_ENV === 'production' && missing.length) {
+    throw new Error(`Faltan variables de entorno requeridas: ${missing.join(', ')}`);
+  }
+
+  return { missing };
+}
 
 export function isAllowedAdminEmail(email) {
   const cleanEmail = String(email || '').trim().toLowerCase();

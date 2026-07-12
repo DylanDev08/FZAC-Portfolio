@@ -96,7 +96,13 @@ export function ProjectGallery({
         )}
 
         <button className="obra-gallery-viewer__image" type="button" onClick={openActive} aria-label={`Ampliar ${projectName}`}>
-          <img src={active.src} alt={`${projectName} - imagen ${safeActiveIndex + 1}`} loading="lazy" />
+          <img
+            src={active.src}
+            alt={active.alt || `${projectName} - imagen ${safeActiveIndex + 1}`}
+            loading={safeActiveIndex === 0 ? 'eager' : 'lazy'}
+            decoding="async"
+            onError={(event) => { event.currentTarget.src = '/assets/img/logo/fzac-logo.jpg'; }}
+          />
           <span>{safeActiveIndex + 1}/{sequence.length}</span>
         </button>
 
@@ -115,7 +121,7 @@ export function ProjectGallery({
               onClick={() => setActiveIndex(index)}
               aria-label={`Ver imagen ${index + 1}`}
             >
-              <img src={item.src} alt="" loading="lazy" />
+              <img src={item.src} alt={item.alt || ''} loading="lazy" decoding="async" onError={(event) => { event.currentTarget.src = '/assets/img/logo/fzac-logo.jpg'; }} />
             </button>
           ))}
         </div>

@@ -19,6 +19,12 @@ const response = await fetch(`${apiUrl}/admin/works`, {
   headers: { Authorization: `Bearer ${token}` },
 });
 const payload = await response.json().catch(() => ({}));
+const invalidResponse = await fetch(`${apiUrl}/admin/works`, {
+  method: 'POST',
+  headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+  body: JSON.stringify({ title: 'Control de validación', slug: 'Slug Inválido', status: 'incorrecto' }),
+});
+const invalidPayload = await invalidResponse.json().catch(() => ({}));
 
 console.log({
   apiUrl,
@@ -26,6 +32,8 @@ console.log({
   authorized: response.ok,
   works: Array.isArray(payload.data) ? payload.data.length : 0,
   error: payload.error || '',
+  validationStatus: invalidResponse.status,
+  validationRejected: invalidResponse.status === 400 && Boolean(invalidPayload.error),
 });
 
-if (!response.ok) process.exitCode = 1;
+if (!response.ok || invalidResponse.status !== 400) process.exitCode = 1;

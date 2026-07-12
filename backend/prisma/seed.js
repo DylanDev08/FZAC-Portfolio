@@ -1,7 +1,7 @@
 import { prisma } from '../db/prisma.js';
 import { env } from '../config/env.js';
 import { syncPortfolioCatalog } from '../models/admin.model.js';
-import { fallbackProjects } from '../../frontend/src/data/projects.js';
+import { portfolioCatalog } from '../data/portfolio-catalog.js';
 
 function slugify(value = '') {
   return String(value)
@@ -32,14 +32,14 @@ const siteTexts = [
   {
     key: 'home.hero.subtitle',
     title: 'Subtítulo principal del inicio',
-    value: 'Planificación, ejecución y terminaciones para obras comerciales y residenciales.',
+    value: 'Desarrollamos obras comerciales y residenciales, integrando planificación, ejecución y control de obra.',
     section: 'home',
     description: 'Bajada institucional del hero.',
   },
   {
     key: 'footer.terms',
     title: 'Términos del portfolio',
-    value: 'Este portfolio expone obras, servicios y registros visuales realizados por Fortaleza Construcciones.',
+    value: 'Este sitio expone obras, servicios, referencias visuales, canales de contacto y material institucional de Fortaleza Construcciones. El contenido se publica con fines informativos y comerciales.',
     section: 'footer',
     description: 'Texto legal breve visible o administrable para el pie del sitio.',
   },
@@ -58,7 +58,7 @@ async function main() {
     const slug = slugify(category.name);
     await prisma.category.upsert({
       where: { slug },
-      update: category,
+      update: {},
       create: { ...category, slug },
     });
   }
@@ -66,12 +66,12 @@ async function main() {
   for (const text of siteTexts) {
     await prisma.siteText.upsert({
       where: { key: text.key },
-      update: text,
+      update: {},
       create: text,
     });
   }
 
-  const catalog = await syncPortfolioCatalog(fallbackProjects, env.adminEmails[0]);
+  const catalog = await syncPortfolioCatalog(portfolioCatalog, env.adminEmails[0]);
   console.log(`[seed] Portfolio administrable sincronizado. Obras nuevas: ${catalog.created}. Total: ${catalog.total}.`);
 
   console.log('[seed] Categorías, textos iniciales y admin sincronizados.');

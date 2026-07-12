@@ -43,6 +43,7 @@ async function ensureBucket(client) {
     });
 
     if (createError && !/already exists/i.test(createError.message || '')) {
+      console.error(`[storage] bucket error bucket=${env.supabaseStorageBucket} message=${createError.message || 'unknown'}`);
       throw new Error(createError.message || `No se pudo crear el bucket ${env.supabaseStorageBucket}.`);
     }
   })();
@@ -133,6 +134,8 @@ export async function uploadImageToStorage(file, folder = 'uploads') {
     ? mimeFromExtension(ext)
     : file.contentType;
 
+  console.info(`[storage] uploading bucket=${env.supabaseStorageBucket} folder=${cleanFolder} path=${path} type=${contentType} bytes=${file.buffer.length}`);
+
   const { data, error } = await client.storage
     .from(env.supabaseStorageBucket)
     .upload(path, file.buffer, {
@@ -142,6 +145,7 @@ export async function uploadImageToStorage(file, folder = 'uploads') {
     });
 
   if (error) {
+    console.error(`[storage] upload failed bucket=${env.supabaseStorageBucket} path=${path} message=${error.message || 'unknown'}`);
     const uploadError = new Error(error.message || 'No se pudo subir la imagen a Supabase Storage.');
     uploadError.status = 400;
     throw uploadError;

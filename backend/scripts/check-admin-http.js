@@ -1,4 +1,5 @@
 import jwt from 'jsonwebtoken';
+import { createClient } from '@supabase/supabase-js';
 import { env } from '../config/env.js';
 
 async function findApiUrl() {
@@ -66,6 +67,11 @@ await request(apiUrl, `/admin/works/${encodeURIComponent(work.id)}`, {
   method: 'DELETE',
   headers: auth,
 });
+
+const storage = createClient(env.supabaseUrl, env.supabaseServiceRoleKey, {
+  auth: { autoRefreshToken: false, persistSession: false },
+});
+await storage.storage.from(env.supabaseStorageBucket).remove([uploaded.path]);
 
 console.log({
   apiUrl,

@@ -1,5 +1,5 @@
 import { prisma } from '../db/prisma.js';
-import { fallbackProjects } from '../../frontend/src/data/projects.js';
+import { portfolioCatalog } from '../data/portfolio-catalog.js';
 
 const targets = [
   { workSlug: 'marvel', addressPart: 'Rondeau 2430' },
@@ -8,7 +8,7 @@ const targets = [
 
 try {
   for (const target of targets) {
-    const sourceWork = fallbackProjects.find((work) => work.slug === target.workSlug);
+    const sourceWork = portfolioCatalog.find((work) => work.slug === target.workSlug);
     const sourceBranch = sourceWork?.sucursales?.find((branch) => branch.direccion?.includes(target.addressPart));
     const storedWork = await prisma.work.findUnique({ where: { slug: target.workSlug } });
     const storedBranches = Array.isArray(storedWork?.branches) ? storedWork.branches : [];

@@ -18,7 +18,7 @@ import {
   updateWork,
   updateWorkImage,
 } from '../models/admin.model.js';
-import { fallbackProjects } from '../../frontend/src/data/projects.js';
+import { portfolioCatalog } from '../data/portfolio-catalog.js';
 import { uploadImageToStorage } from '../services/upload.service.js';
 import { parseMultipartForm } from '../utils/multipart.js';
 
@@ -42,8 +42,10 @@ export async function uploadController(req, res) {
       throw error;
     }
 
-    const uploaded = await uploadImageToStorage(file, fields.folder || 'uploads');
-    console.info(`[admin] upload ok path=${uploaded.path}`);
+    const folder = fields.folder || 'uploads';
+    console.info(`[admin] upload received name=${file.filename} type=${file.contentType} bytes=${file.buffer.length} folder=${folder}`);
+    const uploaded = await uploadImageToStorage(file, folder);
+    console.info(`[admin] upload ok bucket=${uploaded.bucket} path=${uploaded.path} bytes=${uploaded.sizeBytes}`);
     return ok(res, 201, uploaded);
   } catch (error) {
     return fail(res, error, 400);
@@ -104,7 +106,7 @@ export async function deleteWorkController(req, res) {
 
 export async function syncWorksController(req, res) {
   try {
-    const data = await syncPortfolioCatalog(fallbackProjects, req.user?.email);
+    const data = await syncPortfolioCatalog(portfolioCatalog, req.user?.email);
     console.info(`[admin] portfolio catalog synchronized created=${data.created} total=${data.total}`);
     return ok(res, data.created ? 201 : 200, data);
   } catch (error) {

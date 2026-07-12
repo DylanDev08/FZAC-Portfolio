@@ -76,13 +76,21 @@ function imageInputToData(input, section, sortOrder = 0) {
 }
 
 function collectWorkImages(payload = {}) {
+  const cover = toArray(payload.coverImage || payload.cover || payload.portada);
+  const gallery = toArray(payload.images || payload.imagenes);
   const before = toArray(payload.beforeImages || payload.imagenesAntes);
   const process = toArray(payload.processImages || payload.imagenesProceso);
   const final = toArray(payload.finalImages || payload.imagenesFinal);
-  const hasStages = before.length || process.length || final.length;
+  const classifiedUrls = new Set([...cover, ...before, ...process, ...final]
+    .map((item) => imageInputToData(item, 'gallery')?.imageUrl)
+    .filter(Boolean));
+  const unclassifiedGallery = gallery.filter((item) => {
+    const url = imageInputToData(item, 'gallery')?.imageUrl;
+    return url && !classifiedUrls.has(url);
+  });
   const groups = [
-    ['cover', toArray(payload.coverImage || payload.cover || payload.portada)],
-    ['gallery', hasStages ? [] : toArray(payload.images || payload.imagenes)],
+    ['cover', cover],
+    ['gallery', unclassifiedGallery],
     ['before', before],
     ['process', process],
     ['final', final],
@@ -166,7 +174,8 @@ export function workToApi(work) {
     puntos: toArray(work.points),
     order: work.displayOrder || 0,
     destacado: Boolean(work.isFeatured),
-    portada: cover?.imageUrl || '',
+    portada: cover?.imageUrl || work.coverImageUrl || '',
+    portadaPath: cover?.imagePath || work.coverImagePath || '',
     imagenes: gallery.map((image) => image.imageUrl),
     imagenesAntes: before.map((image) => image.imageUrl),
     imagenesProceso: process.map((image) => image.imageUrl),
@@ -215,6 +224,7 @@ async function resolveCategory(payload = {}) {
   if (id) {
     const category = await prisma.category.findUnique({ where: { id } });
     if (category) return category;
+    throw new Error('La categoría seleccionada no existe. Actualizá el panel e intentá nuevamente.');
   }
 
   const rawName = clean(payload.categoryName || payload.category || payload.categoria || payload.tipo);
@@ -247,6 +257,7 @@ function workData(payload = {}, category, authorId = null) {
   if (!slug) throw new Error('La obra necesita un slug válido.');
 
   const status = clean(payload.status || payload.estado) || 'draft';
+  const cover = imageInputToData(payload.coverImage || payload.cover || payload.portada, 'cover');
 
   return {
     slug,
@@ -266,6 +277,8 @@ function workData(payload = {}, category, authorId = null) {
     branches: toArray(payload.branches || payload.sucursales),
     stages: toArray(payload.stages || payload.etapas),
     points: toArray(payload.points || payload.puntos),
+    coverImageUrl: cover?.imageUrl || null,
+    coverImagePath: cover?.imagePath || null,
     displayOrder: toInt(payload.displayOrder || payload.order, 0),
     isFeatured: toBool(payload.isFeatured ?? payload.destacado),
     categoryId: category?.id || null,
@@ -428,12 +441,14 @@ export async function listSiteTexts() {
 export async function createSiteText(payload) {
   const key = clean(payload.key);
   if (!key) throw new Error('El texto necesita una clave.');
+  const value = clean(payload.value || payload.contenido);
+  if (!value) throw new Error('El texto necesita contenido.');
 
   const row = await prisma.siteText.create({
     data: {
       key,
       title: clean(payload.title || payload.titulo) || null,
-      value: clean(payload.value || payload.contenido),
+      value,
       section: clean(payload.section || payload.seccion) || 'general',
       description: clean(payload.description || payload.descripcion),
     },
@@ -444,13 +459,15 @@ export async function createSiteText(payload) {
 export async function updateSiteText(id, payload) {
   const existing = await prisma.siteText.findFirst({ where: { OR: [{ id }, { key: id }] } });
   if (!existing) throw new Error('Texto no encontrado.');
+  const value = clean(payload.value ?? payload.contenido ?? existing.value);
+  if (!value) throw new Error('El texto necesita contenido.');
 
   const row = await prisma.siteText.update({
     where: { id: existing.id },
     data: {
       key: clean(payload.key || existing.key),
       title: clean(payload.title || payload.titulo) || null,
-      value: clean(payload.value || payload.contenido),
+      value,
       section: clean(payload.section || payload.seccion) || existing.section,
       description: clean(payload.description || payload.descripcion),
     },
@@ -477,7 +494,7 @@ export async function createWorkImage(payload) {
   const workId = clean(payload.workId || payload.work_id);
   if (!workId) throw new Error('La imagen necesita una obra asociada.');
 
-  const data = imageInputToData(payload, clean(payload.section) || 'gallery', toInt(payload.sortOrder || payload.order, 0));
+  const data = imageInputToData(payload, clean(payload.section) || 'gallery', toInt(payload.sortOrder ?? payload.order, 0));
   if (!data) throw new Error('La imagen necesita image_url e image_path.');
 
   const row = await prisma.workImage.create({ data: { ...data, workId } });
@@ -491,7 +508,7 @@ export async function updateWorkImage(id, payload) {
   const data = imageInputToData(
     { ...payload, imageUrl: payload.imageUrl || payload.image_url || existing.imageUrl, imagePath: payload.imagePath || payload.image_path || existing.imagePath },
     clean(payload.section || existing.section),
-    toInt(payload.sortOrder || payload.order, existing.sortOrder),
+    toInt(payload.sortOrder ?? payload.order, existing.sortOrder),
   );
   if (!data) throw new Error('La imagen necesita image_url e image_path.');
 
