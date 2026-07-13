@@ -38,6 +38,21 @@ export async function saveProject(project) {
   };
 }
 
+export async function updateProjectStatus(id, estado) {
+  if (!id) throw new Error('No se pudo identificar la obra.');
+  const response = await apiRequest(`/admin/works/${encodeURIComponent(id)}/status`, {
+    method: 'PATCH',
+    body: { status: estado },
+    auth: true,
+  });
+
+  return {
+    ok: true,
+    status: response.status,
+    item: normalizeProject(unwrapData(response)),
+  };
+}
+
 export async function deleteProject(id) {
   await apiRequest(`/admin/works/${encodeURIComponent(id)}`, { method: 'DELETE', auth: true });
   return { ok: true };

@@ -62,6 +62,8 @@ export default function Projects() {
             tipo={tipo}
             onTipoChange={setTipo}
             tipos={tipos}
+            resultCount={filtered.length}
+            totalCount={projects.length}
           />
 
           {loading ? (

@@ -1,7 +1,11 @@
 import { createWork, deleteWork, getWork, updateWork } from '../models/admin.model.js';
 import { prisma } from '../db/prisma.js';
+import { env } from '../config/env.js';
 
 const slug = `codex-check-${Date.now()}`;
+const adminEmail = env.adminEmails[0];
+
+if (!adminEmail) throw new Error('Configura ADMIN_EMAILS antes de ejecutar este check.');
 
 try {
   const created = await createWork({
@@ -18,7 +22,7 @@ try {
       { url: 'https://example.com/storage/v1/object/public/crud-images/check/before-1.jpg', path: 'check/before-1.jpg' },
       { url: 'https://example.com/storage/v1/object/public/crud-images/check/before-2.jpg', path: 'check/before-2.jpg' },
     ],
-  }, 'fortalezaconstruccionesrosario@gmail.com');
+  }, adminEmail);
 
   const found = await getWork(created.id);
   const imageCount = await prisma.workImage.count({ where: { workId: created.id } });
@@ -27,7 +31,7 @@ try {
     ...found,
     imagenesAntes: [before[1]],
     imagenesProceso: [before[0]],
-  }, 'fortalezaconstruccionesrosario@gmail.com');
+  }, adminEmail);
   const reordered = updated.imagenesAntes[0]?.includes('before-2.jpg')
     && updated.imagenesProceso[0]?.includes('before-1.jpg');
   console.log({ created: Boolean(created.id), found: Boolean(found?.id), imageCount, reordered });

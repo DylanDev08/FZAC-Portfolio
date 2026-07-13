@@ -29,33 +29,6 @@ function getApiUrlCandidates() {
   return [4000, 4001, 4002, 4003, 4004, 4005].map((port) => `http://localhost:${port}/api`);
 }
 
-const DEFAULT_ADMIN_EMAILS = [
-  'fortalezaconstruccionesrosario@gmail.com',
-  'materialezfzacecommerce@gmail.com',
-  'dylansalcedo333@gmail.com',
-];
-
-function emailListFromValue(value) {
-  return String(Array.isArray(value) ? value.join(',') : value || '')
-    .split(',')
-    .map((item) => item.trim().toLowerCase())
-    .filter(Boolean);
-}
-
-function uniqueEmailList(items) {
-  return [...new Set(items)];
-}
-
-function resolveAdminEmails(adminEmails, legacyAdminEmail = '') {
-  const configured = emailListFromValue(adminEmails);
-  if (configured.length) return configured;
-
-  return uniqueEmailList([
-    ...DEFAULT_ADMIN_EMAILS,
-    ...emailListFromValue(legacyAdminEmail),
-  ]);
-}
-
 export let SUPABASE_URL = normalizeSupabaseUrl(
   envValue('VITE_SUPABASE_URL')
   || envValue('VITE_SUPABASE_REST_URL')
@@ -63,11 +36,6 @@ export let SUPABASE_URL = normalizeSupabaseUrl(
 );
 export let SUPABASE_ANON_KEY = envValue('VITE_SUPABASE_ANON_KEY');
 export let SUPABASE_BUCKET = envValue('VITE_SUPABASE_STORAGE_BUCKET') || 'crud-images';
-export let ADMIN_EMAILS = resolveAdminEmails(
-  envValue('VITE_ADMIN_EMAILS'),
-  (import.meta.env || {}).VITE_ADMIN_EMAIL,
-);
-export let ADMIN_EMAIL = ADMIN_EMAILS[0] || '';
 export let isSupabaseReady = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY);
 
 export let supabase = isSupabaseReady ? createSupabaseClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
@@ -88,8 +56,6 @@ function applyRuntimeConfig(config = {}) {
   SUPABASE_URL = normalizeSupabaseUrl(config.supabaseUrl || config.url || SUPABASE_URL);
   SUPABASE_ANON_KEY = String(config.supabaseAnonKey || config.anonKey || SUPABASE_ANON_KEY || '').trim();
   SUPABASE_BUCKET = String(config.supabaseStorageBucket || config.bucket || SUPABASE_BUCKET || 'crud-images').trim();
-  ADMIN_EMAILS = resolveAdminEmails(config.adminEmails, config.adminEmail || ADMIN_EMAILS.join(','));
-  ADMIN_EMAIL = ADMIN_EMAILS[0] || '';
   isSupabaseReady = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY);
   supabase = isSupabaseReady ? createSupabaseClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 }
@@ -114,7 +80,7 @@ async function loadPublicConfig() {
       const payload = await response.json().catch(() => ({}));
 
       if (!response.ok || payload.ok === false) {
-        throw new Error(payload.error || 'No se pudo leer la configuración pública de Supabase.');
+        throw new Error(payload.error || 'No se pudo leer la configuracion publica de Supabase.');
       }
 
       applyRuntimeConfig(payload.data || payload);
@@ -124,7 +90,7 @@ async function loadPublicConfig() {
     }
   }
 
-  throw lastError || new Error('No se pudo leer la configuración pública de Supabase.');
+  throw lastError || new Error('No se pudo leer la configuracion publica de Supabase.');
 }
 
 export async function ensureSupabaseReady() {
@@ -139,18 +105,8 @@ export async function ensureSupabaseReady() {
   await configLoadPromise;
 
   if (!isSupabaseReady || !supabase) {
-    throw new Error('Supabase no está configurado. Revisá SUPABASE_URL y SUPABASE_ANON_KEY en el backend .env.');
+    throw new Error('Supabase no esta configurado. Revisa SUPABASE_URL y SUPABASE_ANON_KEY en el backend .env.');
   }
 
   return supabase;
-}
-
-export function isAuthorizedAdmin(user) {
-  const email = String(user?.email || '').trim().toLowerCase();
-  return isAuthorizedAdminEmail(email);
-}
-
-export function isAuthorizedAdminEmail(email) {
-  const cleanEmail = String(email || '').trim().toLowerCase();
-  return Boolean(cleanEmail && ADMIN_EMAILS.includes(cleanEmail));
 }

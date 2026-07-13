@@ -1,11 +1,10 @@
 import { Router } from 'express';
-import { loginLimiter } from '../middleware/security.js';
-import { loginController, registerAdminController } from '../controllers/auth.controller.js';
-import { validatePayload } from './fzac.routes.js';
+import { adminActionLimiter } from '../middleware/security.js';
+import { authMiddleware } from '../middleware/auth.js';
+import { bootstrapAdminController } from '../controllers/auth.controller.js';
 
 const router = Router();
 
-router.post('/login', loginLimiter, validatePayload, loginController);
-router.post('/register', loginLimiter, validatePayload, registerAdminController);
+router.post('/admin/bootstrap', authMiddleware, adminActionLimiter, bootstrapAdminController);
 
 export default router;

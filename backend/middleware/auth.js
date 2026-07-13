@@ -1,4 +1,3 @@
-import jwt from 'jsonwebtoken';
 import { createClient } from '@supabase/supabase-js';
 import { env, isAllowedAdminEmail } from '../config/env.js';
 
@@ -36,19 +35,7 @@ async function verifySupabaseToken(token) {
   }
 }
 
-function verifyLocalToken(token) {
-  try {
-    return jwt.verify(token, env.jwtSecret, { algorithms: ['HS256'] });
-  } catch {
-    return null;
-  }
-}
-
 export async function authMiddleware(req, res, next) {
-  if (!env.authRequired) {
-    return next();
-  }
-
   const authHeader = req.headers.authorization || '';
   const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : '';
 
@@ -57,7 +44,7 @@ export async function authMiddleware(req, res, next) {
   }
 
   try {
-    const decoded = await verifySupabaseToken(token) || verifyLocalToken(token);
+    const decoded = await verifySupabaseToken(token);
     if (!decoded) {
       return res.status(401).json({ error: 'Token JWT inválido' });
     }
@@ -71,8 +58,4 @@ export async function authMiddleware(req, res, next) {
   } catch {
     return res.status(401).json({ error: 'Token JWT inválido' });
   }
-}
-
-export function signToken(payload) {
-  return jwt.sign(payload, env.jwtSecret, { expiresIn: '8h' });
 }

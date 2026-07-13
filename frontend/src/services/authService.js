@@ -1,5 +1,5 @@
-import { ensureSupabaseReady, isAuthorizedAdmin, isAuthorizedAdminEmail } from '../supabase/config.js';
-import { apiRequest } from './httpService.js';
+import { ensureSupabaseReady } from '../supabase/config.js';
+import { apiRequest, unwrapData } from './httpService.js';
 import { createLoginLog } from './logsService.js';
 
 const STORAGE_USER_KEY = 'fzac_user';
@@ -75,6 +75,14 @@ export function subscribeAuth(callback) {
   };
 }
 
+export async function bootstrapAdminProfile() {
+  const response = await apiRequest('/auth/admin/bootstrap', {
+    method: 'POST',
+    auth: true,
+  });
+  return unwrapData(response);
+}
+
 export async function login(email, password) {
   const normalizedEmail = String(email || '').trim().toLowerCase();
 
@@ -87,53 +95,24 @@ export async function login(email, password) {
 
     if (error) throw error;
 
-    if (!isAuthorizedAdmin(data.user)) {
-      await createLoginLog({ email: normalizedEmail, success: false, reason: 'unauthorized-email' });
-      await client.auth.signOut();
-      clearToken();
-      throw new Error('Acceso no autorizado.');
-    }
-
     setToken(data.session?.access_token || '');
     setStoredUser(data.user);
-    await createLoginLog({ email: normalizedEmail, success: true });
-
-    return { token: data.session?.access_token || '', user: { email: data.user.email, uid: data.user.id } };
-  } catch (error) {
-    if (error?.message !== 'Acceso no autorizado.') {
-      await createLoginLog({ email: normalizedEmail, success: false, reason: error?.code || error?.message || 'login-error' });
-    }
-    throw mapSupabaseAuthError(error);
-  }
-}
-
-export async function registerAdmin(email, password) {
-  const normalizedEmail = String(email || '').trim().toLowerCase();
-
-  try {
-    const client = await ensureSupabaseReady();
-
-    if (!isAuthorizedAdminEmail(normalizedEmail)) {
-      throw new Error('Solo el email administrador autorizado puede registrarse.');
-    }
 
     try {
-      await apiRequest('/auth/register', {
-        method: 'POST',
-        body: { email: normalizedEmail, password },
-      });
-    } catch (apiError) {
-      const { error } = await client.auth.signUp({
-        email: normalizedEmail,
-        password,
-      });
-      if (error) throw error;
+      await bootstrapAdminProfile();
+    } catch (bootstrapError) {
+      await client.auth.signOut();
+      clearToken();
+      if ([401, 403].includes(bootstrapError?.status)) {
+        throw new Error('Acceso no autorizado.');
+      }
+      throw bootstrapError;
     }
 
-    await createLoginLog({ email: normalizedEmail, success: true, reason: 'admin-register' });
-    return login(normalizedEmail, password);
+    await createLoginLog({ email: normalizedEmail, success: true });
+    return { token: data.session?.access_token || '', user: { email: data.user.email, uid: data.user.id } };
   } catch (error) {
-    await createLoginLog({ email: normalizedEmail, success: false, reason: error?.code || error?.message || 'register-error' });
+    await createLoginLog({ email: normalizedEmail, success: false, reason: error?.code || error?.message || 'login-error' });
     throw mapSupabaseAuthError(error);
   }
 }
@@ -146,35 +125,22 @@ export async function logout() {
 
 export function mapSupabaseAuthError(error) {
   const message = String(error?.message || '').toLowerCase();
-  const code = String(error?.code || '');
 
   if (error?.message === 'Acceso no autorizado.') {
-    return new Error('Credenciales inválidas o no autorizadas.');
-  }
-
-  if (error?.message === 'Solo el email administrador autorizado puede registrarse.') {
-    return new Error('Solo el email administrador autorizado puede registrarse.');
-  }
-
-  if (message.includes('already') || message.includes('registered') || code.includes('already')) {
-    return new Error('Ese administrador ya está registrado. Iniciá sesión.');
-  }
-
-  if (message.includes('password') && message.includes('6')) {
-    return new Error('La contraseña debe tener al menos 6 caracteres.');
+    return new Error('Credenciales invalidas o no autorizadas.');
   }
 
   if (message.includes('invalid login') || message.includes('invalid credentials')) {
-    return new Error('Credenciales inválidas o no autorizadas.');
+    return new Error('Credenciales invalidas o no autorizadas.');
   }
 
   if (message.includes('rate') || message.includes('too many')) {
-    return new Error('Demasiados intentos. Probá nuevamente más tarde.');
+    return new Error('Demasiados intentos. Proba nuevamente mas tarde.');
   }
 
   if (message.includes('email')) {
-    return new Error('Revisá el email ingresado.');
+    return new Error('Revisa el email ingresado.');
   }
 
-  return new Error('No se pudo validar el acceso. Revisá las credenciales e intentá nuevamente.');
+  return new Error('No se pudo validar el acceso. Revisa las credenciales e intenta nuevamente.');
 }

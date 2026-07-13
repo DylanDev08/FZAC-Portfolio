@@ -34,13 +34,30 @@ export default function Navbar() {
 
     async function watchAdminSession() {
       try {
-        const [{ isAuthorizedAdmin }, { subscribeAuth }] = await Promise.all([
-          import('../supabase/config.js'),
-          import('../services/authService.js'),
-        ]);
+        const {
+          bootstrapAdminProfile,
+          setStoredUser,
+          setToken,
+          subscribeAuth,
+        } = await import('../services/authService.js');
 
         if (!active) return;
-        unsubscribe = subscribeAuth((user) => setIsAdmin(isAuthorizedAdmin(user)));
+        unsubscribe = subscribeAuth(async (user, session) => {
+          if (!user || !session?.access_token) {
+            if (active) setIsAdmin(false);
+            return;
+          }
+
+          setToken(session.access_token);
+          setStoredUser(user);
+
+          try {
+            await bootstrapAdminProfile();
+            if (active) setIsAdmin(true);
+          } catch {
+            if (active) setIsAdmin(false);
+          }
+        });
       } catch {
         if (active) setIsAdmin(false);
       }

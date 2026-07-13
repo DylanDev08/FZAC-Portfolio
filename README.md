@@ -67,7 +67,6 @@ VITE_API_URL=http://localhost:4000/api
 VITE_SUPABASE_URL=https://[PROJECT_REF].supabase.co
 VITE_SUPABASE_ANON_KEY=[ANON_KEY]
 VITE_SUPABASE_STORAGE_BUCKET=crud-images
-VITE_ADMIN_EMAILS=fortalezaconstruccionesrosario@gmail.com,materialezfzacecommerce@gmail.com,dylansalcedo333@gmail.com
 ```
 
 En Vercel multi-servicio `VITE_API_URL` puede omitirse o configurarse como `/api`; el frontend usa automaticamente el backend del mismo dominio. La URL local se conserva solamente para desarrollo.
@@ -83,9 +82,7 @@ SUPABASE_SERVICE_ROLE_KEY="[SERVICE_ROLE_KEY]"
 SUPABASE_STORAGE_BUCKET=crud-images
 MAX_UPLOAD_SIZE_MB=25
 ALLOWED_UPLOAD_MIME_TYPES=image/jpeg,image/png,image/webp,image/gif,image/avif,image/heic,image/heif,image/bmp,image/tiff
-JWT_SECRET="jwt_secret_de_supabase"
-AUTH_REQUIRED=true
-ADMIN_EMAILS=fortalezaconstruccionesrosario@gmail.com,materialezfzacecommerce@gmail.com,dylansalcedo333@gmail.com
+ADMIN_EMAILS=[ADMIN_EMAIL_1],[ADMIN_EMAIL_2]
 CORS_ORIGINS=http://localhost:5173
 ```
 
@@ -126,8 +123,7 @@ npm run build
 ## Endpoints principales
 
 - `GET /health`
-- `POST /api/auth/register`
-- `POST /api/auth/login`
+- `POST /api/auth/admin/bootstrap` (JWT de Supabase y email autorizado requeridos)
 - `GET /api/fzac/obras`
 - `POST /api/fzac/obras`
 - `PUT /api/fzac/obras/:id`
@@ -145,6 +141,7 @@ npm run build
 - `POST /api/admin/works/sync-catalog`
 - `POST /api/admin/works`
 - `PUT /api/admin/works/:id`
+- `PATCH /api/admin/works/:id/status`
 - `DELETE /api/admin/works/:id`
 - `GET /api/admin/categories`
 - `POST /api/admin/categories`
@@ -172,11 +169,11 @@ Las rutas de escritura validan JWT de Supabase y el email administrador.
 ## Seguridad
 
 - `/admin` queda protegido con Supabase Auth.
-- El backend valida JWT con `JWT_SECRET` de Supabase.
+- El backend valida cada access token contra Supabase Auth antes de revisar la allowlist administrativa.
 - El frontend renueva la sesion de Supabase antes de cada operacion privada y reintenta una vez ante un `401`.
 - Prisma reutiliza una unica instancia y limita a una conexion por proceso sobre el pooler de Supabase.
-- Solo el email administrador puede operar rutas privadas.
-- El registro admin del backend usa service role y restringe el email permitido.
+- Solo los emails configurados en `ADMIN_EMAILS` pueden operar rutas privadas.
+- No existe registro publico de administradores ni se envia la lista de emails autorizados al frontend.
 - Supabase Storage sube imagenes desde el backend con `SUPABASE_SERVICE_ROLE_KEY`; el frontend nunca recibe esa key.
 - La base guarda imagenes en `work_images` como `image_url` e `image_path`.
 - Helmet, CORS y rate limiting siguen activos en Express.
@@ -194,12 +191,12 @@ El backend intenta crear el bucket como publico si no existe. Las imagenes carga
 
 ## Crear administradores
 
-1. Agregar el email a `ADMIN_EMAILS` y `VITE_ADMIN_EMAILS`.
-2. Reiniciar backend y frontend.
-3. Desde `/login`, registrar el email autorizado o crearlo desde Supabase Auth.
-4. El backend crea o actualiza su fila en `admin_profiles` al operar el CRUD.
+1. Crear la cuenta desde Supabase Dashboard, en Authentication > Users, y confirmar su email.
+2. Agregar ese email solamente a `ADMIN_EMAILS` en el backend y en las variables del servicio backend de Vercel.
+3. Ejecutar `npm run prisma:seed` para preparar los perfiles administrativos y el contenido inicial.
+4. Ingresar por `/login`. La ruta protegida `POST /api/auth/admin/bootstrap` crea o actualiza de forma idempotente su fila en `admin_profiles`.
 
-Los emails deben existir en ambas variables. El frontend solo decide si muestra el panel; el backend vuelve a validar JWT y email en cada ruta privada.
+El frontend no contiene ni recibe la lista de administradores. Supabase valida la identidad y el backend valida el JWT y la allowlist antes de preparar el perfil o habilitar el CRUD. La ruta de bootstrap no crea usuarios de Auth y no puede utilizarse sin una sesion autorizada.
 
 ## Probar una subida
 
@@ -216,12 +213,14 @@ El backend registra nombre, MIME, bytes, folder, bucket y path. Nunca registra k
 ### Vercel multi-servicio
 
 - Crear un solo proyecto Vercel usando la raiz del repositorio, sin seleccionar `frontend` ni `backend` como Root Directory.
+- En Build and Deployment, seleccionar `Services` como Framework Preset.
 - El `vercel.json` principal declara los servicios `frontend` (Vite) y `backend` (Express).
+- El backend declara `api/index.js` como `entrypoint`; ese modulo exporta la aplicacion Express para el runtime Node de Vercel.
 - `/api/*` y `/health` se envian al backend; las demas rutas se envian al frontend.
 - `frontend/vercel.json` resuelve las rutas de React Router hacia `index.html`.
 - `backend/vercel.json` resuelve las rutas de Express hacia `api/index.js`.
 - Cargar las variables `VITE_*` en el servicio frontend y las variables de Prisma/Supabase en el servicio backend.
-- No configurar `SUPABASE_SERVICE_ROLE_KEY`, `DATABASE_URL`, `DIRECT_URL` ni `JWT_SECRET` en frontend.
+- No configurar `SUPABASE_SERVICE_ROLE_KEY`, `DATABASE_URL` ni `DIRECT_URL` en frontend.
 - Vercel aporta automaticamente sus dominios de preview al CORS; para dominios personalizados agregar `CLIENT_URL` y `CORS_ORIGINS`.
 - Ejecutar localmente `npm run prisma:deploy:portfolio` y `npm run prisma:seed` antes del primer deploy.
 

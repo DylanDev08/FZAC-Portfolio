@@ -1,35 +1,44 @@
 import React, { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
-import { isAuthorizedAdmin } from '../supabase/config.js';
-import { clearToken, logout, setStoredUser, setToken, subscribeAuth } from '../services/authService.js';
+import {
+  bootstrapAdminProfile,
+  clearToken,
+  logout,
+  setStoredUser,
+  setToken,
+  subscribeAuth,
+} from '../services/authService.js';
 
 export default function ProtectedRoute({ children }) {
   const [status, setStatus] = useState('checking');
 
-  useEffect(() => {
-    return subscribeAuth(async (user, session, error) => {
-      if (error) {
-        setStatus('missing-config');
-        return;
-      }
+  useEffect(() => subscribeAuth(async (user, session, error) => {
+    if (error) {
+      setStatus('missing-config');
+      return;
+    }
 
-      if (!user) {
-        clearToken();
-        setStatus('guest');
-        return;
-      }
+    if (!user || !session?.access_token) {
+      clearToken();
+      setStatus('guest');
+      return;
+    }
 
-      if (!isAuthorizedAdmin(user)) {
+    setToken(session.access_token);
+    setStoredUser(user);
+
+    try {
+      await bootstrapAdminProfile();
+      setStatus('admin');
+    } catch (bootstrapError) {
+      if ([401, 403].includes(bootstrapError?.status)) {
         await logout().catch(() => clearToken());
         setStatus('unauthorized');
         return;
       }
-
-      setToken(session?.access_token || '');
-      setStoredUser(user);
-      setStatus('admin');
-    });
-  }, []);
+      setStatus('missing-config');
+    }
+  }), []);
 
   if (status === 'checking') {
     return (
@@ -48,7 +57,7 @@ export default function ProtectedRoute({ children }) {
         <div className="container">
           <span className="eyebrow">Acceso no disponible</span>
           <h1>No se pudo abrir el panel.</h1>
-          <p>Revisá que el backend esté corriendo y que SUPABASE_URL y SUPABASE_ANON_KEY estén completos en backend/.env.</p>
+          <p>Revisa la conexion con el backend y la configuracion de Supabase.</p>
         </div>
       </main>
     );

@@ -238,7 +238,7 @@ async function resolveCategory(payload = {}) {
   });
 }
 
-async function resolveAuthor(email) {
+export async function ensureAdminProfile(email) {
   const cleanEmail = clean(email).toLowerCase();
   if (!cleanEmail) return null;
 
@@ -319,7 +319,7 @@ export async function getWork(id) {
 
 export async function createWork(payload, userEmail, userId) {
   const category = await resolveCategory(payload);
-  await resolveAuthor(userEmail);
+  await ensureAdminProfile(userEmail);
   const data = workData(payload, category, userId);
 
   try {
@@ -342,13 +342,39 @@ export async function updateWork(id, payload, userEmail, userId) {
   if (!existing) throw new Error('Obra no encontrada.');
 
   const category = await resolveCategory(payload);
-  await resolveAuthor(userEmail);
+  await ensureAdminProfile(userEmail);
   const data = workData({ ...payload, slug: payload.slug || existing.slug }, category, userId || existing.authorId);
 
   const row = await prisma.$transaction(async (tx) => {
     await tx.work.update({ where: { id: existing.id }, data });
     await replaceWorkImages(tx, existing.id, payload);
     return tx.work.findUnique({ where: { id: existing.id }, include: workInclude });
+  });
+
+  return workToApi(row);
+}
+
+export async function updateWorkStatus(id, status) {
+  const allowedStatuses = new Set(['finalizada', 'construyendo', 'por-comenzar']);
+  const cleanStatus = clean(status);
+
+  if (!allowedStatuses.has(cleanStatus)) {
+    const error = new Error('El estado seleccionado no es valido.');
+    error.status = 400;
+    throw error;
+  }
+
+  const existing = await prisma.work.findFirst({ where: { OR: [{ id }, { slug: id }] } });
+  if (!existing) {
+    const error = new Error('Obra no encontrada.');
+    error.status = 404;
+    throw error;
+  }
+
+  const row = await prisma.work.update({
+    where: { id: existing.id },
+    data: { status: cleanStatus },
+    include: workInclude,
   });
 
   return workToApi(row);

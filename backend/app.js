@@ -49,8 +49,6 @@ export function createApp() {
         supabaseUrl: env.supabaseUrl,
         supabaseAnonKey: env.supabaseAnonKey,
         supabaseStorageBucket: env.supabaseStorageBucket,
-        adminEmail: env.adminEmail,
-        adminEmails: env.adminEmails,
       },
     });
   });

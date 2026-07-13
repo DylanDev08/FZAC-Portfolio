@@ -37,12 +37,6 @@ function listFromEnv(key) {
 
 loadLocalEnv();
 
-const DEFAULT_ADMIN_EMAILS = [
-  'fortalezaconstruccionesrosario@gmail.com',
-  'materialezfzacecommerce@gmail.com',
-  'dylansalcedo333@gmail.com',
-];
-
 function emailListFromValue(value) {
   return String(value || '')
     .split(',')
@@ -59,16 +53,10 @@ function vercelOrigin(hostname) {
   return cleanHostname ? `https://${cleanHostname}` : '';
 }
 
-const configuredAdminEmails = process.env.ADMIN_EMAILS
-  ? emailListFromValue(process.env.ADMIN_EMAILS)
-  : uniqueEmailList([
-    ...DEFAULT_ADMIN_EMAILS,
-    ...emailListFromValue(process.env.ADMIN_EMAIL),
-  ]);
-
-const allowedAdminEmails = configuredAdminEmails.length
-  ? configuredAdminEmails
-  : DEFAULT_ADMIN_EMAILS;
+const allowedAdminEmails = uniqueEmailList([
+  ...emailListFromValue(process.env.ADMIN_EMAILS),
+  ...emailListFromValue(process.env.ADMIN_EMAIL),
+]);
 
 const DEFAULT_PHOTO_MIME_TYPES = [
   'image/jpeg',
@@ -101,11 +89,7 @@ const configuredCorsOrigins = uniqueEmailList([
 
 export const env = {
   port: numberFromEnv('PORT', 4000),
-  authRequired: process.env.AUTH_REQUIRED !== 'false',
-  adminEmail: allowedAdminEmails[0] || '',
   adminEmails: allowedAdminEmails,
-  adminPassword: String(process.env.ADMIN_PASSWORD || ''),
-  jwtSecret: String(process.env.JWT_SECRET || 'dev-secret'),
   supabaseUrl: String(process.env.SUPABASE_URL || '').replace(/\/rest\/v1\/?$/i, '').replace(/\/$/, ''),
   supabaseAnonKey: String(process.env.SUPABASE_ANON_KEY || ''),
   supabaseServiceRoleKey: String(process.env.SUPABASE_SERVICE_ROLE_KEY || ''),
@@ -116,7 +100,6 @@ export const env = {
   jsonLimit: String(process.env.JSON_LIMIT || '2mb'),
   generalRateLimit: numberFromEnv('RATE_LIMIT_MAX', 100),
   adminRateLimit: numberFromEnv('ADMIN_RATE_LIMIT_MAX', 120),
-  loginRateLimit: numberFromEnv('LOGIN_RATE_LIMIT_MAX', 8),
 };
 
 export function validateEnvironment() {
@@ -126,7 +109,7 @@ export function validateEnvironment() {
     'SUPABASE_URL',
     'SUPABASE_ANON_KEY',
     'SUPABASE_SERVICE_ROLE_KEY',
-    'JWT_SECRET',
+    'ADMIN_EMAILS',
   ];
   const missing = required.filter((key) => !String(process.env[key] || '').trim());
 

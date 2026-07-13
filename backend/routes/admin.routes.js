@@ -17,6 +17,7 @@ import {
   updateCategoryController,
   updateSiteTextController,
   updateWorkController,
+  updateWorkStatusController,
   updateWorkImageController,
   uploadController,
 } from '../controllers/admin.controller.js';
@@ -40,6 +41,7 @@ router.post('/works/sync-catalog', adminActionLimiter, syncWorksController);
 router.get('/works/:id', getWorkController);
 router.post('/works', adminActionLimiter, validateWorkPayload, createWorkController);
 router.put('/works/:id', adminActionLimiter, validateWorkPayload, updateWorkController);
+router.patch('/works/:id/status', adminActionLimiter, updateWorkStatusController);
 router.delete('/works/:id', adminActionLimiter, deleteWorkController);
 
 router.get('/categories', listCategoriesController);

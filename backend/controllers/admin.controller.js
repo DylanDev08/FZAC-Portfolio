@@ -16,6 +16,7 @@ import {
   updateCategory,
   updateSiteText,
   updateWork,
+  updateWorkStatus,
   updateWorkImage,
 } from '../models/admin.model.js';
 import { portfolioCatalog } from '../data/portfolio-catalog.js';
@@ -91,6 +92,16 @@ export async function updateWorkController(req, res) {
     return ok(res, 200, data);
   } catch (error) {
     return fail(res, error, 400);
+  }
+}
+
+export async function updateWorkStatusController(req, res) {
+  try {
+    const data = await updateWorkStatus(req.params.id, req.body?.status || req.body?.estado);
+    console.info(`[admin] work status updated id=${data.id} status=${data.estado}`);
+    return ok(res, 200, data);
+  } catch (error) {
+    return fail(res, error, error.status || 400);
   }
 }
 

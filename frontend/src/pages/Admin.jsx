@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, Plus, Trash2 } from 'lucide-react';
-import { deleteProject, getAdminProjects, saveProject, syncProjectCatalog } from '../services/projectsService.js';
+import { ArrowLeft, ArrowRight, Images, Plus, Trash2 } from 'lucide-react';
+import { deleteProject, getAdminProjects, saveProject, syncProjectCatalog, updateProjectStatus } from '../services/projectsService.js';
 import { logout } from '../services/authService.js';
 import { slugify } from '../services/utils.js';
 import { COLLECTIONS, deleteContentItem, getAdminEventos, getAdminTrabajos, saveContentItem } from '../services/contentService.js';
@@ -158,6 +158,44 @@ function editableImage(item) {
   return { url, imageUrl: url, image_url: url, imagePath: url, image_path: url, alt: '' };
 }
 
+function uniqueImageCount(...sources) {
+  const urls = sources
+    .flatMap((source) => Array.isArray(source) ? source : [source])
+    .map(assetUrl)
+    .filter(Boolean);
+  return new Set(urls).size;
+}
+
+function GalleryBalance({ count, label = 'Galería' }) {
+  const state = count === 0 ? 'empty' : (count >= 5 && count <= 8 ? 'balanced' : 'attention');
+  const detail = count === 0
+    ? 'Todavía no tiene fotos.'
+    : count < 5
+      ? `Sumá ${5 - count} foto(s) para alcanzar el mínimo recomendado.`
+      : count > 8
+        ? 'Elegí las 8 fotos más representativas para mantener galerías parejas.'
+        : 'Cantidad equilibrada. El rango recomendado es de 5 a 8 fotos.';
+
+  return (
+    <div className={`admin-gallery-balance admin-gallery-balance--${state}`}>
+      <Images aria-hidden="true" size={19} />
+      <div>
+        <strong>{label}: {count} foto{count === 1 ? '' : 's'} única{count === 1 ? '' : 's'}</strong>
+        <span>{detail}</span>
+      </div>
+    </div>
+  );
+}
+
+function gallerySummaries(work) {
+  const branches = Array.isArray(work.sucursales) ? work.sucursales : [];
+  const sources = branches.length ? branches : [work];
+  return sources.map((source, index) => ({
+    label: source.nombre || `Galería ${index + 1}`,
+    count: uniqueImageCount(source.portada, source.imagenes, source.imagenesAntes, source.imagenesProceso, source.imagenesFinal),
+  }));
+}
+
 function getOptions(kind) {
   if (kind === 'eventos') return TIPOS_EVENTO;
   if (kind === 'trabajos') return TIPOS_TRABAJO;
@@ -305,6 +343,7 @@ function FileInput({
             if (!src) return null;
             return (
             <span className="admin-upload-preview__item" key={`${src}-${index}`}>
+              <span className="admin-upload-preview__position">{index + 1}</span>
               {previewType === 'video'
                 ? <video src={src} preload="metadata" muted />
                 : <img src={src} alt={`${label} ${index + 1}`} loading="lazy" />}
@@ -324,6 +363,8 @@ function FileInput({
                     event.stopPropagation();
                     onRemovePreview(index);
                   }}
+                  title="Eliminar foto"
+                  aria-label="Eliminar foto"
                 >
                   <Trash2 size={15} />
                 </button>
@@ -384,6 +425,10 @@ function BranchGalleryEditor({ form, setForm, onUpload, uploading }) {
               if (window.confirm('¿Eliminar esta sucursal y su galería?')) setBranches(branches.filter((_, index) => index !== branchIndex));
             }} title="Eliminar sucursal" aria-label="Eliminar sucursal"><Trash2 size={17} /></button>
           </div>
+          <GalleryBalance
+            label="Galería del local"
+            count={uniqueImageCount(branch.portada, branch.imagenes, branch.imagenesAntes, branch.imagenesProceso, branch.imagenesFinal)}
+          />
           <div className="admin-form__grid">
             <Field label="Nombre del local" value={branch.nombre} onChange={(value) => updateBranch(branchIndex, { nombre: value })} placeholder="Ej. Pellegrini" />
             <Field label="Dirección" value={branch.direccion} onChange={(value) => updateBranch(branchIndex, { direccion: value })} placeholder="Calle, número, ciudad" />
@@ -516,6 +561,13 @@ function ContentForm({ kind, form, setForm, onSubmit, onClear, onUpload, uploadi
             )}
           </div>
 
+          {isObra && (
+            <GalleryBalance
+              label="Galería principal"
+              count={uniqueImageCount(form.portada, form.imagenes, form.imagenesAntes, form.imagenesProceso, form.imagenesFinal)}
+            />
+          )}
+
           <div className="admin-upload-grid">
             <FileInput
               label="Subir portada"
@@ -632,7 +684,7 @@ function ContentForm({ kind, form, setForm, onSubmit, onClear, onUpload, uploadi
   );
 }
 
-function ContentList({ title, items, kind, onEdit, onDelete }) {
+function ContentList({ title, items, kind, onEdit, onDelete, onStatusChange, statusUpdatingId }) {
   const cfg = RESOURCE_CONFIG[kind];
   if (!items.length) return <div className="admin-list__empty">No hay contenido cargado en {cfg.label.toLowerCase()}.</div>;
 
@@ -654,7 +706,20 @@ function ContentList({ title, items, kind, onEdit, onDelete }) {
             </div>
             <div className="admin-item__meta">
               <span>{item.tipo}</span>
-              {item.estado && <span>{item.estado}</span>}
+              {kind === 'obras' && (
+                <label className="admin-item__status-control">
+                  <span>Estado</span>
+                  <select
+                    value={item.estado || 'finalizada'}
+                    onChange={(event) => onStatusChange(item, event.target.value)}
+                    disabled={statusUpdatingId === item.id}
+                    aria-label={`Cambiar estado de ${item.nombre || item.titulo}`}
+                  >
+                    {ESTADOS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+                  </select>
+                </label>
+              )}
+              {kind !== 'obras' && item.estado && <span>{item.estado}</span>}
               {item.direccion && <span>{item.direccion}</span>}
               {item.ubicacion && <span>{item.ubicacion}</span>}
               {item.anio && <span>{item.anio}</span>}
@@ -790,17 +855,21 @@ export default function Admin() {
   const [siteTextForm, setSiteTextForm] = useState(EMPTY_SITE_TEXT);
   const [msg, setMsg] = useState('');
   const [uploading, setUploading] = useState(false);
+  const [statusUpdatingId, setStatusUpdatingId] = useState('');
   const [realtimeTick, setRealtimeTick] = useState(0);
   const navigate = useNavigate();
 
   const stats = useMemo(() => {
     const imageUrls = new Set();
     items.obras.forEach((obra) => {
-      [obra.portada ? [obra.portada] : [], obra.imagenes, obra.imagenesAntes, obra.imagenesProceso, obra.imagenesFinal]
-        .forEach((group) => {
-          if (!Array.isArray(group)) return;
-          group.map(assetUrl).filter(Boolean).forEach((url) => imageUrls.add(url));
-        });
+      const sources = [obra, ...(Array.isArray(obra.sucursales) ? obra.sucursales : [])];
+      sources.forEach((source) => {
+        [source.portada ? [source.portada] : [], source.imagenes, source.imagenesAntes, source.imagenesProceso, source.imagenesFinal]
+          .forEach((group) => {
+            if (!Array.isArray(group)) return;
+            group.map(assetUrl).filter(Boolean).forEach((url) => imageUrls.add(url));
+          });
+      });
     });
 
     return {
@@ -867,6 +936,24 @@ export default function Admin() {
       await refresh();
     } catch (error) {
       notify(error.message || 'No se pudo eliminar.');
+    }
+  }
+
+  async function changeWorkStatus(item, nextStatus) {
+    if (!item?.id || item.estado === nextStatus || statusUpdatingId) return;
+
+    try {
+      setStatusUpdatingId(item.id);
+      const result = await updateProjectStatus(item.id, nextStatus);
+      setItems((current) => ({
+        ...current,
+        obras: current.obras.map((work) => work.id === item.id ? result.item : work),
+      }));
+      notify(`Status ${result.status}: estado de la obra actualizado.`);
+    } catch (error) {
+      notify(`Status ${error.status || 400}: ${error.message || 'No se pudo cambiar el estado.'}`);
+    } finally {
+      setStatusUpdatingId('');
     }
   }
 
@@ -951,6 +1038,16 @@ export default function Admin() {
     const payload = buildPayload(form, kind);
     if (!payload.nombre) return notify('Status 400: El contenido necesita un nombre.');
     if (!payload.descripcion) return notify('Status 400: Agregá una descripción profesional.');
+    if (kind === 'obras') {
+      const unbalanced = gallerySummaries(payload).filter(({ count }) => count < 5 || count > 8);
+      if (unbalanced.length) {
+        const detail = unbalanced.map(({ label, count }) => `${label}: ${count}`).join('\n');
+        const shouldContinue = window.confirm(
+          `Hay galerías fuera del rango recomendado de 5 a 8 fotos:\n\n${detail}\n\n¿Guardar de todos modos?`
+        );
+        if (!shouldContinue) return;
+      }
+    }
 
     try {
       const result = await cfg.save({ ...payload, id: form.id });
@@ -1086,7 +1183,15 @@ export default function Admin() {
                   <button className="btn btn--primary" type="button" onClick={() => openNew(tab)}>Nuevo</button>
                 </div>
               </div>
-              <ContentList title={RESOURCE_CONFIG[tab].label} items={items[tab]} kind={tab} onEdit={editItem} onDelete={removeItem} />
+              <ContentList
+                title={RESOURCE_CONFIG[tab].label}
+                items={items[tab]}
+                kind={tab}
+                onEdit={editItem}
+                onDelete={removeItem}
+                onStatusChange={changeWorkStatus}
+                statusUpdatingId={statusUpdatingId}
+              />
             </article>
           )}
 

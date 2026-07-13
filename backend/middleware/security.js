@@ -1,12 +1,12 @@
 import rateLimit from 'express-rate-limit';
 import { env } from '../config/env.js';
 
-export const loginLimiter = rateLimit({
+export const loginLogLimiter = rateLimit({
   windowMs: 10 * 60 * 1000,
-  max: env.loginRateLimit,
+  max: 20,
   standardHeaders: true,
   legacyHeaders: false,
-  message: { error: 'Demasiados intentos de acceso. Intentá nuevamente en unos minutos.' },
+  message: { error: 'Demasiados intentos de acceso registrados. Intenta nuevamente en unos minutos.' },
 });
 
 export const adminActionLimiter = rateLimit({
@@ -14,7 +14,7 @@ export const adminActionLimiter = rateLimit({
   max: env.adminRateLimit,
   standardHeaders: true,
   legacyHeaders: false,
-  message: { error: 'Demasiadas acciones administrativas. Intentá nuevamente en unos minutos.' },
+  message: { error: 'Demasiadas acciones administrativas. Intenta nuevamente en unos minutos.' },
 });
 
 export function protectRoutes(req, res, next) {
@@ -22,7 +22,7 @@ export function protectRoutes(req, res, next) {
   const isValid = token.startsWith('Bearer ') && token.split(' ')[1]?.length;
 
   if (!isValid) {
-    return res.status(401).json({ error: 'Token de autorización requerido' });
+    return res.status(401).json({ error: 'Token de autorizacion requerido' });
   }
 
   next();
@@ -30,7 +30,7 @@ export function protectRoutes(req, res, next) {
 
 export function sanitizeBody(req, res, next) {
   if (!req.body || typeof req.body !== 'object' || Array.isArray(req.body)) {
-    return res.status(400).json({ ok: false, status: 400, error: 'El cuerpo debe ser un objeto válido' });
+    return res.status(400).json({ ok: false, status: 400, error: 'El cuerpo debe ser un objeto valido' });
   }
 
   const forbidden = /<\s*script|javascript\s*:|onerror\s*=|onload\s*=/i;
