@@ -1,5 +1,5 @@
 // Datos locales curados para el portfolio público.
-// Slugs estables: son usados por rutas, SEO y Vercel.
+// Slugs estables: son usados por rutas, SEO y redirects de produccion.
 
 const unique = (items) => items.filter(Boolean).filter((item, index, array) => array.indexOf(item) === index);
 const obra = (path) => `/assets/img/obras/${path}`;

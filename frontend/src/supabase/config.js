@@ -14,8 +14,10 @@ function normalizeSupabaseUrl(value) {
 
 function getConfiguredApiUrl() {
   const viteEnv = import.meta.env || {};
+  const apiOrigin = String(viteEnv.VITE_API_ORIGIN || '').trim().replace(/\/$/, '');
   return String(
-    viteEnv.VITE_API_URL
+    (apiOrigin ? `${apiOrigin}/api` : '')
+    || viteEnv.VITE_API_URL
     || viteEnv.VITE_CONTACT_API_URL
     || ''
   ).replace(/\/$/, '');

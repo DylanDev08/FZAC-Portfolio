@@ -5,8 +5,14 @@ const DEFAULT_API_URL = viteEnv.PROD ? '/api' : 'http://localhost:4000/api';
 const LOCAL_API_CANDIDATES = [4000, 4001, 4002, 4003, 4004, 4005].map((port) => `http://localhost:${port}/api`);
 const TOKEN_KEY = 'fzac_token';
 
+function apiUrlFromOrigin(origin) {
+  const normalizedOrigin = String(origin || '').trim().replace(/\/$/, '');
+  return normalizedOrigin ? `${normalizedOrigin}/api` : '';
+}
+
 const CONFIGURED_API_URL = String(
-  viteEnv.VITE_API_URL
+  apiUrlFromOrigin(viteEnv.VITE_API_ORIGIN)
+  || viteEnv.VITE_API_URL
   || viteEnv.VITE_CONTACT_API_URL
   || ''
 ).replace(/\/$/, '');

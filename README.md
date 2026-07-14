@@ -31,15 +31,14 @@ El proyecto queda administrable desde un panel privado para que una persona no t
 - Helmet
 - express-rate-limit
 - JWT Supabase
-- Vercel para frontend
-- Render para backend Express
+- Render Static Site para frontend
+- Render Web Service para backend Express
 
 ## Estructura
 
 ```text
 fzac_work/
   frontend/
-    vercel.json
     src/
       components/
       data/
@@ -70,7 +69,7 @@ VITE_SUPABASE_ANON_KEY=[ANON_KEY]
 VITE_SUPABASE_STORAGE_BUCKET=crud-images
 ```
 
-En Vercel, `VITE_API_URL` debe apuntar al dominio publico de Render e incluir `/api`, por ejemplo `https://fzac-backend.onrender.com/api`. La URL local se conserva solamente para desarrollo.
+En produccion, Render inyecta `VITE_API_ORIGIN` con la URL publica del backend. El frontend agrega `/api` automaticamente; `VITE_API_URL` se conserva para desarrollo local o una configuracion manual.
 
 Backend: copiar `backend/.env.example` a `backend/.env` y completar:
 
@@ -209,54 +208,36 @@ El frontend no contiene ni recibe la lista de administradores. Supabase valida l
 
 El backend registra nombre, MIME, bytes, folder, bucket y path. Nunca registra keys ni tokens.
 
-## Deploy
+## Deploy en Render
 
-La arquitectura de produccion usa un unico repositorio con dos destinos: Vercel sirve el frontend estatico y Render ejecuta Express. No se utiliza Vercel Services ni se migra a Next.js.
+La arquitectura de produccion usa un solo repositorio y un solo Blueprint. Render crea dos servicios separados pero coordinados:
 
-### 1. Backend en Render
+- `FZAC-Portfolio`: Web Service Node/Express con Root Directory `backend`.
+- `FZAC-Portfolio-1`: Static Site React/Vite con Root Directory `frontend` y publicacion desde `dist`.
+
+### Crear el Blueprint
 
 1. En Render, elegir `New > Blueprint` y conectar este repositorio.
-2. Render detecta `/render.yaml`, configura `backend` como `Root Directory` y crea el Web Service gratuito `fzac-backend`.
-3. Completar en el dashboard los secretos marcados con `sync: false`:
+2. Seleccionar la rama `main` y usar `render.yaml` como Blueprint Path.
+3. Completar una sola vez los secretos marcados con `sync: false`:
 
 ```env
-NODE_ENV=production
-DATABASE_URL="postgresql://...?pgbouncer=true&connection_limit=1"
-DIRECT_URL="postgresql://..."
-SUPABASE_URL="https://[PROJECT_REF].supabase.co"
-SUPABASE_ANON_KEY="[ANON_KEY]"
-SUPABASE_SERVICE_ROLE_KEY="[SERVICE_ROLE_KEY]"
-SUPABASE_STORAGE_BUCKET=crud-images
-MAX_UPLOAD_SIZE_MB=25
+DATABASE_URL=postgresql://...?pgbouncer=true&connection_limit=1
+DIRECT_URL=postgresql://...
+SUPABASE_URL=https://[PROJECT_REF].supabase.co
+SUPABASE_ANON_KEY=[ANON_KEY]
+SUPABASE_SERVICE_ROLE_KEY=[SERVICE_ROLE_KEY]
 ADMIN_EMAILS=[ADMIN_EMAIL_1],[ADMIN_EMAIL_2]
-CLIENT_URL=https://[FRONTEND].vercel.app
-CORS_ORIGINS=https://[FRONTEND].vercel.app
 ```
 
-4. El Blueprint ejecuta `npm ci && npm run prisma:generate`, inicia con `npm start` y valida `/health`.
-5. Finalizado el deploy, comprobar `https://[BACKEND].onrender.com/health`.
+4. Confirmar la creacion de los dos servicios y esperar ambos builds.
+5. Verificar `https://fzac-portfolio.onrender.com/health` y abrir `https://fzac-portfolio-1.onrender.com`.
 
-Render inyecta `PORT`; no es necesario definirlo en produccion. Express escucha en `0.0.0.0`, como exige Render. Para un dominio personalizado del frontend, agregar tambien su origen exacto a `CORS_ORIGINS`, separado por comas.
+El Blueprint enlaza automaticamente las URLs: el frontend recibe `VITE_API_ORIGIN`, mientras `CLIENT_URL` y `CORS_ORIGINS` reciben la URL del sitio estatico. `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY` heredan los valores publicos del backend. La service role, Prisma y las conexiones PostgreSQL nunca llegan al frontend.
 
-El plan gratuito puede entrar en reposo cuando no recibe trafico y demorar el primer request. Para una API siempre activa, cambiar el plan del servicio en Render; el codigo y las variables no cambian.
+Los redirects historicos, headers de seguridad, cache de assets y fallback de React Router estan declarados en `render.yaml`. Para un dominio personalizado del frontend, agregarlo en el backend como `ADDITIONAL_CORS_ORIGINS`.
 
-### 2. Frontend en Vercel
-
-1. Conectar el mismo repositorio a un unico proyecto Vercel.
-2. Configurar `Root Directory` como `frontend` y Framework Preset como `Vite`.
-3. El build es `npm run build` y el directorio de salida es `dist`, ambos declarados en `frontend/vercel.json`.
-4. Cargar solamente variables publicas del frontend:
-
-```env
-VITE_API_URL=https://[BACKEND].onrender.com/api
-VITE_SUPABASE_URL=https://[PROJECT_REF].supabase.co
-VITE_SUPABASE_ANON_KEY=[ANON_KEY]
-VITE_SUPABASE_STORAGE_BUCKET=crud-images
-```
-
-5. Desplegar nuevamente luego de definir `VITE_API_URL`, porque Vite incorpora esa URL durante el build.
-
-No configurar `SUPABASE_SERVICE_ROLE_KEY`, `DATABASE_URL`, `DIRECT_URL` ni `ADMIN_EMAILS` en Vercel. Los redirects historicos, headers de seguridad, cache de assets y fallback de React Router estan centralizados en `frontend/vercel.json`.
+Render inyecta `PORT`; no es necesario definirlo. Express escucha en `0.0.0.0`. El plan gratuito del backend puede entrar en reposo y demorar el primer request; cambiar el plan no requiere modificar el codigo.
 
 ### Migraciones iniciales
 
@@ -293,7 +274,7 @@ npm run check
 - `Puerto 4000 ocupado`: cerrar la instancia anterior. El backend ya no cambia de puerto silenciosamente.
 - `P3005` o tablas de `auth`: usar `npm run prisma:deploy:portfolio`, nunca `db push --accept-data-loss`.
 - `400` al subir: revisar el mensaje JSON, MIME permitido, limite de 25MB y nombre del bucket.
-- `CORS`: agregar el origen exacto del frontend a `CORS_ORIGINS`, separado por comas.
+- `CORS`: el dominio Render se configura automaticamente; agregar dominios personalizados a `ADDITIONAL_CORS_ORIGINS`, separados por comas.
 - Imagen rota: revisar `image_url` y `image_path`; el frontend muestra el logo como fallback visual.
 
 ## Compatibilidad de datos
