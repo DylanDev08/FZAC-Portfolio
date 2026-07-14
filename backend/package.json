@@ -4,6 +4,9 @@
   "description": "Backend para el portfolio FZAC con CRUD de obras y seguridad básica",
   "main": "server.js",
   "type": "module",
+  "engines": {
+    "node": ">=22.22.0 <23.0.0"
+  },
   "scripts": {
     "dev": "node server.js",
     "start": "node server.js",
