@@ -13,7 +13,7 @@ El proyecto queda administrable desde un panel privado para que una persona no t
 - Se eliminaron configuraciones del proveedor anterior.
 - Se mantuvo el panel admin y se agrego CRUD backend para obras, categorias, textos e imagenes.
 - Se conserva el fallback local del portfolio cuando backend/Supabase no responde.
-- Se mantiene el registro limitado al email administrador autorizado.
+- Se mantiene el acceso limitado a los emails administradores autorizados.
 - Se mantiene la proteccion de la ruta admin con sesion Supabase.
 - Se mantiene el backend Express con Helmet, CORS, rate limits y validaciones.
 
@@ -31,13 +31,15 @@ El proyecto queda administrable desde un panel privado para que una persona no t
 - Helmet
 - express-rate-limit
 - JWT Supabase
-- Vercel o hosting estatico para frontend
+- Vercel para frontend
+- Render para backend Express
 
 ## Estructura
 
 ```text
 fzac_work/
   frontend/
+    vercel.json
     src/
       components/
       data/
@@ -46,7 +48,6 @@ fzac_work/
       styles/
       supabase/
   backend/
-    api/
     config/
     controllers/
     db/
@@ -54,7 +55,7 @@ fzac_work/
     models/
     prisma/
     routes/
-  vercel.json
+  render.yaml
   README.md
 ```
 
@@ -69,7 +70,7 @@ VITE_SUPABASE_ANON_KEY=[ANON_KEY]
 VITE_SUPABASE_STORAGE_BUCKET=crud-images
 ```
 
-En Vercel multi-servicio `VITE_API_URL` puede omitirse o configurarse como `/api`; el frontend usa automaticamente el backend del mismo dominio. La URL local se conserva solamente para desarrollo.
+En Vercel, `VITE_API_URL` debe apuntar al dominio publico de Render e incluir `/api`, por ejemplo `https://fzac-backend.onrender.com/api`. La URL local se conserva solamente para desarrollo.
 
 Backend: copiar `backend/.env.example` a `backend/.env` y completar:
 
@@ -192,7 +193,7 @@ El backend intenta crear el bucket como publico si no existe. Las imagenes carga
 ## Crear administradores
 
 1. Crear la cuenta desde Supabase Dashboard, en Authentication > Users, y confirmar su email.
-2. Agregar ese email solamente a `ADMIN_EMAILS` en el backend y en las variables del servicio backend de Vercel.
+2. Agregar ese email solamente a `ADMIN_EMAILS` en el backend y en las variables privadas del servicio de Render.
 3. Ejecutar `npm run prisma:seed` para preparar los perfiles administrativos y el contenido inicial.
 4. Ingresar por `/login`. La ruta protegida `POST /api/auth/admin/bootstrap` crea o actualiza de forma idempotente su fila en `admin_profiles`.
 
@@ -210,25 +211,64 @@ El backend registra nombre, MIME, bytes, folder, bucket y path. Nunca registra k
 
 ## Deploy
 
-### Vercel multi-servicio
+La arquitectura de produccion usa un unico repositorio con dos destinos: Vercel sirve el frontend estatico y Render ejecuta Express. No se utiliza Vercel Services ni se migra a Next.js.
 
-- Crear un solo proyecto Vercel usando la raiz del repositorio, sin seleccionar `frontend` ni `backend` como Root Directory.
-- En Build and Deployment, seleccionar `Services` como Framework Preset.
-- El `vercel.json` principal declara los servicios `frontend` (Vite) y `backend` (Express).
-- El backend declara `api/index.js` como `entrypoint`; ese modulo exporta la aplicacion Express para el runtime Node de Vercel.
-- `/api/*` y `/health` se envian al backend; las demas rutas se envian al frontend.
-- `frontend/vercel.json` resuelve las rutas de React Router hacia `index.html`.
-- `backend/vercel.json` resuelve las rutas de Express hacia `api/index.js`.
-- Cargar las variables `VITE_*` en el servicio frontend y las variables de Prisma/Supabase en el servicio backend.
-- No configurar `SUPABASE_SERVICE_ROLE_KEY`, `DATABASE_URL` ni `DIRECT_URL` en frontend.
-- Vercel aporta automaticamente sus dominios de preview al CORS; para dominios personalizados agregar `CLIENT_URL` y `CORS_ORIGINS`.
-- Ejecutar localmente `npm run prisma:deploy:portfolio` y `npm run prisma:seed` antes del primer deploy.
+### 1. Backend en Render
 
-El deploy se realiza desde la raiz del repositorio. No hacen falta dos proyectos Vercel separados.
+1. En Render, elegir `New > Blueprint` y conectar este repositorio.
+2. Render detecta `/render.yaml`, configura `backend` como `Root Directory` y crea el Web Service gratuito `fzac-backend`.
+3. Completar en el dashboard los secretos marcados con `sync: false`:
 
-Para cargas cercanas a 25MB se recomienda Render, Railway o un servidor Node persistente: las funciones serverless de Vercel pueden imponer un límite de request inferior aunque la aplicación permita 25MB.
+```env
+NODE_ENV=production
+DATABASE_URL="postgresql://...?pgbouncer=true&connection_limit=1"
+DIRECT_URL="postgresql://..."
+SUPABASE_URL="https://[PROJECT_REF].supabase.co"
+SUPABASE_ANON_KEY="[ANON_KEY]"
+SUPABASE_SERVICE_ROLE_KEY="[SERVICE_ROLE_KEY]"
+SUPABASE_STORAGE_BUCKET=crud-images
+MAX_UPLOAD_SIZE_MB=25
+ADMIN_EMAILS=[ADMIN_EMAIL_1],[ADMIN_EMAIL_2]
+CLIENT_URL=https://[FRONTEND].vercel.app
+CORS_ORIGINS=https://[FRONTEND].vercel.app
+```
 
-Tambien se puede desplegar `backend/` en Render, Railway o un servidor Node persistente usando `npm start`.
+4. El Blueprint ejecuta `npm ci && npm run prisma:generate`, inicia con `npm start` y valida `/health`.
+5. Finalizado el deploy, comprobar `https://[BACKEND].onrender.com/health`.
+
+Render inyecta `PORT`; no es necesario definirlo en produccion. Express escucha en `0.0.0.0`, como exige Render. Para un dominio personalizado del frontend, agregar tambien su origen exacto a `CORS_ORIGINS`, separado por comas.
+
+El plan gratuito puede entrar en reposo cuando no recibe trafico y demorar el primer request. Para una API siempre activa, cambiar el plan del servicio en Render; el codigo y las variables no cambian.
+
+### 2. Frontend en Vercel
+
+1. Conectar el mismo repositorio a un unico proyecto Vercel.
+2. Configurar `Root Directory` como `frontend` y Framework Preset como `Vite`.
+3. El build es `npm run build` y el directorio de salida es `dist`, ambos declarados en `frontend/vercel.json`.
+4. Cargar solamente variables publicas del frontend:
+
+```env
+VITE_API_URL=https://[BACKEND].onrender.com/api
+VITE_SUPABASE_URL=https://[PROJECT_REF].supabase.co
+VITE_SUPABASE_ANON_KEY=[ANON_KEY]
+VITE_SUPABASE_STORAGE_BUCKET=crud-images
+```
+
+5. Desplegar nuevamente luego de definir `VITE_API_URL`, porque Vite incorpora esa URL durante el build.
+
+No configurar `SUPABASE_SERVICE_ROLE_KEY`, `DATABASE_URL`, `DIRECT_URL` ni `ADMIN_EMAILS` en Vercel. Los redirects historicos, headers de seguridad, cache de assets y fallback de React Router estan centralizados en `frontend/vercel.json`.
+
+### Migraciones iniciales
+
+Antes del primer deploy contra una base nueva, ejecutar una sola vez desde un entorno seguro:
+
+```bash
+cd backend
+npm run prisma:deploy:portfolio
+npm run prisma:seed
+```
+
+Las migraciones no se ejecutan automaticamente en cada deploy. No usar `prisma db push --accept-data-loss`.
 
 ## Comprobaciones
 

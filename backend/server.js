@@ -5,8 +5,9 @@ const app = createApp();
 const { missing } = validateEnvironment();
 if (missing.length) console.warn(`[config] Variables opcionales durante desarrollo sin completar: ${missing.join(', ')}`);
 
-const server = app.listen(env.port, () => {
-  console.log(`Backend FZAC corriendo en http://localhost:${env.port}`);
+const host = '0.0.0.0';
+const server = app.listen(env.port, host, () => {
+  console.log(`Backend FZAC escuchando en ${host}:${env.port}`);
 });
 
 server.on('error', (error) => {
