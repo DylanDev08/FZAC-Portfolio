@@ -127,7 +127,7 @@ export function mapSupabaseAuthError(error) {
   const message = String(error?.message || '').toLowerCase();
 
   if (error?.message === 'Acceso no autorizado.') {
-    return new Error('Credenciales invalidas o no autorizadas.');
+    return new Error('La cuenta es valida, pero no tiene permisos de administrador.');
   }
 
   if (message.includes('invalid login') || message.includes('invalid credentials')) {

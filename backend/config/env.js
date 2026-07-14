@@ -28,20 +28,21 @@ function numberFromEnv(key, fallback) {
   return Number.isFinite(value) && value > 0 ? value : fallback;
 }
 
-function listFromEnv(key) {
-  return String(process.env[key] || '')
-    .split(',')
+function valuesFromString(value) {
+  return String(value || '')
+    .split(/[,;\r\n]+/)
     .map((item) => item.trim())
     .filter(Boolean);
+}
+
+function listFromEnv(key) {
+  return valuesFromString(process.env[key]);
 }
 
 loadLocalEnv();
 
 function emailListFromValue(value) {
-  return String(value || '')
-    .split(',')
-    .map((item) => item.trim().toLowerCase())
-    .filter(Boolean);
+  return valuesFromString(value).map((item) => item.toLowerCase());
 }
 
 function uniqueEmailList(items) {
