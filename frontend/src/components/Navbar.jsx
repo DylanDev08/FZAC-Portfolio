@@ -17,7 +17,7 @@ const SERVICIOS = [
   { label: 'Construcción húmeda', hash: 'construccion-humeda' },
   { label: 'Herrería y montaje', hash: 'herreria' },
   { label: 'Pintura e impermeabilización', hash: 'pintura-terminaciones' },
-  { label: 'Electricidad integral', hash: 'electricidad' },
+  { label: 'Electricidad', hash: 'electricidad' },
   { label: 'Plomería y gas', hash: 'plomeria' },
   { label: 'Gestión de obra', hash: 'trabajos-institucionales' },
 ];

@@ -117,8 +117,8 @@ export default function ProjectDetail() {
               ) : (
                 <article className="obra-gallery-empty reveal is-visible">
                   <span className="eyebrow">Galería</span>
-                  <h2>Material fotográfico pendiente</h2>
-                  <p>La ficha está creada para esta obra, pero todavía no se cargaron imágenes reales para mostrar públicamente.</p>
+                  <h2>Registro fotográfico próximamente</h2>
+                  <p>Estamos preparando las imágenes de esta obra para incorporarlas al sitio.</p>
                 </article>
               )
             )}

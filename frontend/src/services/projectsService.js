@@ -2,20 +2,63 @@ import { fallbackProjects } from '../data/projects.js';
 import { apiRequest, unwrapData } from './httpService.js';
 import { normalizeDate, slugify } from './utils.js';
 
+const REMOVED_PUBLIC_IMAGES = new Set([
+  '/assets/img/obras/armstrong/01.jpg',
+  '/assets/img/obras/marvel-funes/04.jpg',
+]);
+
+const PRODUCTION_COPY_CUTOFF = Date.parse('2026-07-15T00:00:00.000Z');
+
+function cleanPublicImages(source = {}) {
+  const cleanList = (items) => Array.isArray(items) ? items.filter((item) => !REMOVED_PUBLIC_IMAGES.has(item)) : [];
+  return {
+    ...source,
+    imagenes: cleanList(source.imagenes),
+    imagenesAntes: cleanList(source.imagenesAntes),
+    imagenesProceso: cleanList(source.imagenesProceso),
+    imagenesFinal: cleanList(source.imagenesFinal),
+  };
+}
+
+function applyProductionContent(project) {
+  const curated = fallbackProjects.find((item) => item.slug === project.slug);
+  const cleaned = cleanPublicImages(project);
+  if (!curated) return cleaned;
+
+  const useCuratedCopy = !cleaned.updatedAt || Date.parse(cleaned.updatedAt) < PRODUCTION_COPY_CUTOFF;
+
+  const curatedBranches = Array.isArray(curated.sucursales) ? curated.sucursales : [];
+  const branches = (cleaned.sucursales || []).map((branch, index) => {
+    const curatedBranch = curatedBranches.find((item) => item.direccion === branch.direccion) || curatedBranches[index];
+    const nextBranch = cleanPublicImages(branch);
+    return curatedBranch
+      ? { ...nextBranch, descripcion: useCuratedCopy ? curatedBranch.descripcion : (nextBranch.descripcion || curatedBranch.descripcion) }
+      : nextBranch;
+  });
+
+  return {
+    ...cleaned,
+    descripcion: useCuratedCopy ? curated.descripcion : (cleaned.descripcion || curated.descripcion),
+    proceso: useCuratedCopy ? curated.proceso : (cleaned.proceso || curated.proceso),
+    finalizacion: useCuratedCopy ? curated.finalizacion : (cleaned.finalizacion || curated.finalizacion),
+    sucursales: branches,
+  };
+}
+
 export async function getProjects() {
   try {
     const payload = await apiRequest('/fzac/works');
-    const remoteProjects = unwrapData(payload).map((item) => normalizeProject(item));
-    return remoteProjects.length ? orderProjects(remoteProjects) : orderProjects(fallbackProjects.map(normalizeProject));
+    const remoteProjects = unwrapData(payload).map((item) => applyProductionContent(normalizeProject(item)));
+    return remoteProjects.length ? orderProjects(remoteProjects) : orderProjects(fallbackProjects.map((item) => applyProductionContent(normalizeProject(item))));
   } catch (error) {
     console.warn('[FZAC] Backend/Supabase no disponible. Usando obras locales.', error.message);
-    return fallbackProjects;
+    return orderProjects(fallbackProjects.map((item) => applyProductionContent(normalizeProject(item))));
   }
 }
 
 export async function getAdminProjects() {
   const payload = await apiRequest('/admin/works', { auth: true });
-  return unwrapData(payload).map((item) => normalizeProject(item));
+  return unwrapData(payload).map((item) => cleanPublicImages(normalizeProject(item)));
 }
 
 export async function syncProjectCatalog() {

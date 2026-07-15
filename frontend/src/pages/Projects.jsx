@@ -47,8 +47,8 @@ export default function Projects() {
       <section className="page-hero projects-hero">
         <div className="container">
           <span className="eyebrow">Obras</span>
-          <h1>Obras comerciales y residenciales ejecutadas con criterio técnico</h1>
-          <p>Explorá obras finalizadas, proyectos en ejecución y próximos desarrollos, con registros visuales ordenados por etapas y soluciones constructivas reales.</p>
+          <h1>Obras comerciales y residenciales</h1>
+          <p>Conocé proyectos finalizados, obras en ejecución y próximos desarrollos de Fortaleza Construcciones.</p>
         </div>
       </section>
 
@@ -98,9 +98,9 @@ export default function Projects() {
       <section className="section trabajos-section trabajos-section--compact">
         <div className="container">
           <div className="section-heading reveal is-visible">
-            <span className="eyebrow">+ trabajos</span>
-            <h2>Referencias vinculadas a servicios</h2>
-            <p>Estos registros complementan el portfolio principal y ayudan a mostrar soluciones puntuales de aluminio, mantenimiento, pintura e interiores.</p>
+            <span className="eyebrow">Servicios</span>
+            <h2>Trabajos por especialidad</h2>
+            <p>Construcción en seco, instalaciones, revestimientos, cielorrasos y otras soluciones ejecutadas por nuestro equipo.</p>
           </div>
           <div className="reference-grid">
             {trabajos.map((item) => (

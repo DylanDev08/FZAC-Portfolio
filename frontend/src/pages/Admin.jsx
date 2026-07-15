@@ -119,7 +119,7 @@ const TIPOS_TRABAJO = [
   'Interiores / ambientación',
   'Sistema de aluminio / terminaciones',
   'Pérgolas / escaleras / entrepisos',
-  'Electricidad integral',
+  'Electricidad',
   'Plomería integral / gas',
 ];
 
@@ -803,7 +803,7 @@ function SiteTextManager({ items, form, setForm, onSubmit, onClear, onEdit, onDe
       <div className="admin-card__header">
         <span className="eyebrow">Textos</span>
         <h2>Textos editables del sitio</h2>
-        <p>Administrá textos institucionales listos para deploy. Usá claves claras y contenido final, sin contenido provisorio.</p>
+        <p>Administrá los textos institucionales visibles en el sitio y mantené cada sección actualizada.</p>
       </div>
 
       {message && <p className="admin-feedback" role="status">{message}</p>}

@@ -1,10 +1,12 @@
 import { apiRequest, unwrapData } from './httpService.js';
 
 export const DEFAULT_SITE_TEXTS = {
-  'home.hero.title': 'Fortaleza Construcciones',
-  'home.hero.subtitle': 'Desarrollamos obras comerciales y residenciales, integrando planificación, ejecución y control de obra.',
-  'footer.terms': 'Este sitio expone obras, servicios, referencias visuales, canales de contacto y material institucional de Fortaleza Construcciones. El contenido se publica con fines informativos y comerciales.',
+  'home.hero.title': 'Construimos espacios que hacen crecer tus proyectos',
+  'home.hero.subtitle': 'Planificamos y ejecutamos obras comerciales y residenciales, desde la estructura hasta las terminaciones.',
+  'footer.terms': 'Las imágenes publicadas corresponden a trabajos y participaciones de Fortaleza Construcciones. Todos los derechos reservados.',
 };
+
+const PRODUCTION_COPY_CUTOFF = Date.parse('2026-07-15T00:00:00.000Z');
 
 let siteTextsPromise = null;
 
@@ -19,7 +21,8 @@ async function loadPublicSiteTexts() {
     const payload = await apiRequest('/fzac/site-texts');
     const rows = unwrapData(payload);
     return (Array.isArray(rows) ? rows : []).reduce((texts, row) => {
-      if (row?.key && row?.value) texts[row.key] = row.value;
+      const isNewerAdminCopy = row?.updatedAt && Date.parse(row.updatedAt) >= PRODUCTION_COPY_CUTOFF;
+      if (row?.key && row?.value && (!DEFAULT_SITE_TEXTS[row.key] || isNewerAdminCopy)) texts[row.key] = row.value;
       return texts;
     }, { ...DEFAULT_SITE_TEXTS });
   } catch (error) {

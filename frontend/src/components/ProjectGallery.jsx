@@ -30,7 +30,7 @@ export function ProjectGallery({
   projectName,
   onOpen,
   sectionTitle = 'Galería del proyecto',
-  sectionIntro = 'Recorrido visual del proyecto, desde el inicio de obra hasta el resultado final.',
+  sectionIntro = 'Imágenes del proceso de obra y del resultado final.',
   compact = false,
 }) {
   const sequence = useMemo(() => flattenGalleryGroups(groups), [groups]);
@@ -139,7 +139,7 @@ export function BranchGalleries({ project, onOpen }) {
       <div className="obra-branches-gallery__head">
         <span className="eyebrow">Locales por dirección</span>
         <h2>{project.nombre}</h2>
-        <p>Cada local queda separado con su dirección y su galería propia, mostrando el recorrido completo del proyecto de forma limpia y cronológica.</p>
+        <p>Conocé el trabajo realizado en cada sucursal y el resultado de cada espacio.</p>
       </div>
 
       <div className="obra-branches-gallery__list">
@@ -160,7 +160,7 @@ export function BranchGalleries({ project, onOpen }) {
                 projectName={`${project.nombre} - ${title}`}
                 onOpen={onOpen}
                 sectionTitle="Galería del local"
-                sectionIntro="Recorrido visual ordenado de forma cronológica."
+                sectionIntro="Proceso de obra, detalles y terminaciones del local."
                 compact
               />
             </article>

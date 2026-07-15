@@ -20,7 +20,7 @@ export const portfolioCatalog = [
     "avance": 100,
     "destacado": true,
     "order": 1,
-    "descripcion": "Desarrollo integral de tres locales gastronómicos, con planificación de obra, ejecución en seco y húmeda, terminaciones interiores, frentes comerciales e identidad visual aplicada a cada punto de atención.",
+    "descripcion": "Ejecución integral de tres locales gastronómicos, desde la preparación de cada espacio hasta las instalaciones, terminaciones y aplicación de la identidad comercial.",
     "portada": "/assets/img/obras/sliders-funes/sliders-funes-final-05.jpg",
     "imagenes": [
       "/assets/img/obras/sliders-jujuy/sliders-jujuy-final-01.jpg",
@@ -75,7 +75,7 @@ export const portfolioCatalog = [
         "nombre": "Sliders Hamburger — Jujuy 2514",
         "direccion": "Jujuy 2514, Rosario, Santa Fe",
         "ubicacion": "Rosario",
-        "descripcion": "Galería ordenada del local de Jujuy, desde los primeros registros de obra hasta las terminaciones finales.",
+        "descripcion": "Ejecución del local de Jujuy 2514, con trabajos de obra interior, frente comercial y terminaciones.",
         "portada": "/assets/img/obras/sliders-jujuy/sliders-jujuy-final-01.jpg",
         "imagenes": [
           "/assets/img/obras/sliders-jujuy/sliders-jujuy-final-01.jpg",
@@ -102,7 +102,7 @@ export const portfolioCatalog = [
         "nombre": "Sliders Hamburger — Juan Manuel de Rosas 1062",
         "direccion": "Juan Manuel de Rosas 1062, Rosario, Santa Fe",
         "ubicacion": "Rosario",
-        "descripcion": "Registro visual organizado del local de Juan Manuel de Rosas, separando sus fotos del resto de las sucursales.",
+        "descripcion": "Desarrollo del local de Juan Manuel de Rosas 1062, con adecuación del espacio e identidad de marca.",
         "portada": "/assets/img/obras/sliders-rosas/sliders-rosas-final-01.jpg",
         "imagenes": [
           "/assets/img/obras/sliders-rosas/sliders-rosas-final-01.jpg",
@@ -129,7 +129,7 @@ export const portfolioCatalog = [
         "nombre": "Sliders Hamburger — Ruta Nacional 9 1832",
         "direccion": "Ruta Nacional 9 1832, Funes, Santa Fe",
         "ubicacion": "Funes",
-        "descripcion": "Galería correspondiente al local de Funes, con portada final, registros iniciales y fotos de entrega.",
+        "descripcion": "Construcción y terminación del local de Funes, sobre Ruta Nacional 9.",
         "portada": "/assets/img/obras/sliders-funes/sliders-funes-final-05.jpg",
         "imagenes": [
           "/assets/img/obras/sliders-funes/sliders-funes-final-05.jpg",
@@ -161,8 +161,8 @@ export const portfolioCatalog = [
       "Terminaciones",
       "Entrega final"
     ],
-    "proceso": "Cada sucursal se presenta con galería independiente para evitar cruces de material y mantener una lectura cronológica clara.",
-    "finalizacion": "Tres locales finalizados, documentados por dirección y con material visual ordenado para presentación comercial."
+    "proceso": "Planificación y ejecución coordinada según las condiciones y necesidades de cada sucursal.",
+    "finalizacion": "Tres locales entregados con una identidad consistente y soluciones adaptadas a cada ubicación."
   },
   {
     "id": "marvel",
@@ -183,7 +183,7 @@ export const portfolioCatalog = [
     "avance": 100,
     "destacado": true,
     "order": 2,
-    "descripcion": "Ejecución de locales gastronómicos para una marca con identidad visual marcada, integrando frentes comerciales, interiores funcionales, revestimientos, iluminación y terminaciones listas para operación.",
+    "descripcion": "Desarrollo de cuatro locales gastronómicos, integrando obra civil, frentes comerciales, revestimientos, iluminación y terminaciones acordes a la identidad de la marca.",
     "portada": "/assets/img/obras/marvel-pellegrini/marvel-pellegrini-02.jpg",
     "imagenes": [
       "/assets/img/obras/marvel-pellegrini/marvel-pellegrini-02.jpg",
@@ -201,7 +201,6 @@ export const portfolioCatalog = [
       "/assets/img/obras/marvel-funes/marvel-funes-dibujos.jpg",
       "/assets/img/obras/marvel-funes/01.jpg",
       "/assets/img/obras/marvel-funes/03.jpg",
-      "/assets/img/obras/marvel-funes/04.jpg",
       "/assets/img/obras/marvel-viamonte/00-portada-viamonte.jpg",
       "/assets/img/obras/marvel-viamonte/marvel-viamonte-inicio-01.jpg",
       "/assets/img/obras/marvel-viamonte/marvel-viamonte-inicio-02.jpg",
@@ -227,7 +226,6 @@ export const portfolioCatalog = [
       "/assets/img/obras/marvel-funes/marvel-funes-dibujos.jpg",
       "/assets/img/obras/marvel-funes/01.jpg",
       "/assets/img/obras/marvel-funes/03.jpg",
-      "/assets/img/obras/marvel-funes/04.jpg",
       "/assets/img/obras/marvel-viamonte/00-portada-viamonte.jpg",
       "/assets/img/obras/marvel-viamonte/marvel-viamonte-inicio-01.jpg",
       "/assets/img/obras/marvel-viamonte/marvel-viamonte-inicio-02.jpg",
@@ -244,7 +242,7 @@ export const portfolioCatalog = [
         "nombre": "Marvel’s Food — Av. Pellegrini 1149",
         "direccion": "Av. Pellegrini 1149, Rosario, Santa Fe",
         "ubicacion": "Rosario",
-        "descripcion": "Galería propia del local de Pellegrini, con registros de frente, interior y terminaciones comerciales.",
+        "descripcion": "Intervención del local de Av. Pellegrini, con renovación del frente, el salón y las terminaciones interiores.",
         "portada": "/assets/img/obras/marvel-pellegrini/marvel-pellegrini-02.jpg",
         "imagenes": [
           "/assets/img/obras/marvel-pellegrini/marvel-pellegrini-02.jpg",
@@ -267,7 +265,7 @@ export const portfolioCatalog = [
         "nombre": "Marvel’s Food — Rondeau 2430",
         "direccion": "Rondeau 2430, Rosario, Santa Fe",
         "ubicacion": "Rosario",
-        "descripcion": "Galería propia del local de Rondeau 2430, separada del resto de las sucursales y presentada como registro final del espacio comercial.",
+        "descripcion": "Ejecución del local de Rondeau 2430, desde la adecuación inicial hasta la puesta a punto del espacio comercial.",
         "portada": "/assets/img/obras/marvel-rondeau/marvel-rondeau-final-01.jpg",
         "imagenes": [
           "/assets/img/obras/marvel-rondeau/marvel-rondeau-final-01.jpg",
@@ -292,29 +290,27 @@ export const portfolioCatalog = [
         "nombre": "Marvel’s Food — Ruta Nacional 9 972",
         "direccion": "Ruta Nacional 9 972, Funes, Santa Fe",
         "ubicacion": "Funes",
-        "descripcion": "Galería del local de Funes, con material del frente, ambientación interior e identidad gráfica aplicada.",
+        "descripcion": "Desarrollo del local de Funes, con frente comercial, ambientación interior e identidad gráfica aplicada.",
         "portada": "/assets/img/obras/marvel-funes/marvel-funes-frente.jpg",
         "imagenes": [
           "/assets/img/obras/marvel-funes/marvel-funes-frente.jpg",
           "/assets/img/obras/marvel-funes/marvel-funes-dibujos.jpg",
           "/assets/img/obras/marvel-funes/01.jpg",
-          "/assets/img/obras/marvel-funes/03.jpg",
-          "/assets/img/obras/marvel-funes/04.jpg"
+          "/assets/img/obras/marvel-funes/03.jpg"
         ],
         "imagenesAntes": [],
         "imagenesProceso": [],
         "imagenesFinal": [
           "/assets/img/obras/marvel-funes/marvel-funes-dibujos.jpg",
           "/assets/img/obras/marvel-funes/01.jpg",
-          "/assets/img/obras/marvel-funes/03.jpg",
-          "/assets/img/obras/marvel-funes/04.jpg"
+          "/assets/img/obras/marvel-funes/03.jpg"
         ]
       },
       {
         "nombre": "Marvel’s Food — Viamonte 1434",
         "direccion": "Viamonte 1434, Rosario, Santa Fe",
         "ubicacion": "Rosario",
-        "descripcion": "Galería cronológica del local de Viamonte, con registros iniciales y fotos finales del espacio terminado.",
+        "descripcion": "Transformación del local de Viamonte 1434, incluyendo obra interior, instalaciones y terminaciones finales.",
         "portada": "/assets/img/obras/marvel-viamonte/00-portada-viamonte.jpg",
         "imagenes": [
           "/assets/img/obras/marvel-viamonte/00-portada-viamonte.jpg",
@@ -348,8 +344,8 @@ export const portfolioCatalog = [
       "Identidad comercial",
       "Entrega final"
     ],
-    "proceso": "Las galerías se organizan por dirección para mostrar cada local con su material correspondiente.",
-    "finalizacion": "Locales finalizados y presentados con una lectura visual profesional por sucursal."
+    "proceso": "Cada local se resolvió de acuerdo con su distribución, su entorno y las necesidades operativas de la marca.",
+    "finalizacion": "Cuatro espacios comerciales terminados y listos para su funcionamiento."
   },
   {
     "id": "burger-house",
@@ -366,7 +362,7 @@ export const portfolioCatalog = [
     "avance": 100,
     "destacado": true,
     "order": 3,
-    "descripcion": "Desarrollo de locales gastronómicos con ejecución integral, ambientación comercial, terminaciones interiores y resolución de espacios orientados a una experiencia de marca sólida y funcional.",
+    "descripcion": "Ejecución integral de dos locales gastronómicos, con adecuación del espacio, ambientación comercial, instalaciones y terminaciones interiores.",
     "portada": "/assets/img/obras/burger-house-pellegrini/BurgerHousePellegriniFinal01.webp",
     "imagenes": [
       "/assets/img/obras/burger-house-pellegrini/BurgerHousePellegriniFinal01.webp",
@@ -390,7 +386,7 @@ export const portfolioCatalog = [
         "nombre": "Burger House Grill Pellegrini",
         "direccion": "Av. Pellegrini 916, Rosario, Santa Fe",
         "ubicacion": "Rosario",
-        "descripcion": "Galería independiente del local de Pellegrini, ordenada según la nomenclatura real de la carpeta.",
+        "descripcion": "Desarrollo del local de Av. Pellegrini 916, con intervención interior y resolución de la imagen comercial.",
         "portada": "/assets/img/obras/burger-house-pellegrini/BurgerHousePellegriniFinal01.webp",
         "imagenes": [
           "/assets/img/obras/burger-house-pellegrini/BurgerHousePellegriniFinal01.webp",
@@ -415,7 +411,7 @@ export const portfolioCatalog = [
         "nombre": "Burger House Grill Mariano Perdriel",
         "direccion": "Mariano Perdriel 115, Rosario, Santa Fe",
         "ubicacion": "Rosario",
-        "descripcion": "Galería independiente del local de Mariano Perdriel, ordenada según la nomenclatura real de la carpeta y con el frente nocturno como cierre de la secuencia.",
+        "descripcion": "Ejecución del local de Mariano Perdriel 115, desde la preparación inicial hasta el frente y las terminaciones finales.",
         "portada": "/assets/img/obras/burger-house-florida/burger-florida-final-01.jpg",
         "imagenes": [
           "/assets/img/obras/burger-house-florida/burger-florida-final-01.jpg",
@@ -445,8 +441,8 @@ export const portfolioCatalog = [
       "Ambientación",
       "Entrega final"
     ],
-    "proceso": "Las galerías se presentan separadas por local para evitar cruces entre Pellegrini y Mariano Perdriel.",
-    "finalizacion": "Cada sucursal conserva su propio recorrido visual, con imágenes ordenadas y listas para presentación comercial."
+    "proceso": "Coordinación integral de obra y terminaciones, respetando la identidad y la operación de cada local.",
+    "finalizacion": "Dos locales finalizados con soluciones funcionales y una imagen comercial coherente."
   },
   {
     "id": "armstrong",
@@ -466,11 +462,10 @@ export const portfolioCatalog = [
     "avance": 100,
     "destacado": false,
     "order": 4,
-    "descripcion": "Proyecto residencial ejecutado con seguimiento de sectores exteriores e interiores, integrando trabajos de obra, terminaciones y detalles finales para una presentación clara del resultado.",
+    "descripcion": "Intervención residencial en Armstrong, con trabajos en fachada, galería e interiores, colocación de revestimientos y terminaciones generales.",
     "portada": "/assets/img/obras/armstrong/05.jpg",
     "imagenes": [
       "/assets/img/obras/armstrong/05.jpg",
-      "/assets/img/obras/armstrong/01.jpg",
       "/assets/img/obras/armstrong/02.jpg",
       "/assets/img/obras/armstrong/08.jpg",
       "/assets/img/obras/armstrong/09.jpg",
@@ -478,7 +473,6 @@ export const portfolioCatalog = [
     ],
     "imagenesAntes": [],
     "imagenesProceso": [
-      "/assets/img/obras/armstrong/01.jpg",
       "/assets/img/obras/armstrong/02.jpg"
     ],
     "imagenesFinal": [
@@ -494,8 +488,8 @@ export const portfolioCatalog = [
       "Terminaciones",
       "Finalización"
     ],
-    "proceso": "Galería organizada con el material disponible de exterior, interior y terminaciones.",
-    "finalizacion": "Proyecto finalizado con registro visual completo."
+    "proceso": "La obra se desarrolló por sectores para coordinar tareas exteriores, interiores y detalles de terminación.",
+    "finalizacion": "Vivienda finalizada con espacios renovados y terminaciones listas para su uso."
   },
   {
     "id": "fichines",
@@ -510,7 +504,7 @@ export const portfolioCatalog = [
     "estado": "finalizada",
     "avance": 100,
     "order": 5,
-    "descripcion": "Proyecto comercial para local recreativo, con preparación del espacio, organización funcional, fachada terminada y sectores interiores listos para uso.",
+    "descripcion": "Acondicionamiento integral de un local recreativo, con intervención de fachada, distribución interior y preparación de los sectores de juegos.",
     "portada": "/assets/img/obras/fichines/fichines-final-fachada.jpeg",
     "imagenes": [
       "/assets/img/obras/fichines/fichines-final-fachada.jpeg",
@@ -541,8 +535,8 @@ export const portfolioCatalog = [
       "Desarrollo interior",
       "Entrega final"
     ],
-    "proceso": "Registro ordenado desde los avances iniciales hasta la ambientación interior y fachada terminada.",
-    "finalizacion": "Local finalizado con fachada, sector de juegos y espacios interiores listos para presentación."
+    "proceso": "Adecuación del espacio, resolución de circulaciones y ejecución de las terminaciones interiores y exteriores.",
+    "finalizacion": "Local entregado con fachada e interiores listos para recibir al público."
   },
   {
     "id": "flama",
@@ -557,7 +551,7 @@ export const portfolioCatalog = [
     "estado": "por-comenzar",
     "avance": 0,
     "order": 6,
-    "descripcion": "Registro del Local de Flama en Jujuy 2238, Rosario, preparado para centralizar imágenes de relevamiento, avance y terminaciones desde el panel administrativo.",
+    "descripcion": "Próxima intervención comercial en Jujuy 2238, Rosario, actualmente en etapa de relevamiento y definición de alcance.",
     "portada": "",
     "imagenes": [],
     "imagenesAntes": [],
@@ -570,8 +564,8 @@ export const portfolioCatalog = [
       "Planificación",
       "Seguimiento de obra"
     ],
-    "proceso": "Ficha operativa del local, lista para incorporar fotos por etapa desde el CRUD administrativo.",
-    "finalizacion": "El material final se publicará desde el panel cuando la obra tenga registro visual confirmado."
+    "proceso": "Relevamiento del espacio y planificación de las tareas necesarias antes del inicio de obra.",
+    "finalizacion": "Proyecto en planificación."
   },
   {
     "id": "roldan",
@@ -586,7 +580,7 @@ export const portfolioCatalog = [
     "estado": "por-comenzar",
     "avance": 0,
     "order": 7,
-    "descripcion": "Proyecto residencial preparado para inicio de obra, con documentación visual previa y organización de recursos para la etapa operativa.",
+    "descripcion": "Proyecto residencial en Roldán, en etapa de planificación y preparación para el inicio de obra.",
     "portada": "/assets/img/obras/roldan/portada.jpg",
     "imagenes": [
       "/assets/img/obras/roldan/portada.jpg",
@@ -610,7 +604,7 @@ export const portfolioCatalog = [
       "Organización de recursos",
       "Inicio de obra"
     ],
-    "proceso": "Proyecto en etapa previa, con registro de referencia para planificación y presentación.",
+    "proceso": "Definición de etapas, recursos y prioridades para comenzar la ejecución.",
     "finalizacion": "Obra por iniciar."
   }
 ];

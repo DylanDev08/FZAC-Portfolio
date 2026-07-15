@@ -25,21 +25,21 @@ const siteTexts = [
   {
     key: 'home.hero.title',
     title: 'Título principal del inicio',
-    value: 'Fortaleza Construcciones',
+    value: 'Construimos espacios que hacen crecer tus proyectos',
     section: 'home',
     description: 'Texto principal visible en la primera pantalla del portfolio.',
   },
   {
     key: 'home.hero.subtitle',
     title: 'Subtítulo principal del inicio',
-    value: 'Desarrollamos obras comerciales y residenciales, integrando planificación, ejecución y control de obra.',
+    value: 'Planificamos y ejecutamos obras comerciales y residenciales, desde la estructura hasta las terminaciones.',
     section: 'home',
     description: 'Bajada institucional del hero.',
   },
   {
     key: 'footer.terms',
     title: 'Términos del portfolio',
-    value: 'Este sitio expone obras, servicios, referencias visuales, canales de contacto y material institucional de Fortaleza Construcciones. El contenido se publica con fines informativos y comerciales.',
+    value: 'Las imágenes publicadas corresponden a trabajos y participaciones de Fortaleza Construcciones. Todos los derechos reservados.',
     section: 'footer',
     description: 'Texto legal breve visible o administrable para el pie del sitio.',
   },
@@ -66,7 +66,7 @@ async function main() {
   for (const text of siteTexts) {
     await prisma.siteText.upsert({
       where: { key: text.key },
-      update: {},
+      update: text,
       create: text,
     });
   }

@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { DEFAULT_SITE_TEXTS, getPublicSiteTexts } from '../services/siteTextService.js';
 
-const ecommerceUrl = '';
 const adtechUrl = 'https://www.instagram.com/adtech.ros/';
 
 const adtechServices = [
@@ -25,10 +24,10 @@ export default function Footer() {
       <div className="container site-footer__container site-footer__container--balanced">
         <section className="site-footer__column site-footer__brand">
           <span className="site-footer__label">Fortaleza Construcciones</span>
-          <h3>Planificación y ejecución de obras desde cero</h3>
+          <h3>Construimos tu proyecto de principio a fin</h3>
           <p>
-            Desarrollo de obras comerciales y residenciales con planificación,
-            estructura, ejecución integral y terminaciones profesionales.
+            Obras comerciales y residenciales con planificación, coordinación
+            integral y terminaciones cuidadas.
           </p>
         </section>
 
@@ -44,8 +43,8 @@ export default function Footer() {
           <span className="site-footer__label">Soluciones asociadas</span>
           <h4>AdTech</h4>
           <p>
-            Servicio externo asociado para complementar proyectos con identidad visual,
-            comunicación digital, renders y desarrollo tecnológico.
+            Equipo asociado para complementar proyectos con renders, identidad visual
+            y soluciones digitales.
           </p>
           <ul className="site-footer__chips" aria-label="Servicios de AdTech">
             {adtechServices.map((service) => <li key={service}>{service}</li>)}
@@ -56,21 +55,19 @@ export default function Footer() {
         </section>
 
         <section className="site-footer__column site-footer__commerce">
-          <span className="site-footer__label">FZAC</span>
-          <h4>E-Commerce</h4>
-          <p>Próximo espacio para recursos, productos y soluciones vinculadas a la construcción.</p>
-          {ecommerceUrl ? (
-            <a className="site-footer__cta" href={ecommerceUrl} target="_blank" rel="noreferrer">Entrar al e-commerce →</a>
-          ) : (
-            <span className="site-footer__status">Próximamente</span>
-          )}
+          <span className="site-footer__label">Contacto</span>
+          <h4>¿Tenés un proyecto?</h4>
+          <p>Escribinos para coordinar una visita, solicitar un presupuesto o conversar sobre tu próxima obra.</p>
+          <a className="site-footer__cta" href="https://wa.me/5493415847000?text=Hola%20Fortaleza%20Construcciones%2C%20quiero%20consultar%20por%20una%20obra" target="_blank" rel="noreferrer">
+            Hablar por WhatsApp →
+          </a>
         </section>
 
         <section className="site-footer__column site-footer__legal" aria-label="Términos y condiciones">
-          <span className="site-footer__label">Términos</span>
-          <h4>Portfolio institucional</h4>
+          <span className="site-footer__label">Información legal</span>
+          <h4>Uso del contenido</h4>
           <p>{terms}</p>
-          <p className="site-footer__author">Autor: Fortaleza Construcciones.</p>
+          <p className="site-footer__author">© {new Date().getFullYear()} Fortaleza Construcciones.</p>
         </section>
       </div>
     </footer>

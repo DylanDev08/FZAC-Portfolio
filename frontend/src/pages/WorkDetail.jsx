@@ -174,8 +174,8 @@ export default function WorkDetail() {
     return (
       <main className="page-hero">
         <div className="container">
-          <span className="eyebrow">+ trabajos</span>
-          <h1>Cargando referencia...</h1>
+          <span className="eyebrow">Servicios</span>
+          <h1>Cargando trabajos...</h1>
         </div>
       </main>
     );
@@ -196,8 +196,8 @@ export default function WorkDetail() {
         <div className="obra-hero__bg" style={{ background: `linear-gradient(180deg, rgba(8,8,8,.28), rgba(8,8,8,.94)), linear-gradient(90deg, rgba(8,8,8,.9), rgba(8,8,8,.34), rgba(8,8,8,.82)), url('${cover}') center/cover no-repeat` }} />
         <div className="container obra-hero__container">
           <div className="obra-hero__content reveal is-visible">
-            <div className="breadcrumb"><Link to="/">Inicio</Link><span>/</span><Link to="/proyectos">+ trabajos</Link><span>/</span><strong>{item.nombre}</strong></div>
-            <span className="eyebrow">Referencias técnicas</span>
+            <div className="breadcrumb"><Link to="/">Inicio</Link><span>/</span><Link to="/proyectos">Servicios</Link><span>/</span><strong>{item.nombre}</strong></div>
+            <span className="eyebrow">Trabajos realizados</span>
             <h1>{item.nombre}</h1>
             <p>{item.descripcion}</p>
             <div className="obra-hero__meta">
@@ -213,8 +213,8 @@ export default function WorkDetail() {
         <div className="container trabajos-rubros-layout">
           <div className="section-heading reveal is-visible trabajos-rubros-heading">
             <span className="eyebrow">Galerías por rubro</span>
-            <h2>Trabajos varios organizados por especialidad</h2>
-            <p>Cada rubro tiene su propia galería real para recorrer foto por foto, con material organizado por especialidad y sin imágenes sueltas.</p>
+            <h2>Nuestros trabajos, rubro por rubro</h2>
+            <p>Recorré una selección de trabajos terminados y soluciones aplicadas en obras comerciales y residenciales.</p>
           </div>
 
           <div className="trabajos-rubros-list">

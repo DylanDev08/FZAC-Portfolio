@@ -8,22 +8,22 @@ import { getTrabajos, getEventos } from '../services/contentService.js';
 import { DEFAULT_SITE_TEXTS, getPublicSiteTexts } from '../services/siteTextService.js';
 
 const services = [
-  { title: 'Steel Framing', tag: 'Construcción en seco', text: 'Estructuras livianas con perfiles galvanizados para viviendas, locales y ampliaciones con ejecución rápida y precisa.', points: ['Menor carga húmeda', 'Montaje limpio', 'Alta precisión'], workHash: 'construccion-en-seco' },
-  { title: 'Drywall', tag: 'Interiores', text: 'Tabiquería, cielorrasos, revestimientos y soluciones interiores con terminaciones prolijas y funcionales.', points: ['Cielorrasos', 'Tabiques', 'Revestimientos'], workHash: 'drywall' },
-  { title: 'Construcción húmeda', tag: 'Obra tradicional', text: 'Albañilería, mampostería, revoques, carpetas, contrapisos y reparaciones con criterio técnico.', points: ['Revoques', 'Carpetas', 'Contrapisos'], workHash: 'construccion-humeda' },
-  { title: 'Herrería y montaje', tag: 'Estructuras', text: 'Pérgolas, escaleras, entrepisos, estructuras y soluciones metálicas livianas integradas al proyecto.', points: ['Pérgolas', 'Entrepisos', 'Montajes'], workHash: 'herreria' },
-  { title: 'Pintura e impermeabilización', tag: 'Terminaciones', text: 'Preparación de superficies, pintura interior/exterior, enlucidos y protección de muros o sectores críticos.', points: ['Interior/exterior', 'Enlucidos', 'Protección'], workHash: 'pintura-terminaciones' },
-  { title: 'Electricidad integral', tag: 'Instalaciones', text: 'Instalaciones para viviendas, locales comerciales e industrias con lectura funcional del espacio.', points: ['Locales', 'Viviendas', 'Mantenimiento'], workHash: 'electricidad' },
-  { title: 'Plomería y gas', tag: 'Instalaciones', text: 'Gasista matriculado, termofusión, sistemas epoxi/fusión y desagües cloacales o pluviales.', points: ['Agua', 'Gas', 'Desagües'], workHash: 'plomeria' },
-  { title: 'Gestión de obra', tag: 'Planificación', text: 'Organización de etapas, coordinación operativa, control de avance y asesoramiento para ejecutar con orden.', points: ['Etapas', 'Control', 'Coordinación'], workHash: 'trabajos-institucionales' },
+  { title: 'Steel Framing', tag: 'Construcción en seco', text: 'Estructuras de perfiles galvanizados para viviendas, locales y ampliaciones, con montaje preciso y menor tiempo de obra.', points: ['Montaje preciso', 'Obra limpia', 'Versatilidad'], workHash: 'construccion-en-seco' },
+  { title: 'Drywall', tag: 'Interiores', text: 'Tabiques, cielorrasos y revestimientos interiores resueltos con terminaciones prolijas y funcionales.', points: ['Cielorrasos', 'Tabiques', 'Revestimientos'], workHash: 'drywall' },
+  { title: 'Construcción húmeda', tag: 'Obra tradicional', text: 'Mampostería, revoques, carpetas, contrapisos y reparaciones ejecutadas con criterio técnico.', points: ['Mampostería', 'Revoques', 'Contrapisos'], workHash: 'construccion-humeda' },
+  { title: 'Herrería y montaje', tag: 'Estructuras', text: 'Fabricación y montaje de pérgolas, escaleras, entrepisos y estructuras metálicas adaptadas a cada espacio.', points: ['Pérgolas', 'Entrepisos', 'Montajes'], workHash: 'herreria' },
+  { title: 'Pintura e impermeabilización', tag: 'Terminaciones', text: 'Preparación, protección y terminación de superficies interiores y exteriores para un resultado duradero.', points: ['Interiores', 'Exteriores', 'Protección'], workHash: 'pintura-terminaciones' },
+  { title: 'Electricidad', tag: 'Instalaciones', text: 'Instalaciones, tableros y mantenimiento eléctrico para viviendas, locales comerciales e industrias.', points: ['Instalaciones', 'Tableros', 'Mantenimiento'], workHash: 'electricidad' },
+  { title: 'Plomería y gas', tag: 'Instalaciones', text: 'Instalaciones de agua, gas y desagües con materiales y sistemas adecuados para cada proyecto.', points: ['Agua', 'Gas', 'Desagües'], workHash: 'plomeria' },
+  { title: 'Gestión de obra', tag: 'Planificación', text: 'Coordinación de etapas, equipos y materiales para cumplir objetivos, tiempos y calidad de ejecución.', points: ['Planificación', 'Seguimiento', 'Coordinación'], workHash: 'trabajos-institucionales' },
 ];
 
 
 const processSteps = [
-  ['01', 'Planificación inicial', 'Análisis del espacio, necesidades, uso proyectado y alcance real de obra.'],
-  ['02', 'Planificación', 'Definición de etapas, materiales, recursos y tiempos para ejecutar con orden.'],
-  ['03', 'Ejecución', 'Desarrollo de obra con control de avance, coordinación y resolución técnica.'],
-  ['04', 'Terminaciones', 'Detalles finales, limpieza, revisión y entrega con presencia profesional.'],
+  ['01', 'Relevamiento', 'Analizamos el espacio, las necesidades y el alcance de la intervención.'],
+  ['02', 'Planificación', 'Definimos etapas, materiales, recursos y tiempos de trabajo.'],
+  ['03', 'Ejecución', 'Coordinamos la obra y controlamos cada avance en el lugar.'],
+  ['04', 'Entrega', 'Revisamos terminaciones y entregamos el espacio listo para usar.'],
 ];
 
 export default function Home() {
@@ -100,8 +100,8 @@ export default function Home() {
         <div className="container">
           <div className="section-heading reveal is-visible">
             <span className="eyebrow">Servicios</span>
-            <h2>Soluciones técnicas para obras comerciales y residenciales</h2>
-            <p>Cada servicio se plantea desde una lógica constructiva real: desempeño, tiempos, terminación y adaptabilidad.</p>
+            <h2>Todo lo que tu obra necesita, en un solo equipo</h2>
+            <p>Resolvemos estructura, instalaciones y terminaciones con una coordinación integral de principio a fin.</p>
           </div>
           <div className="services-grid services-grid--premium services-grid--delivery">
             {services.map((service, index) => (
@@ -128,8 +128,8 @@ export default function Home() {
         <div className="container">
           <div className="section-heading reveal is-visible">
             <span className="eyebrow">Obras destacadas</span>
-            <h2>Obras comerciales y residenciales ejecutadas con criterio técnico</h2>
-            <p>Proyectos reales desarrollados por Fortaleza Construcciones, mostrando procesos, soluciones constructivas, terminaciones y resultados aplicados.</p>
+            <h2>Proyectos que reflejan nuestra forma de trabajar</h2>
+            <p>Una selección de obras comerciales y residenciales ejecutadas por Fortaleza Construcciones.</p>
           </div>
           <div className="projects-grid projects-grid--featured">
             {featuredProjects.map((project) => <ProjectCard key={project.id} project={project} />)}
@@ -140,9 +140,9 @@ export default function Home() {
       <section className="section trabajos-section">
         <div className="container">
           <div className="section-heading reveal is-visible">
-            <span className="eyebrow">+ trabajos</span>
-            <h2>Trabajos varios organizados por secciones</h2>
-            <p>Registros complementarios de fachadas, casas, interiores, cielorrasos, revestimientos, instalaciones y terminaciones, organizados por tipo de trabajo.</p>
+            <span className="eyebrow">Otros trabajos</span>
+            <h2>Soluciones para cada etapa de obra</h2>
+            <p>Conocé nuestros trabajos de construcción en seco, instalaciones, revestimientos, cielorrasos y terminaciones.</p>
           </div>
           <div className="reference-grid">
             {trabajos.map((item) => (
@@ -164,8 +164,8 @@ export default function Home() {
         <div className="container events-preview-layout">
           <div className="section-heading reveal is-visible">
             <span className="eyebrow">Eventos y participaciones</span>
-            <h2>Presencia de FZAC en espacios comerciales, eventos y desarrollos gastronómicos</h2>
-            <p>Estas participaciones no se muestran como obra principal: funcionan como validación de experiencia, armado de espacios y capacidad operativa en entornos de alto movimiento.</p>
+            <h2>Experiencia aplicada a eventos y espacios comerciales</h2>
+            <p>Acompañamos montajes y desarrollos gastronómicos que exigen coordinación, velocidad y atención al detalle.</p>
             <a href="/eventos" className="btn btn--primary">Ver eventos</a>
           </div>
           {eventos[0] && <EventCard event={eventos[0]} />}
@@ -176,7 +176,7 @@ export default function Home() {
         <div className="container">
           <div className="section-heading reveal is-visible">
             <span className="eyebrow">Metodología</span>
-            <h2>Proceso de trabajo claro, medible y profesional</h2>
+            <h2>Un proceso claro de principio a fin</h2>
           </div>
           <div className="process-grid">
             {processSteps.map(([number, title, text]) => (
@@ -194,17 +194,17 @@ export default function Home() {
         <div className="container diferencial-layout why-feature-layout">
           <figure className="why-feature-image reveal is-visible">
             <img src="/assets/img/obras/marvel-pellegrini/marvel-pellegrini-02.jpg" alt="Interior comercial Marvel’s Food ejecutado por Fortaleza Construcciones" loading="lazy" />
-            <figcaption>Proyecto gastronómico ejecutado · Marvel Burger Co</figcaption>
+            <figcaption>Local gastronómico ejecutado por Fortaleza Construcciones</figcaption>
           </figure>
 
           <div className="diferencial-copy reveal is-visible">
             <span className="eyebrow">Por qué elegirnos</span>
-            <h2>Capacidad técnica, lectura de proyecto y ejecución con presencia profesional</h2>
-            <p>Trabajamos integrando planificación, ejecución, terminación y resolución de obra para responder a requerimientos comerciales y residenciales con enfoque serio y operativo.</p>
+            <h2>Un equipo que se hace cargo de cada etapa</h2>
+            <p>Integramos planificación, ejecución y terminaciones para que cada proyecto avance con orden y una única coordinación.</p>
             <div className="diferencial-points">
-              <article className="diferencial-point glass-card"><h3>Planificación consistente</h3><p>Ordenamos etapas, materiales y prioridades antes de ejecutar.</p></article>
-              <article className="diferencial-point glass-card"><h3>Resolución técnica</h3><p>Ajustamos cada decisión técnica al proyecto, al uso final y al resultado esperado.</p></article>
-              <article className="diferencial-point glass-card"><h3>Terminaciones profesionales</h3><p>La entrega final cuida funcionalidad, estética e imagen del proyecto.</p></article>
+              <article className="diferencial-point glass-card"><h3>Planificación</h3><p>Ordenamos etapas, materiales y prioridades antes de comenzar.</p></article>
+              <article className="diferencial-point glass-card"><h3>Resolución técnica</h3><p>Adaptamos cada decisión al espacio, al uso y al objetivo del proyecto.</p></article>
+              <article className="diferencial-point glass-card"><h3>Terminaciones cuidadas</h3><p>Revisamos los detalles para entregar un resultado funcional y prolijo.</p></article>
             </div>
           </div>
         </div>
@@ -216,7 +216,7 @@ export default function Home() {
             <div className="contact-panel__copy">
               <span className="eyebrow">Contacto directo</span>
               <h2>Hablemos de tu proyecto</h2>
-              <p>Para consultas, presupuestos o coordinación de obra, contactanos por el canal que te resulte más cómodo. La respuesta llega directo al equipo de Fortaleza Construcciones, sin formularios ni pasos intermedios.</p>
+              <p>Contanos qué necesitás y coordinamos una primera conversación para evaluar el proyecto.</p>
             </div>
 
             <div className="contact-direct-grid" aria-label="Canales de contacto">

@@ -59,7 +59,7 @@ export default function Login() {
           <span className="eyebrow" style={{ marginTop: 32 }}>Gestion interna</span>
           <h1>Panel administrativo</h1>
           <p>
-            Acceso privado para cargar obras, imagenes, textos, eventos y trabajos del portfolio.
+            Acceso privado para administrar obras, imágenes, textos, eventos y trabajos del sitio.
           </p>
 
           <div className="login-benefits">
@@ -95,7 +95,7 @@ export default function Login() {
 
             <div className="form-row">
               <label htmlFor="login-pass">Contrasena</label>
-              <input id="login-pass" type="password" autoComplete="current-password" placeholder="Ingresa tu contrasena" value={password} onChange={(event) => setPassword(event.target.value)} required />
+              <input id="login-pass" type="password" autoComplete="current-password" placeholder="Ingresá tu contraseña" value={password} onChange={(event) => setPassword(event.target.value)} required />
             </div>
 
             {err && <p className="form-feedback" role="alert">{err}</p>}

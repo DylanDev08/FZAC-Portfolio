@@ -129,7 +129,7 @@ export default function EventDetail() {
             <article className="obra-side-card glass-card reveal is-visible">
               <span className="eyebrow">Contacto</span>
               <h3>Proyectos comerciales</h3>
-              <p>FZAC también trabaja en espacios comerciales, eventos, locales y puntos de atención de alto tránsito.</p>
+              <p>Planificamos y ejecutamos locales, stands y espacios comerciales adaptados a cada necesidad.</p>
               <a href="/#contacto" className="btn btn--primary btn--full">Solicitar presupuesto</a>
             </article>
           </aside>

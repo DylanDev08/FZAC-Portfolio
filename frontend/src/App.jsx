@@ -17,8 +17,8 @@ export default function App() {
   const [bootPhase, setBootPhase] = useState('building');
 
   useEffect(() => {
-    const readyTimeout = globalThis.setTimeout(() => setBootPhase('ready'), 1700);
-    const completeTimeout = globalThis.setTimeout(() => setBootPhase('complete'), 2400);
+    const readyTimeout = globalThis.setTimeout(() => setBootPhase('ready'), 650);
+    const completeTimeout = globalThis.setTimeout(() => setBootPhase('complete'), 950);
     return () => {
       globalThis.clearTimeout(readyTimeout);
       globalThis.clearTimeout(completeTimeout);

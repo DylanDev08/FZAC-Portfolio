@@ -8,7 +8,7 @@ export const eventosFallback = [
     categoria: 'Eventos y participaciones',
     ubicacion: 'Argentina',
     anio: '2026',
-    descripcion: 'Participación de FZAC en Burgerland, colaborando en el armado de espacios gastronómicos, soporte técnico de stands y presencia vinculada a franquicias del rubro.',
+    descripcion: 'Participación de FZAC en Burgerland, colaborando en el armado y soporte técnico de espacios gastronómicos.',
     portada: '/assets/img/eventos/burgerland/burgerland-01.jpg',
     imagenes: [
       '/assets/img/eventos/burgerland/burgerland-01.jpg',
@@ -18,10 +18,10 @@ export const eventosFallback = [
     video: '',
     videos: [],
     puntos: [
-      'Participación en evento gastronómico de alto movimiento',
-      'Armado y soporte técnico de espacios comerciales',
-      'Experiencia aplicada a franquicias y puntos de atención',
-      'Validación de marca en entornos reales de uso intensivo'
+      'Armado de espacios gastronómicos',
+      'Soporte técnico durante el evento',
+      'Coordinación de tareas y tiempos',
+      'Resolución de espacios comerciales'
     ],
     destacado: true,
     order: 1

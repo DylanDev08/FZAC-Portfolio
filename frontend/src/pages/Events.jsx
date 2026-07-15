@@ -21,8 +21,8 @@ export default function Events() {
       <section className="page-hero events-hero">
         <div className="container">
           <span className="eyebrow">Eventos</span>
-          <h1>Participaciones que fortalecen presencia, experiencia y capacidad operativa</h1>
-          <p>Además de obras comerciales y residenciales, FZAC participa en desarrollos, eventos y espacios de uso intensivo donde se requiere criterio técnico, armado prolijo y respuesta operativa.</p>
+          <h1>FZAC en eventos y desarrollos comerciales</h1>
+          <p>Participamos en montajes y espacios gastronómicos donde la coordinación, los tiempos y la calidad de ejecución son fundamentales.</p>
         </div>
       </section>
 
