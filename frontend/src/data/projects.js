@@ -21,9 +21,9 @@ const makeGallery = ({ portada, inicio = [], proceso = [], final = [], extra = [
 };
 
 export const portfolioLocations = [
-  { brand: 'Sliders Hamburger', name: 'Jujuy', address: 'Jujuy 2514, Rosario, Santa Fe', slug: 'sliders-hamburger' },
-  { brand: 'Sliders Hamburger', name: 'Juan Manuel de Rosas', address: 'Juan Manuel de Rosas 1062, Rosario, Santa Fe', slug: 'sliders-hamburger' },
-  { brand: 'Sliders Hamburger', name: 'Funes', address: 'Ruta Nacional 9 1832, Funes, Santa Fe', slug: 'sliders-hamburger' },
+  { brand: 'Sliders Hamburgers', name: 'Jujuy', address: 'Jujuy 2514, Rosario, Santa Fe', slug: 'sliders-hamburger' },
+  { brand: 'Sliders Hamburgers', name: 'Juan Manuel de Rosas', address: 'Juan Manuel de Rosas 1062, Rosario, Santa Fe', slug: 'sliders-hamburger' },
+  { brand: 'Sliders Hamburgers', name: 'Funes', address: 'Ruta Nacional 9 1832, Funes, Santa Fe', slug: 'sliders-hamburger' },
   { brand: 'Marvel’s Food', name: 'Pellegrini', address: 'Av. Pellegrini 1149, Rosario, Santa Fe', slug: 'marvel' },
   { brand: 'Marvel’s Food', name: 'Rondeau 2430', address: 'Rondeau 2430, Rosario, Santa Fe', slug: 'marvel' },
   { brand: 'Marvel’s Food', name: 'Funes', address: 'Ruta Nacional 9 972, Funes, Santa Fe', slug: 'marvel' },
@@ -285,7 +285,7 @@ export const fallbackProjects = [
     id: 'sliders-hamburger',
     slug: 'sliders-hamburger',
     aliases: ['slider', 'sliders', 'sliders-hamburgers'],
-    nombre: 'Sliders Hamburger',
+    nombre: 'Sliders Hamburgers',
     tipo: 'Locales gastronómicos',
     categoria: 'Marca gastronómica',
     esFranquicia: true,
@@ -305,7 +305,7 @@ export const fallbackProjects = [
     imagenesFinal: [],
     sucursales: [
       {
-        nombre: 'Sliders Hamburger — Jujuy 2514',
+        nombre: 'Sliders Hamburgers — Jujuy 2514',
         direccion: 'Jujuy 2514, Rosario, Santa Fe',
         ubicacion: 'Rosario',
         descripcion: 'Ejecución del local de Jujuy 2514, con trabajos de obra interior, frente comercial y terminaciones.',
@@ -313,7 +313,7 @@ export const fallbackProjects = [
         ...slidersJujuy,
       },
       {
-        nombre: 'Sliders Hamburger — Juan Manuel de Rosas 1062',
+        nombre: 'Sliders Hamburgers — Juan Manuel de Rosas 1062',
         direccion: 'Juan Manuel de Rosas 1062, Rosario, Santa Fe',
         ubicacion: 'Rosario',
         descripcion: 'Desarrollo del local de Juan Manuel de Rosas 1062, con adecuación del espacio e identidad de marca.',
@@ -321,7 +321,7 @@ export const fallbackProjects = [
         ...slidersRosas,
       },
       {
-        nombre: 'Sliders Hamburger — Ruta Nacional 9 1832',
+        nombre: 'Sliders Hamburgers — Ruta Nacional 9 1832',
         direccion: 'Ruta Nacional 9 1832, Funes, Santa Fe',
         ubicacion: 'Funes',
         descripcion: 'Construcción y terminación del local de Funes, sobre Ruta Nacional 9.',

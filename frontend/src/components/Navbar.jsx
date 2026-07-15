@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { Link, NavLink, useNavigate } from 'react-router-dom';
+import React, { useEffect, useRef, useState } from 'react';
+import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 
 const FALLBACK_OBRAS = [
   { slug: 'sliders-hamburger', label: 'Sliders Hamburgers' },
@@ -26,7 +26,11 @@ export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [portfolioItems, setPortfolioItems] = useState(FALLBACK_OBRAS);
+  const location = useLocation();
   const navigate = useNavigate();
+  const menuButtonRef = useRef(null);
+  const menuRef = useRef(null);
+  const firstMobileLinkRef = useRef(null);
 
   useEffect(() => {
     let active = true;
@@ -70,6 +74,55 @@ export default function Navbar() {
       if (typeof unsubscribe === 'function') unsubscribe();
     };
   }, []);
+
+  useEffect(() => {
+    setOpen(false);
+  }, [location.pathname, location.hash]);
+
+  useEffect(() => {
+    if (!open) return undefined;
+
+    const previousOverflow = document.body.style.overflow;
+    const menu = menuRef.current;
+    document.body.style.overflow = 'hidden';
+    firstMobileLinkRef.current?.focus({ preventScroll: true });
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        setOpen(false);
+        menuButtonRef.current?.focus({ preventScroll: true });
+        return;
+      }
+
+      if (event.key !== 'Tab' || !menu) return;
+      const focusable = [...menu.querySelectorAll('a[href], button:not([disabled]), summary')]
+        .filter((element) => element.offsetParent !== null);
+      if (!focusable.length) return;
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    const handleResize = () => {
+      if (window.innerWidth > 860) setOpen(false);
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [open]);
 
   useEffect(() => {
     let active = true;
@@ -162,25 +215,75 @@ export default function Navbar() {
             )}
           </nav>
 
-          <button className={`mobile-menu-btn ${open ? 'is-open' : ''}`} type="button" aria-label={open ? 'Cerrar menú' : 'Abrir menú'} aria-expanded={open} onClick={() => setOpen((prev) => !prev)}>
+          <button
+            ref={menuButtonRef}
+            className={`mobile-menu-btn ${open ? 'is-open' : ''}`}
+            type="button"
+            aria-label={open ? 'Cerrar menú' : 'Abrir menú'}
+            aria-expanded={open}
+            aria-controls="mobile-navigation"
+            onClick={() => setOpen((prev) => !prev)}
+          >
             <span />
             <span />
             <span />
           </button>
         </div>
 
-        <div className={`mobile-nav ${open ? 'is-open' : ''}`} aria-hidden={!open}>
-          <div className="mobile-nav__inner">
-            <Link onClick={close} to="/">Inicio</Link>
-            <Link onClick={close} to="/proyectos">Obras</Link>
-            {portfolioItems.map((obra) => <Link key={obra.slug} onClick={close} to={`/obra/${obra.slug}`}>{obra.label}</Link>)}
-            <Link onClick={close} to="/trabajos/trabajos-varios">Servicios</Link>
-            <Link onClick={close} to="/eventos">Eventos</Link>
-            <a onClick={close} href="/#contacto">Contacto</a>
-            {isAdmin && <Link onClick={close} to="/admin">Administración</Link>}
-            {isAdmin && <button onClick={handleLogout} className="mobile-logout" type="button">Cerrar sesión</button>}
+        <div
+          ref={menuRef}
+          id="mobile-navigation"
+          className={`mobile-nav ${open ? 'is-open' : ''}`}
+          aria-hidden={!open}
+          inert={open ? undefined : ''}
+        >
+          <div className="mobile-nav__head">
+            <div>
+              <span>Menú</span>
+              <strong>Fortaleza Construcciones</strong>
+            </div>
+            <button type="button" onClick={close} aria-label="Cerrar menú">×</button>
           </div>
-        </div>
+
+          <nav className="mobile-nav__inner" aria-label="Navegación móvil">
+            <div className="mobile-nav__primary">
+              <Link ref={firstMobileLinkRef} onClick={close} to="/">Inicio</Link>
+              <Link onClick={close} to="/proyectos">Todas las obras</Link>
+              <Link onClick={close} to="/eventos">Eventos</Link>
+              <a onClick={close} href="/#contacto">Contacto</a>
+            </div>
+
+            <details className="mobile-nav__section">
+              <summary>Portfolio <span aria-hidden="true">+</span></summary>
+              <div className="mobile-nav__links">
+                {portfolioItems.map((obra) => <Link key={obra.slug} onClick={close} to={`/obra/${obra.slug}`}>{obra.label}</Link>)}
+              </div>
+            </details>
+
+            <details className="mobile-nav__section">
+              <summary>Servicios <span aria-hidden="true">+</span></summary>
+              <div className="mobile-nav__links">
+                {SERVICIOS.map((servicio) => (
+                  <Link key={servicio.hash} onClick={close} to={`/trabajos/trabajos-varios#${servicio.hash}`}>
+                    {servicio.label}
+                  </Link>
+                ))}
+              </div>
+            </details>
+
+            <a
+              className="mobile-nav__cta"
+              href="https://wa.me/5493415847000?text=Hola%20Fortaleza%20Construcciones%2C%20quiero%20consultar%20por%20una%20obra"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Solicitar presupuesto
+            </a>
+
+            {isAdmin && <Link className="mobile-nav__admin" onClick={close} to="/admin">Administración</Link>}
+            {isAdmin && <button onClick={handleLogout} className="mobile-logout" type="button">Cerrar sesión</button>}
+          </nav>
+          </div>
       </header>
     </>
   );

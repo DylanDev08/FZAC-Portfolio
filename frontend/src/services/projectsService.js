@@ -9,6 +9,10 @@ const REMOVED_PUBLIC_IMAGES = new Set([
 
 const PRODUCTION_COPY_CUTOFF = Date.parse('2026-07-15T00:00:00.000Z');
 
+function normalizeBrandName(value = '') {
+  return String(value).replace(/Sliders Hamburger(?!s)/g, 'Sliders Hamburgers');
+}
+
 function cleanPublicImages(source = {}) {
   const cleanList = (items) => Array.isArray(items) ? items.filter((item) => !REMOVED_PUBLIC_IMAGES.has(item)) : [];
   return {
@@ -115,6 +119,8 @@ export function normalizeProject(project) {
     ...project,
     id: project.id || safeSlug,
     slug: safeSlug,
+    nombre: normalizeBrandName(project.nombre || project.titulo || ''),
+    titulo: normalizeBrandName(project.titulo || ''),
     anio: project.anio || project.año || '',
     portada: project.portada || project.imagenPortada || project.imagenes?.[0] || '',
     imagenes: Array.isArray(project.imagenes) ? project.imagenes.filter(Boolean) : [],
@@ -125,6 +131,7 @@ export function normalizeProject(project) {
     sucursales: Array.isArray(project.sucursales)
       ? project.sucursales.filter(Boolean).map((branch) => ({
           ...branch,
+          nombre: normalizeBrandName(branch.nombre || ''),
           portada: branch.portada || branch.imagenes?.[0] || '',
           imagenes: Array.isArray(branch.imagenes) ? branch.imagenes.filter(Boolean) : [],
           imagenesAntes: Array.isArray(branch.imagenesAntes) ? branch.imagenesAntes.filter(Boolean) : [],
