@@ -218,7 +218,6 @@ const electricidadGallery = unique([
   obra('trabajos-varios/electricidad/Electricidad-fzac-02.jpg'),
   obra('trabajos-varios/electricidad/Electricidad-fzac-03.jpg'),
   obra('trabajos-varios/electricidad/Electricidad-fzac-04.jpg'),
-  obra('trabajos-varios/electricidad/Electricidad-fzac-05.jpg'),
 ]);
 
 const plomeriaGallery = unique([
