@@ -214,17 +214,17 @@ const construccionHumedaGallery = unique([
 ]);
 
 const electricidadGallery = unique([
-  obra('trabajos-varios/electricidad/Electricidad-fzac-01.jpg'),
-  obra('trabajos-varios/electricidad/Electricidad-fzac-02.jpg'),
-  obra('trabajos-varios/electricidad/Electricidad-fzac-03.jpg'),
-  obra('trabajos-varios/electricidad/Electricidad-fzac-04.jpg'),
+  obra('trabajos-varios/electricidad/Electricidad-fzac-01-v2.jpg'),
+  obra('trabajos-varios/electricidad/Electricidad-fzac-02-v2.jpg'),
+  obra('trabajos-varios/electricidad/Electricidad-fzac-03-v2.jpg'),
+  obra('trabajos-varios/electricidad/Electricidad-fzac-04-v2.jpg'),
 ]);
 
 const plomeriaGallery = unique([
   obra('trabajos-varios/servicios-integrales-finalizados/plomería-01.jpg'),
-  obra('trabajos-varios/plomeria/Plomeria-fzac-01.jpg'),
-  obra('trabajos-varios/plomeria/Plomeria-fzac-02.jpg'),
-  obra('trabajos-varios/plomeria/Plomeria-fzac-03.jpg'),
+  obra('trabajos-varios/plomeria/Plomeria-fzac-01-v2.jpg'),
+  obra('trabajos-varios/plomeria/Plomeria-fzac-02-v2.jpg'),
+  obra('trabajos-varios/plomeria/Plomeria-fzac-03-v2.jpg'),
 ]);
 
 const instalacionCeramicosGallery = unique([
