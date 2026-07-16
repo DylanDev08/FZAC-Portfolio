@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { buildGalleryGroupsFromSource, flattenGalleryGroups } from '../lib/gallery.js';
+import { getProjectBranchAnchor } from '../lib/routes.js';
 
 export function ProjectLocation({ project }) {
   const locations = Array.isArray(project.sucursales) && project.sucursales.length
@@ -149,7 +150,11 @@ export function BranchGalleries({ project, onOpen }) {
           const title = branch.nombre || `${project.nombre} ${index + 1}`;
 
           return (
-            <article className="obra-branch-block" key={`${title}-${branch.direccion || index}`}>
+            <article
+              className="obra-branch-block"
+              id={getProjectBranchAnchor(branch, index)}
+              key={`${title}-${branch.direccion || index}`}
+            >
               <div className="obra-branch-block__header">
                 <span>Local {index + 1}</span>
                 <h3>{title}</h3>

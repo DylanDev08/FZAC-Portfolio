@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Link, Navigate, useParams } from 'react-router-dom';
+import { Link, Navigate, useLocation, useParams } from 'react-router-dom';
 import { BranchGalleries, ProjectGallery, ProjectLocation } from '../components/ProjectGallery.jsx';
 import Seo from '../components/Seo.jsx';
 import { buildGalleryGroupsFromSource } from '../lib/gallery.js';
@@ -8,6 +8,7 @@ import { getProjects } from '../services/projectsService.js';
 
 export default function ProjectDetail() {
   const { slug } = useParams();
+  const location = useLocation();
   const canonicalSlug = getCanonicalProjectSlug(slug);
   const [project, setProject] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -36,6 +37,17 @@ export default function ProjectDetail() {
   }, [project]);
 
   const hasBranchGalleries = Boolean(Array.isArray(project?.sucursales) && project.sucursales.length);
+
+  useEffect(() => {
+    if (!project || !location.hash) return undefined;
+
+    const frame = window.requestAnimationFrame(() => {
+      const targetId = decodeURIComponent(location.hash.slice(1));
+      document.getElementById(targetId)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [location.hash, project]);
 
   function openLightbox(images, index) {
     setLightbox({ images, index });

@@ -1,10 +1,35 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { getProjectBranchAnchor } from '../lib/routes.js';
 
 const FALLBACK_OBRAS = [
-  { slug: 'sliders-hamburger', label: 'Sliders Hamburgers' },
-  { slug: 'marvel', label: 'Marvel’s Food' },
-  { slug: 'burger-house', label: 'Burger House Grill' },
+  {
+    slug: 'sliders-hamburger',
+    label: 'Sliders Hamburgers',
+    children: [
+      { label: 'Jujuy 2514', anchor: 'sucursal-jujuy-2514-rosario-santa-fe' },
+      { label: 'Juan Manuel de Rosas 1062', anchor: 'sucursal-juan-manuel-de-rosas-1062-rosario-santa-fe' },
+      { label: 'Ruta Nacional 9 1832, Funes', anchor: 'sucursal-ruta-nacional-9-1832-funes-santa-fe' },
+    ],
+  },
+  {
+    slug: 'marvel',
+    label: 'Marvel’s Food',
+    children: [
+      { label: 'Av. Pellegrini 1149', anchor: 'sucursal-av.-pellegrini-1149-rosario-santa-fe' },
+      { label: 'Rondeau 2430', anchor: 'sucursal-rondeau-2430-rosario-santa-fe' },
+      { label: 'Ruta Nacional 9 972, Funes', anchor: 'sucursal-ruta-nacional-9-972-funes-santa-fe' },
+      { label: 'Viamonte 1434', anchor: 'sucursal-viamonte-1434-rosario-santa-fe' },
+    ],
+  },
+  {
+    slug: 'burger-house',
+    label: 'Burger House Grill',
+    children: [
+      { label: 'Av. Pellegrini 916', anchor: 'sucursal-av.-pellegrini-916-rosario-santa-fe' },
+      { label: 'Mariano Perdriel 115', anchor: 'sucursal-mariano-perdriel-115-rosario-santa-fe' },
+    ],
+  },
   { slug: 'armstrong', label: 'Armstrong' },
   { slug: 'fichines', label: 'Fichines' },
   { slug: 'flama', label: 'Local de Flama' },
@@ -24,6 +49,7 @@ const SERVICIOS = [
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
+  const [openMobileSection, setOpenMobileSection] = useState('portfolio');
   const [isAdmin, setIsAdmin] = useState(false);
   const [portfolioItems, setPortfolioItems] = useState(FALLBACK_OBRAS);
   const location = useLocation();
@@ -77,6 +103,7 @@ export default function Navbar() {
 
   useEffect(() => {
     setOpen(false);
+    setOpenMobileSection('portfolio');
   }, [location.pathname, location.hash]);
 
   useEffect(() => {
@@ -133,7 +160,16 @@ export default function Navbar() {
         const projects = await getProjects();
         const nextItems = projects
           .filter((project) => project?.slug && (project.nombre || project.titulo))
-          .map((project) => ({ slug: project.slug, label: project.nombre || project.titulo }));
+          .map((project) => ({
+            slug: project.slug,
+            label: project.nombre || project.titulo,
+            children: Array.isArray(project.sucursales)
+              ? project.sucursales.map((branch, index) => ({
+                  label: branch.nombre || branch.direccion || `Local ${index + 1}`,
+                  anchor: getProjectBranchAnchor(branch, index),
+                }))
+              : [],
+          }));
 
         if (active && nextItems.length) setPortfolioItems(nextItems);
       } catch {
@@ -150,6 +186,15 @@ export default function Navbar() {
 
   function close() {
     setOpen(false);
+  }
+
+  function toggleMenu() {
+    if (!open) setOpenMobileSection('portfolio');
+    setOpen((current) => !current);
+  }
+
+  function toggleMobileSection(section) {
+    setOpenMobileSection((current) => current === section ? '' : section);
   }
 
   async function handleLogout() {
@@ -222,7 +267,7 @@ export default function Navbar() {
             aria-label={open ? 'Cerrar menú' : 'Abrir menú'}
             aria-expanded={open}
             aria-controls="mobile-navigation"
-            onClick={() => setOpen((prev) => !prev)}
+            onClick={toggleMenu}
           >
             <span />
             <span />
@@ -253,23 +298,63 @@ export default function Navbar() {
               <a onClick={close} href="/#contacto">Contacto</a>
             </div>
 
-            <details className="mobile-nav__section">
-              <summary>Portfolio <span aria-hidden="true">+</span></summary>
-              <div className="mobile-nav__links">
-                {portfolioItems.map((obra) => <Link key={obra.slug} onClick={close} to={`/obra/${obra.slug}`}>{obra.label}</Link>)}
-              </div>
-            </details>
+            <div className={`mobile-nav__section ${openMobileSection === 'portfolio' ? 'is-open' : ''}`}>
+              <button
+                className="mobile-nav__section-trigger"
+                type="button"
+                aria-expanded={openMobileSection === 'portfolio'}
+                aria-controls="mobile-portfolio-links"
+                onClick={() => toggleMobileSection('portfolio')}
+              >
+                Obras por proyecto <span aria-hidden="true">+</span>
+              </button>
+              {openMobileSection === 'portfolio' && (
+                <div className="mobile-nav__links mobile-nav__portfolio-links" id="mobile-portfolio-links">
+                  {portfolioItems.map((obra) => {
+                    const children = Array.isArray(obra.children) ? obra.children : [];
+                    return (
+                      <div className="mobile-nav__project-group" key={obra.slug}>
+                        <Link className="mobile-nav__project-title" onClick={close} to={`/obra/${obra.slug}`}>
+                          {obra.label}
+                        </Link>
+                        {children.length > 0 && (
+                          <div className="mobile-nav__project-branches">
+                            {children.map((branch) => (
+                              <Link
+                                key={`${obra.slug}-${branch.anchor}`}
+                                onClick={close}
+                                to={`/obra/${obra.slug}#${branch.anchor}`}
+                              >
+                                {branch.label}
+                              </Link>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
 
-            <details className="mobile-nav__section">
-              <summary>Servicios <span aria-hidden="true">+</span></summary>
-              <div className="mobile-nav__links">
+            <div className={`mobile-nav__section ${openMobileSection === 'services' ? 'is-open' : ''}`}>
+              <button
+                className="mobile-nav__section-trigger"
+                type="button"
+                aria-expanded={openMobileSection === 'services'}
+                aria-controls="mobile-services-links"
+                onClick={() => toggleMobileSection('services')}
+              >
+                Servicios <span aria-hidden="true">+</span>
+              </button>
+              {openMobileSection === 'services' && <div className="mobile-nav__links" id="mobile-services-links">
                 {SERVICIOS.map((servicio) => (
                   <Link key={servicio.hash} onClick={close} to={`/trabajos/trabajos-varios#${servicio.hash}`}>
                     {servicio.label}
                   </Link>
                 ))}
-              </div>
-            </details>
+              </div>}
+            </div>
 
             <a
               className="mobile-nav__cta"

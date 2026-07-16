@@ -1,3 +1,5 @@
+import { slugify } from '../services/utils.js';
+
 const PROJECT_ALIASES = {
   slider: 'sliders-hamburger',
   sliders: 'sliders-hamburger',
@@ -20,3 +22,7 @@ export function getProjectPath(projectOrSlug = '') {
   return `/obra/${getCanonicalProjectSlug(slug)}`;
 }
 
+export function getProjectBranchAnchor(branch = {}, index = 0) {
+  const source = branch.direccion || branch.nombre || `local-${index + 1}`;
+  return `sucursal-${slugify(source) || index + 1}`;
+}

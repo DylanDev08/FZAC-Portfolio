@@ -7747,6 +7747,8 @@ a[href*="wa.me"] {
     overflow-y: auto;
     overscroll-behavior: contain;
     scrollbar-width: thin;
+    touch-action: pan-y;
+    -webkit-overflow-scrolling: touch;
   }
 
   .mobile-nav__primary {
@@ -7774,30 +7776,30 @@ a[href*="wa.me"] {
     background: rgba(255, 255, 255, 0.025);
   }
 
-  .mobile-nav__section summary {
+  .mobile-nav__section-trigger {
     display: flex;
+    width: 100%;
     min-height: 52px;
     padding: 0 15px;
     align-items: center;
     justify-content: space-between;
     gap: 12px;
     color: #fff;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    text-align: left;
     font-weight: 900;
     cursor: pointer;
-    list-style: none;
   }
 
-  .mobile-nav__section summary::-webkit-details-marker {
-    display: none;
-  }
-
-  .mobile-nav__section summary span {
+  .mobile-nav__section-trigger span {
     color: var(--color-primary-strong);
     font-size: 1.25rem;
     transition: transform 180ms ease;
   }
 
-  .mobile-nav__section[open] summary span {
+  .mobile-nav__section.is-open .mobile-nav__section-trigger span {
     transform: rotate(45deg);
   }
 
@@ -7814,6 +7816,37 @@ a[href*="wa.me"] {
     color: var(--color-text-soft);
     font-size: 0.9rem;
     line-height: 1.35;
+  }
+
+  .mobile-nav__project-group {
+    min-width: 0;
+  }
+
+  .mobile-nav__project-group + .mobile-nav__project-group {
+    margin-top: 5px;
+  }
+
+  .mobile-nav__inner .mobile-nav__project-title {
+    color: #fff;
+    background: rgba(217, 164, 65, 0.08);
+    font-weight: 850;
+  }
+
+  .mobile-nav__project-branches {
+    display: grid;
+  }
+
+  .mobile-nav__inner .mobile-nav__project-branches a {
+    position: relative;
+    padding-left: 24px;
+    color: rgba(255, 255, 255, 0.72);
+  }
+
+  .mobile-nav__inner .mobile-nav__project-branches a::before {
+    position: absolute;
+    left: 10px;
+    color: var(--color-primary-strong);
+    content: '—';
   }
 
   .mobile-nav__inner .mobile-nav__cta {
@@ -7837,6 +7870,10 @@ a[href*="wa.me"] {
     border-radius: 12px;
     color: var(--color-primary-strong);
   }
+}
+
+.obra-branch-block {
+  scroll-margin-top: calc(var(--header-height) + 24px);
 }
 
 @media (max-width: 760px) {
