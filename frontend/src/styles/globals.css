@@ -7667,11 +7667,18 @@ a[href*="wa.me"] {
     z-index: 1300;
     display: flex;
     width: min(92vw, 420px);
+    height: 100vh;
     height: 100dvh;
-    max-height: none;
+    max-height: 100vh;
+    max-height: 100dvh;
     padding: 0;
     flex-direction: column;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    touch-action: pan-y;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
     border: 0;
     border-left: 1px solid rgba(217, 164, 65, 0.18);
     border-radius: 0;
@@ -7692,13 +7699,18 @@ a[href*="wa.me"] {
   }
 
   .mobile-nav__head {
+    position: sticky;
+    top: 0;
+    z-index: 2;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 16px;
+    flex: 0 0 auto;
     min-height: 76px;
     padding: max(14px, env(safe-area-inset-top)) 18px 14px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+    background: rgba(10, 11, 13, 0.98);
   }
 
   .mobile-nav__head > div {
@@ -7739,16 +7751,13 @@ a[href*="wa.me"] {
 
   .mobile-nav__inner {
     display: flex;
-    min-height: 0;
+    min-height: max-content;
     padding: 18px 18px max(22px, env(safe-area-inset-bottom));
-    flex: 1;
+    flex: 0 0 auto;
     flex-direction: column;
     gap: 14px;
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    scrollbar-width: thin;
+    overflow: visible;
     touch-action: pan-y;
-    -webkit-overflow-scrolling: touch;
   }
 
   .mobile-nav__primary {
