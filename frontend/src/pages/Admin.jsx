@@ -423,9 +423,17 @@ function FileInput({
 
 function BranchGalleryEditor({ form, setForm, onUpload, uploading }) {
   const branches = Array.isArray(form.sucursales) ? form.sucursales : [];
+  const [activeBranchIndex, setActiveBranchIndex] = useState(0);
+  const activeIndex = Math.min(activeBranchIndex, Math.max(branches.length - 1, 0));
+  const activeBranch = branches[activeIndex];
   const setBranches = (next) => setForm((prev) => ({ ...prev, sucursales: next }));
   const updateBranch = (index, changes) => setBranches(branches.map((branch, branchIndex) => branchIndex === index ? { ...branch, ...changes } : branch));
-  const moveBranch = (index, direction) => setBranches(moveArrayItem(branches, index, direction));
+  const moveBranch = (index, direction) => {
+    const destination = index + direction;
+    if (destination < 0 || destination >= branches.length) return;
+    setBranches(moveArrayItem(branches, index, direction));
+    setActiveBranchIndex(destination);
+  };
   const updateMedia = (branchIndex, key, updater) => {
     const branch = branches[branchIndex] || {};
     const current = toArray(branch[key]);
@@ -442,9 +450,23 @@ function BranchGalleryEditor({ form, setForm, onUpload, uploading }) {
       [toKey]: [...toArray(branch[toKey]), selected],
     });
   };
-  const addBranch = () => setBranches([...branches, {
-    id: '', nombre: `Sucursal ${branches.length + 1}`, direccion: '', portada: '', imagenes: [], imagenesAntes: [], imagenesProceso: [], imagenesFinal: [],
-  }]);
+  const addBranch = () => {
+    setBranches([...branches, {
+      id: '', nombre: `Sucursal ${branches.length + 1}`, direccion: '', portada: '', imagenes: [], imagenesAntes: [], imagenesProceso: [], imagenesFinal: [],
+    }]);
+    setActiveBranchIndex(branches.length);
+  };
+
+  const removeBranch = (index) => {
+    if (!window.confirm('¿Eliminar esta sucursal y su galería?')) return;
+    const next = branches.filter((_, branchIndex) => branchIndex !== index);
+    setBranches(next);
+    setActiveBranchIndex(Math.min(index, Math.max(next.length - 1, 0)));
+  };
+
+  useEffect(() => {
+    setActiveBranchIndex(0);
+  }, [form.id]);
 
   return (
     <section className="admin-branches-editor">
@@ -460,38 +482,59 @@ function BranchGalleryEditor({ form, setForm, onUpload, uploading }) {
         </div>
       )}
 
-      {branches.map((branch, branchIndex) => (
-        <article className="admin-branch-card" key={branch.id || `${branch.nombre}-${branchIndex}`}>
+      {branches.length > 0 && (
+        <div className="admin-branch-tabs" role="tablist" aria-label="Galerías por dirección">
+          {branches.map((branch, branchIndex) => {
+            const count = uniqueImageCount(branch.portada, branch.imagenes, branch.imagenesAntes, branch.imagenesProceso, branch.imagenesFinal);
+            return (
+              <button
+                className={`admin-branch-tab ${activeIndex === branchIndex ? 'is-active' : ''}`}
+                type="button"
+                role="tab"
+                aria-selected={activeIndex === branchIndex}
+                aria-controls="admin-active-branch-gallery"
+                key={branch.id || `${branch.nombre}-${branchIndex}`}
+                onClick={() => setActiveBranchIndex(branchIndex)}
+              >
+                <span>{branch.direccion || `Dirección ${branchIndex + 1}`}</span>
+                <small>{branch.nombre || `Sucursal ${branchIndex + 1}`}</small>
+                <strong>{count} foto{count === 1 ? '' : 's'}</strong>
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {activeBranch && (
+        <article className="admin-branch-card" id="admin-active-branch-gallery" role="tabpanel" aria-label={`Galería ${activeBranch.direccion || activeBranch.nombre}`}>
           <div className="admin-branch-card__head">
             <div className="admin-branch-card__identity">
-              <span>Galería {branchIndex + 1}</span>
-              <strong>{branch.nombre || `Sucursal ${branchIndex + 1}`}</strong>
-              {branch.direccion && <small>{branch.direccion}</small>}
+              <span>Galería {activeIndex + 1} de {branches.length}</span>
+              <strong>{activeBranch.nombre || `Sucursal ${activeIndex + 1}`}</strong>
+              {activeBranch.direccion && <small>{activeBranch.direccion}</small>}
             </div>
             <div className="admin-branch-card__actions">
-              <button type="button" onClick={() => moveBranch(branchIndex, -1)} disabled={branchIndex === 0} title="Mover galería hacia arriba" aria-label="Mover galería hacia arriba"><ArrowUp size={16} /></button>
-              <button type="button" onClick={() => moveBranch(branchIndex, 1)} disabled={branchIndex === branches.length - 1} title="Mover galería hacia abajo" aria-label="Mover galería hacia abajo"><ArrowDown size={16} /></button>
-              <button className="admin-icon-danger" type="button" onClick={() => {
-                if (window.confirm('¿Eliminar esta sucursal y su galería?')) setBranches(branches.filter((_, index) => index !== branchIndex));
-              }} title="Eliminar sucursal" aria-label="Eliminar sucursal"><Trash2 size={17} /></button>
+              <button type="button" onClick={() => moveBranch(activeIndex, -1)} disabled={activeIndex === 0} title="Mover galería hacia arriba" aria-label="Mover galería hacia arriba"><ArrowUp size={16} /></button>
+              <button type="button" onClick={() => moveBranch(activeIndex, 1)} disabled={activeIndex === branches.length - 1} title="Mover galería hacia abajo" aria-label="Mover galería hacia abajo"><ArrowDown size={16} /></button>
+              <button className="admin-icon-danger" type="button" onClick={() => removeBranch(activeIndex)} title="Eliminar sucursal" aria-label="Eliminar sucursal"><Trash2 size={17} /></button>
             </div>
           </div>
           <GalleryBalance
-            label="Galería del local"
-            count={uniqueImageCount(branch.portada, branch.imagenes, branch.imagenesAntes, branch.imagenesProceso, branch.imagenesFinal)}
+            label={activeBranch.direccion || 'Galería del local'}
+            count={uniqueImageCount(activeBranch.portada, activeBranch.imagenes, activeBranch.imagenesAntes, activeBranch.imagenesProceso, activeBranch.imagenesFinal)}
           />
           <div className="admin-form__grid">
-            <Field label="Nombre del local" value={branch.nombre} onChange={(value) => updateBranch(branchIndex, { nombre: value })} placeholder="Ej. Pellegrini" />
-            <Field label="Dirección" value={branch.direccion} onChange={(value) => updateBranch(branchIndex, { direccion: value })} placeholder="Calle, número, ciudad" />
+            <Field label="Nombre del local" value={activeBranch.nombre} onChange={(value) => updateBranch(activeIndex, { nombre: value })} placeholder="Ej. Pellegrini" />
+            <Field label="Dirección" value={activeBranch.direccion} onChange={(value) => updateBranch(activeIndex, { direccion: value })} placeholder="Calle, número, ciudad" />
           </div>
           <div className="admin-upload-grid admin-upload-grid--branches">
             <FileInput
               label="Portada del local"
               accept="image/*,.jpg,.jpeg,.jfif,.png,.webp,.gif,.avif,.heic,.heif,.bmp,.tif,.tiff"
               disabled={uploading || !isStorageUploadReady}
-              previewItems={branch.portada ? [branch.portada] : []}
-              onRemovePreview={() => updateBranch(branchIndex, { portada: '' })}
-              onChange={(files) => onUpload({ branchIndex, target: 'portada' }, files)}
+              previewItems={activeBranch.portada ? [activeBranch.portada] : []}
+              onRemovePreview={() => updateBranch(activeIndex, { portada: '' })}
+              onChange={(files) => onUpload({ branchIndex: activeIndex, target: 'portada' }, files)}
             />
             {IMAGE_STAGE_OPTIONS.map(({ value: key, label }) => (
               <FileInput
@@ -500,19 +543,19 @@ function BranchGalleryEditor({ form, setForm, onUpload, uploading }) {
                 accept="image/*,.jpg,.jpeg,.jfif,.png,.webp,.gif,.avif,.heic,.heif,.bmp,.tif,.tiff"
                 multiple
                 disabled={uploading || !isStorageUploadReady}
-                previewItems={branch[key]}
-                onRemovePreview={(index) => updateMedia(branchIndex, key, (items) => items.filter((_, itemIndex) => itemIndex !== index))}
-                onMovePreview={(index, direction) => updateMedia(branchIndex, key, (items) => moveArrayItem(items, index, direction))}
-                onEditPreview={(index, changes) => updateMedia(branchIndex, key, (items) => items.map((item, itemIndex) => itemIndex === index ? { ...editableImage(item), ...changes } : item))}
+                previewItems={activeBranch[key]}
+                onRemovePreview={(index) => updateMedia(activeIndex, key, (items) => items.filter((_, itemIndex) => itemIndex !== index))}
+                onMovePreview={(index, direction) => updateMedia(activeIndex, key, (items) => moveArrayItem(items, index, direction))}
+                onEditPreview={(index, changes) => updateMedia(activeIndex, key, (items) => items.map((item, itemIndex) => itemIndex === index ? { ...editableImage(item), ...changes } : item))}
                 stageValue={key}
                 stageOptions={IMAGE_STAGE_OPTIONS}
-                onStageChange={(index, target) => transferMedia(branchIndex, key, index, target)}
-                onChange={(files) => onUpload({ branchIndex, target: key }, files)}
+                onStageChange={(index, target) => transferMedia(activeIndex, key, index, target)}
+                onChange={(files) => onUpload({ branchIndex: activeIndex, target: key }, files)}
               />
             ))}
           </div>
         </article>
-      ))}
+      )}
     </section>
   );
 }

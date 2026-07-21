@@ -4893,6 +4893,71 @@ a[href*="wa.me"] {
   color: var(--color-primary-strong);
 }
 
+.admin-branch-tabs {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(210px, 1fr);
+  gap: 9px;
+  width: 100%;
+  padding: 2px 2px 9px;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scrollbar-width: thin;
+  scroll-snap-type: inline proximity;
+}
+
+.admin-branch-tab {
+  display: grid;
+  align-content: start;
+  gap: 4px;
+  min-width: 0;
+  min-height: 86px;
+  padding: 12px 13px;
+  border: 1px solid rgba(255,255,255,.11);
+  border-radius: 7px;
+  color: var(--color-text);
+  text-align: left;
+  background: rgba(255,255,255,.035);
+  cursor: pointer;
+  scroll-snap-align: start;
+  transition: border-color .2s ease, background-color .2s ease;
+}
+
+.admin-branch-tab:hover,
+.admin-branch-tab.is-active {
+  border-color: rgba(240,190,93,.65);
+  background: rgba(240,190,93,.1);
+}
+
+.admin-branch-tab.is-active {
+  box-shadow: inset 0 3px 0 var(--color-primary-strong);
+}
+
+.admin-branch-tab > span,
+.admin-branch-tab > small {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.admin-branch-tab > span {
+  font-size: .86rem;
+  font-weight: 850;
+  line-height: 1.25;
+}
+
+.admin-branch-tab > small {
+  color: var(--color-text-muted);
+  font-size: .73rem;
+  line-height: 1.25;
+}
+
+.admin-branch-tab > strong {
+  margin-top: 3px;
+  color: var(--color-primary-strong);
+  font-size: .7rem;
+  text-transform: uppercase;
+}
+
 .admin-branch-card {
   display: grid;
   gap: 16px;
@@ -5089,6 +5154,7 @@ a[href*="wa.me"] {
 @media (max-width: 760px) {
   .admin-upload-preview { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .admin-branches-editor, .admin-branch-card { padding: 14px; }
+  .admin-branch-tabs { grid-auto-columns: minmax(195px, 78vw); }
   .admin-unassigned-gallery { padding: 14px; }
   .admin-unassigned-gallery__grid { grid-template-columns: 1fr; }
 }
