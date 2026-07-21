@@ -4876,6 +4876,23 @@ a[href*="wa.me"] {
   color: var(--color-text-muted);
 }
 
+.admin-branches-editor__empty {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 54px;
+  padding: 13px 15px;
+  border: 1px dashed rgba(240,190,93,.26);
+  border-radius: 7px;
+  color: var(--color-text-muted);
+  background: rgba(240,190,93,.04);
+}
+
+.admin-branches-editor__empty svg {
+  flex: 0 0 auto;
+  color: var(--color-primary-strong);
+}
+
 .admin-branch-card {
   display: grid;
   gap: 16px;
@@ -4883,6 +4900,180 @@ a[href*="wa.me"] {
   border: 1px solid rgba(255,255,255,.1);
   border-radius: 8px;
   background: rgba(0,0,0,.22);
+}
+
+.admin-branch-card__identity {
+  display: grid;
+  gap: 3px;
+}
+
+.admin-branch-card__identity > span {
+  color: var(--color-primary-strong);
+  font-size: .72rem;
+  font-weight: 850;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.admin-branch-card__identity strong {
+  font-size: 1.05rem;
+}
+
+.admin-branch-card__identity small {
+  color: var(--color-text-muted);
+  font-style: normal;
+}
+
+.admin-branch-card__actions {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.admin-branch-card__actions button {
+  display: inline-grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 6px;
+  color: var(--color-text);
+  background: rgba(255,255,255,.05);
+  cursor: pointer;
+}
+
+.admin-branch-card__actions button:disabled {
+  opacity: .35;
+  cursor: not-allowed;
+}
+
+.admin-unassigned-gallery {
+  display: grid;
+  gap: 16px;
+  padding: 20px;
+  border: 1px solid rgba(240,190,93,.38);
+  border-radius: 8px;
+  background: rgba(240,190,93,.06);
+}
+
+.admin-unassigned-gallery__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.admin-unassigned-gallery__head h3 {
+  margin: 5px 0;
+}
+
+.admin-unassigned-gallery__head p {
+  max-width: 720px;
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
+.admin-unassigned-gallery__head > strong {
+  flex: 0 0 auto;
+  padding: 7px 10px;
+  border-radius: 6px;
+  color: #111;
+  background: var(--color-primary-strong);
+  font-size: .78rem;
+}
+
+.admin-unassigned-gallery__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.admin-unassigned-image {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr) 36px;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding: 9px;
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 7px;
+  background: rgba(0,0,0,.3);
+}
+
+.admin-unassigned-image img {
+  width: 72px;
+  height: 58px;
+  border-radius: 5px;
+  object-fit: cover;
+}
+
+.admin-unassigned-image > div {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.admin-unassigned-image span {
+  color: var(--color-primary-strong);
+  font-size: .75rem;
+  font-weight: 800;
+}
+
+.admin-unassigned-image select {
+  width: 100%;
+  min-width: 0;
+  min-height: 34px;
+  border: 1px solid rgba(255,255,255,.13);
+  border-radius: 5px;
+  color: var(--color-text);
+  background: #171512;
+}
+
+.admin-unassigned-image > button {
+  display: inline-grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 6px;
+  color: #fff;
+  background: #8d2f2f;
+  cursor: pointer;
+}
+
+.admin-item__galleries {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 10px;
+}
+
+.admin-item__galleries-title,
+.admin-item__gallery-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 30px;
+  padding: 5px 9px;
+  border-radius: 5px;
+  font-size: .76rem;
+}
+
+.admin-item__galleries-title {
+  color: var(--color-primary-strong);
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.admin-item__gallery-pill {
+  border: 1px solid rgba(255,255,255,.1);
+  color: var(--color-text-muted);
+  background: rgba(255,255,255,.04);
+}
+
+.admin-item__gallery-pill strong {
+  color: var(--color-text);
 }
 
 .admin-icon-danger {
@@ -4898,10 +5089,15 @@ a[href*="wa.me"] {
 @media (max-width: 760px) {
   .admin-upload-preview { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .admin-branches-editor, .admin-branch-card { padding: 14px; }
+  .admin-unassigned-gallery { padding: 14px; }
+  .admin-unassigned-gallery__grid { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 440px) {
   .admin-upload-preview { grid-template-columns: 1fr; }
+  .admin-unassigned-gallery__head { display: grid; }
+  .admin-unassigned-image { grid-template-columns: 60px minmax(0, 1fr) 34px; }
+  .admin-unassigned-image img { width: 60px; height: 54px; }
 }
 
 .admin-item__thumb,

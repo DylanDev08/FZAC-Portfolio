@@ -37,6 +37,23 @@ function validateImageArrays(body) {
   return '';
 }
 
+function validateBranches(value) {
+  if (value === undefined) return '';
+  if (!Array.isArray(value)) return 'Las sucursales deben ser una lista.';
+
+  for (const [index, branch] of value.entries()) {
+    if (!isObject(branch)) return `La sucursal ${index + 1} debe ser un objeto válido.`;
+    const name = text(branch.nombre || branch.name);
+    if (!name || name.length > 140) return `La sucursal ${index + 1} necesita un nombre de hasta 140 caracteres.`;
+    if (branch.portada && !validImageInput(branch.portada)) return `La portada de ${name} no es válida.`;
+
+    const imageError = validateImageArrays(branch);
+    if (imageError) return `${name}: ${imageError}`;
+  }
+
+  return '';
+}
+
 export function validateWorkPayload(req, res, next) {
   const body = req.body;
   if (!isObject(body)) return fail(res, 'El cuerpo debe ser un objeto válido.');
@@ -54,7 +71,8 @@ export function validateWorkPayload(req, res, next) {
   if (categoryId && !UUID_PATTERN.test(categoryId)) return fail(res, 'categoryId debe ser un UUID válido.');
   if (!isNumeric(order)) return fail(res, 'El orden debe ser numérico.');
   if (!isNumeric(progress) || Number(progress) < 0 || Number(progress) > 100) return fail(res, 'El avance debe ser un número entre 0 y 100.');
-  if (body.sucursales !== undefined && !Array.isArray(body.sucursales)) return fail(res, 'Las sucursales deben ser una lista.');
+  const branchError = validateBranches(body.sucursales ?? body.branches);
+  if (branchError) return fail(res, branchError);
 
   const imageError = validateImageArrays(body);
   if (imageError) return fail(res, imageError);

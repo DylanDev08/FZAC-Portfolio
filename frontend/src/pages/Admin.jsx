@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, Images, Plus, Trash2 } from 'lucide-react';
+import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Images, Plus, Trash2 } from 'lucide-react';
 import { deleteProject, getAdminProjects, saveProject, syncProjectCatalog, updateProjectStatus } from '../services/projectsService.js';
 import { logout } from '../services/authService.js';
 import { slugify } from '../services/utils.js';
@@ -103,6 +103,8 @@ const IMAGE_STAGE_OPTIONS = [
   { value: 'imagenesFinal', label: 'Finalizada' },
 ];
 
+const BRANCH_IMAGE_KEYS = IMAGE_STAGE_OPTIONS.map(({ value }) => value);
+
 const TIPOS_OBRA = [
   'Local gastronómico',
   'Local de juegos',
@@ -166,6 +168,46 @@ function uniqueImageCount(...sources) {
   return new Set(urls).size;
 }
 
+function uniqueImages(items, seen = new Set()) {
+  return toArray(items).filter((item) => {
+    const url = assetUrl(item);
+    if (!url || seen.has(url)) return false;
+    seen.add(url);
+    return true;
+  });
+}
+
+function normalizeBranchGallery(branch = {}) {
+  const seen = new Set();
+  const coverUrl = assetUrl(branch.portada);
+  if (coverUrl) seen.add(coverUrl);
+
+  const normalized = {
+    ...branch,
+    nombre: String(branch.nombre || '').trim(),
+    direccion: String(branch.direccion || '').trim(),
+    portada: branch.portada || '',
+  };
+
+  // Las etapas tienen prioridad sobre la galeria general para evitar duplicados.
+  ['imagenesAntes', 'imagenesProceso', 'imagenesFinal', 'imagenes'].forEach((key) => {
+    normalized[key] = uniqueImages(branch[key], seen);
+  });
+
+  return normalized;
+}
+
+function branchImageUrls(branches) {
+  const urls = new Set();
+  toArray(branches).forEach((branch) => {
+    [branch.portada, ...BRANCH_IMAGE_KEYS.flatMap((key) => toArray(branch[key]))]
+      .map(assetUrl)
+      .filter(Boolean)
+      .forEach((url) => urls.add(url));
+  });
+  return urls;
+}
+
 function GalleryBalance({ count, label = 'Galería' }) {
   const state = count === 0 ? 'empty' : (count >= 5 && count <= 8 ? 'balanced' : 'attention');
   const detail = count === 0
@@ -208,28 +250,20 @@ function normalizeForForm(item = {}) {
     const matches = workImages.filter((image) => image.section === section);
     return matches.length ? matches : (Array.isArray(fallback) ? fallback : []);
   };
-  const branches = (Array.isArray(item.sucursales) ? item.sucursales : []).map((branch) => {
-    const stagedUrls = new Set([
-      branch.portada,
-      ...toArray(branch.imagenesAntes),
-      ...toArray(branch.imagenesProceso),
-      ...toArray(branch.imagenesFinal),
-    ].map(assetUrl).filter(Boolean));
-    return {
-      ...branch,
-      imagenes: toArray(branch.imagenes).filter((image) => !stagedUrls.has(assetUrl(image))),
-    };
-  });
+  const branches = (Array.isArray(item.sucursales) ? item.sucursales : []).map(normalizeBranchGallery);
+  const assignedToBranches = branchImageUrls(branches);
+  const unassigned = (section, fallback) => bySection(section, fallback)
+    .filter((image) => !assignedToBranches.has(assetUrl(image)));
   return {
     ...EMPTY,
     ...item,
     titulo: item.titulo || item.nombre || '',
     nombre: item.nombre || item.titulo || '',
     anio: item.anio || item.año || '',
-    imagenes: bySection('gallery', item.imagenes),
-    imagenesAntes: bySection('before', item.imagenesAntes),
-    imagenesProceso: bySection('process', item.imagenesProceso),
-    imagenesFinal: bySection('final', item.imagenesFinal),
+    imagenes: unassigned('gallery', item.imagenes),
+    imagenesAntes: unassigned('before', item.imagenesAntes),
+    imagenesProceso: unassigned('process', item.imagenesProceso),
+    imagenesFinal: unassigned('final', item.imagenesFinal),
     videos: Array.isArray(item.videos) ? item.videos : [],
     galeriaVideo: Array.isArray(item.galeriaVideo) ? item.galeriaVideo : [],
     stages: Array.isArray(item.stages) ? item.stages : [],
@@ -258,6 +292,7 @@ function buildPayload(form, kind) {
     galeriaVideo: toArray(form.galeriaVideo),
     stages: toArray(form.stages),
     puntos: toArray(form.puntos),
+    sucursales: toArray(form.sucursales).map(normalizeBranchGallery),
     destacado: Boolean(form.destacado),
   };
 
@@ -390,6 +425,7 @@ function BranchGalleryEditor({ form, setForm, onUpload, uploading }) {
   const branches = Array.isArray(form.sucursales) ? form.sucursales : [];
   const setBranches = (next) => setForm((prev) => ({ ...prev, sucursales: next }));
   const updateBranch = (index, changes) => setBranches(branches.map((branch, branchIndex) => branchIndex === index ? { ...branch, ...changes } : branch));
+  const moveBranch = (index, direction) => setBranches(moveArrayItem(branches, index, direction));
   const updateMedia = (branchIndex, key, updater) => {
     const branch = branches[branchIndex] || {};
     const current = toArray(branch[key]);
@@ -413,17 +449,32 @@ function BranchGalleryEditor({ form, setForm, onUpload, uploading }) {
   return (
     <section className="admin-branches-editor">
       <div className="admin-branches-editor__head">
-        <div><span className="eyebrow">Sucursales</span><h3>Galerias por local</h3><p>Editá cada dirección y ordená sus fotos sin salir de la obra.</p></div>
+        <div><span className="eyebrow">Galerías de la obra</span><h3>{branches.length ? 'Una galería por local' : 'Galería principal'}</h3><p>{branches.length ? 'Cada sucursal conserva su portada, dirección y etapas sin mezclar fotos.' : 'Esta obra usa la galería principal. Agregá una sucursal solo si tiene más de un local.'}</p></div>
         <button className="btn btn--ghost" type="button" onClick={addBranch}><Plus size={17} /> Agregar sucursal</button>
       </div>
+
+      {!branches.length && (
+        <div className="admin-branches-editor__empty">
+          <Images size={20} aria-hidden="true" />
+          <span>Las fotos se administran arriba como una única galería de obra.</span>
+        </div>
+      )}
 
       {branches.map((branch, branchIndex) => (
         <article className="admin-branch-card" key={branch.id || `${branch.nombre}-${branchIndex}`}>
           <div className="admin-branch-card__head">
-            <strong>{branch.nombre || `Sucursal ${branchIndex + 1}`}</strong>
-            <button className="admin-icon-danger" type="button" onClick={() => {
-              if (window.confirm('¿Eliminar esta sucursal y su galería?')) setBranches(branches.filter((_, index) => index !== branchIndex));
-            }} title="Eliminar sucursal" aria-label="Eliminar sucursal"><Trash2 size={17} /></button>
+            <div className="admin-branch-card__identity">
+              <span>Galería {branchIndex + 1}</span>
+              <strong>{branch.nombre || `Sucursal ${branchIndex + 1}`}</strong>
+              {branch.direccion && <small>{branch.direccion}</small>}
+            </div>
+            <div className="admin-branch-card__actions">
+              <button type="button" onClick={() => moveBranch(branchIndex, -1)} disabled={branchIndex === 0} title="Mover galería hacia arriba" aria-label="Mover galería hacia arriba"><ArrowUp size={16} /></button>
+              <button type="button" onClick={() => moveBranch(branchIndex, 1)} disabled={branchIndex === branches.length - 1} title="Mover galería hacia abajo" aria-label="Mover galería hacia abajo"><ArrowDown size={16} /></button>
+              <button className="admin-icon-danger" type="button" onClick={() => {
+                if (window.confirm('¿Eliminar esta sucursal y su galería?')) setBranches(branches.filter((_, index) => index !== branchIndex));
+              }} title="Eliminar sucursal" aria-label="Eliminar sucursal"><Trash2 size={17} /></button>
+            </div>
           </div>
           <GalleryBalance
             label="Galería del local"
@@ -466,11 +517,83 @@ function BranchGalleryEditor({ form, setForm, onUpload, uploading }) {
   );
 }
 
+function UnassignedGalleryEditor({ form, setForm }) {
+  const branches = toArray(form.sucursales);
+  const groups = IMAGE_STAGE_OPTIONS
+    .map(({ value, label }) => ({ key: value, label, items: toArray(form[value]) }))
+    .filter(({ items }) => items.length);
+
+  if (!branches.length || !groups.length) return null;
+
+  const assignToBranch = (sourceKey, imageIndex, branchIndex) => {
+    setForm((prev) => {
+      const source = toArray(prev[sourceKey]);
+      const image = source[imageIndex];
+      if (!image) return prev;
+
+      return {
+        ...prev,
+        [sourceKey]: source.filter((_, index) => index !== imageIndex),
+        sucursales: toArray(prev.sucursales).map((branch, index) => index === branchIndex
+          ? { ...branch, [sourceKey]: [...toArray(branch[sourceKey]), image] }
+          : branch),
+      };
+    });
+  };
+
+  const removeImage = (sourceKey, imageIndex) => setForm((prev) => ({
+    ...prev,
+    [sourceKey]: toArray(prev[sourceKey]).filter((_, index) => index !== imageIndex),
+  }));
+
+  return (
+    <section className="admin-unassigned-gallery">
+      <div className="admin-unassigned-gallery__head">
+        <div>
+          <span className="eyebrow">Pendiente de ordenar</span>
+          <h3>Fotos sin sucursal asignada</h3>
+          <p>Estas fotos antiguas no están mezcladas con los locales. Asignalas a la galería correcta o eliminalas.</p>
+        </div>
+        <strong>{groups.reduce((total, group) => total + group.items.length, 0)} pendiente(s)</strong>
+      </div>
+      <div className="admin-unassigned-gallery__grid">
+        {groups.flatMap(({ key, label, items }) => items.map((item, imageIndex) => {
+          const src = assetUrl(item);
+          return (
+            <article className="admin-unassigned-image" key={`${key}-${src}-${imageIndex}`}>
+              <img src={src} alt={item?.alt || `Foto sin asignar ${imageIndex + 1}`} loading="lazy" />
+              <div>
+                <span>{label}</span>
+                <select
+                  defaultValue=""
+                  onChange={(event) => {
+                    if (event.target.value !== '') assignToBranch(key, imageIndex, Number(event.target.value));
+                  }}
+                  aria-label="Asignar foto a una sucursal"
+                >
+                  <option value="" disabled>Asignar a un local...</option>
+                  {branches.map((branch, branchIndex) => (
+                    <option key={branch.id || `${branch.nombre}-${branchIndex}`} value={branchIndex}>
+                      {branch.nombre || `Sucursal ${branchIndex + 1}`}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <button type="button" onClick={() => removeImage(key, imageIndex)} title="Eliminar foto sin asignar" aria-label="Eliminar foto sin asignar"><Trash2 size={16} /></button>
+            </article>
+          );
+        }))}
+      </div>
+    </section>
+  );
+}
+
 function ContentForm({ kind, form, setForm, onSubmit, onClear, onUpload, uploading, message, categories = [] }) {
   const cfg = RESOURCE_CONFIG[kind];
   const isEvent = kind === 'eventos';
   const isWork = kind === 'trabajos';
   const isObra = kind === 'obras';
+  const hasBranchGalleries = isObra && toArray(form.sucursales).length > 0;
 
   const set = (key, value) => setForm((prev) => {
     const next = { ...prev, [key]: value };
@@ -548,10 +671,11 @@ function ContentForm({ kind, form, setForm, onSubmit, onClear, onUpload, uploadi
         <div className="admin-media-panel">
           <div className="admin-media-panel__head">
             <span className="eyebrow">Multimedia</span>
-            <h3>Fotos de obra</h3>
+            <h3>{hasBranchGalleries ? 'Portada general de la obra' : 'Galería principal de la obra'}</h3>
             <p>
-              Subí fotos desde el panel y ordenalas por portada, galería, antes, proceso y finalizada.
-              Supabase Storage guarda el archivo y la base registra la URL automáticamente.
+              {hasBranchGalleries
+                ? 'Esta portada identifica la obra en el portfolio. Las fotos del recorrido se administran por local más abajo.'
+                : 'Subí fotos desde el panel y ordenalas por portada, galería, antes, proceso y finalizada. Supabase Storage guarda el archivo y la base registra la URL automáticamente.'}
             </p>
             {!isStorageUploadReady && (
               <p className="admin-media-warning">
@@ -561,7 +685,7 @@ function ContentForm({ kind, form, setForm, onSubmit, onClear, onUpload, uploadi
             )}
           </div>
 
-          {isObra && (
+          {isObra && !hasBranchGalleries && (
             <GalleryBalance
               label="Galería principal"
               count={uniqueImageCount(form.portada, form.imagenes, form.imagenesAntes, form.imagenesProceso, form.imagenesFinal)}
@@ -578,6 +702,8 @@ function ContentForm({ kind, form, setForm, onSubmit, onClear, onUpload, uploadi
               onRemovePreview={() => set('portada', '')}
               onChange={(files) => onUpload('portada', files)}
             />
+            {!hasBranchGalleries && (
+              <>
             <FileInput
               label="Subir galería general"
               accept="image/*,.jpg,.jpeg,.jfif,.png,.webp,.gif,.avif,.heic,.heif,.bmp,.tif,.tiff"
@@ -642,6 +768,8 @@ function ContentForm({ kind, form, setForm, onSubmit, onClear, onUpload, uploadi
                 />
               </>
             )}
+              </>
+            )}
           </div>
 
           {uploading && <p className="admin-uploading-state">Subiendo archivos. No cierres esta pestaña...</p>}
@@ -653,14 +781,15 @@ function ContentForm({ kind, form, setForm, onSubmit, onClear, onUpload, uploadi
               <Field label="Ruta o URL de portada" value={form.portada} onChange={(v) => set('portada', v)} placeholder="/assets/img/obras/marvel-pellegrini/marvel-pellegrini-02.jpg" />
               <Field label="Ruta o URL de video principal" value={form.video} onChange={(v) => set('video', v)} placeholder="https://.../video.mp4" />
             </div>
-            <Area label="Galería general" value={arrToText(form.imagenes)} onChange={(v) => set('imagenes', v)} rows={5} placeholder="Una ruta o URL por línea" />
-            {isObra && <Area label="Galería antes" value={arrToText(form.imagenesAntes)} onChange={(v) => set('imagenesAntes', v)} rows={4} placeholder="Una ruta o URL por línea" />}
-            {isObra && <Area label="Galería en proceso" value={arrToText(form.imagenesProceso)} onChange={(v) => set('imagenesProceso', v)} rows={4} placeholder="Una ruta o URL por línea" />}
-            {isObra && <Area label="Galería finalizada" value={arrToText(form.imagenesFinal)} onChange={(v) => set('imagenesFinal', v)} rows={4} placeholder="Una ruta o URL por línea" />}
+            {!hasBranchGalleries && <Area label="Galería general" value={arrToText(form.imagenes)} onChange={(v) => set('imagenes', v)} rows={5} placeholder="Una ruta o URL por línea" />}
+            {isObra && !hasBranchGalleries && <Area label="Galería antes" value={arrToText(form.imagenesAntes)} onChange={(v) => set('imagenesAntes', v)} rows={4} placeholder="Una ruta o URL por línea" />}
+            {isObra && !hasBranchGalleries && <Area label="Galería en proceso" value={arrToText(form.imagenesProceso)} onChange={(v) => set('imagenesProceso', v)} rows={4} placeholder="Una ruta o URL por línea" />}
+            {isObra && !hasBranchGalleries && <Area label="Galería finalizada" value={arrToText(form.imagenesFinal)} onChange={(v) => set('imagenesFinal', v)} rows={4} placeholder="Una ruta o URL por línea" />}
             <Area label="Videos extra" value={arrToText(isEvent ? form.videos : form.galeriaVideo)} onChange={(v) => set(isEvent ? 'videos' : 'galeriaVideo', v)} rows={4} placeholder="Una ruta o URL por línea" />
           </details>
         </div>
 
+        {isObra && <UnassignedGalleryEditor form={form} setForm={setForm} />}
         {isObra && <BranchGalleryEditor form={form} setForm={setForm} onUpload={onUpload} uploading={uploading} />}
 
         {form.portada && (
@@ -724,6 +853,16 @@ function ContentList({ title, items, kind, onEdit, onDelete, onStatusChange, sta
               {item.ubicacion && <span>{item.ubicacion}</span>}
               {item.anio && <span>{item.anio}</span>}
             </div>
+            {kind === 'obras' && (
+              <div className="admin-item__galleries" aria-label="Galerías de la obra">
+                <span className="admin-item__galleries-title"><Images size={16} aria-hidden="true" /> Galerías</span>
+                {gallerySummaries(item).map(({ label, count }, index) => (
+                  <span className="admin-item__gallery-pill" key={`${label}-${index}`}>
+                    {label} <strong>{count}</strong>
+                  </span>
+                ))}
+              </div>
+            )}
             <p className="admin-item__desc">{item.descripcion}</p>
             <div className="admin-item__actions">
               <button className="admin-item__btn" type="button" onClick={() => onEdit(kind, item)}>Editar</button>
