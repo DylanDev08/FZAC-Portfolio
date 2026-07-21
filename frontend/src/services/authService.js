@@ -88,6 +88,9 @@ export async function login(email, password) {
 
   try {
     const client = await ensureSupabaseReady();
+    clearToken();
+    await client.auth.signOut({ scope: 'local' }).catch(() => {});
+
     const { data, error } = await client.auth.signInWithPassword({
       email: normalizedEmail,
       password,

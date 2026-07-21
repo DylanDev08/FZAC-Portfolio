@@ -60,7 +60,14 @@ async function fetchWithAuthRetry(url, init, auth) {
   let response = await fetch(url, init);
   if (!auth || response.status !== 401) return response;
 
-  const token = await resolveAuthToken(true);
+  let token = '';
+  try {
+    token = await resolveAuthToken(true);
+  } catch {
+    localStorage.removeItem(TOKEN_KEY);
+    return response;
+  }
+
   if (!token) return response;
 
   response = await fetch(url, {
