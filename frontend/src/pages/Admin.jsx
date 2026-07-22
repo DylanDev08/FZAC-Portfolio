@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Images, Plus, Trash2 } from 'lucide-react';
+import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Download, Images, Plus, Trash2 } from 'lucide-react';
 import { deleteProject, getAdminProjects, saveProject, syncProjectCatalog, updateProjectStatus } from '../services/projectsService.js';
 import { logout } from '../services/authService.js';
 import { slugify } from '../services/utils.js';
@@ -139,6 +139,79 @@ function toArray(value) {
 
 function assetUrl(item) {
   return typeof item === 'string' ? item : (item?.url || item?.publicUrl || item?.image_url || item?.imageUrl || '');
+}
+
+function extensionFromMime(type = '') {
+  const cleanType = String(type || '').split(';')[0].trim().toLowerCase();
+  const map = {
+    'image/jpeg': 'jpg',
+    'image/png': 'png',
+    'image/webp': 'webp',
+    'image/gif': 'gif',
+    'image/avif': 'avif',
+    'image/heic': 'heic',
+    'image/heif': 'heif',
+    'image/bmp': 'bmp',
+    'image/tiff': 'tiff',
+  };
+  return map[cleanType] || '';
+}
+
+function filenameFromUrl(src, fallback) {
+  try {
+    const pathname = new URL(src, window.location.origin).pathname;
+    const lastSegment = decodeURIComponent(pathname.split('/').filter(Boolean).pop() || '');
+    if (lastSegment && /\.[a-z0-9]{2,5}$/i.test(lastSegment)) return lastSegment;
+  } catch {
+    // Si la URL no se puede parsear, seguimos con un nombre propio del panel.
+  }
+
+  return fallback;
+}
+
+function normalizeDownloadName(name, extension = '') {
+  const safeName = String(name || 'fzac-imagen')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9._-]+/gi, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .toLowerCase() || 'fzac-imagen';
+  if (!extension || /\.[a-z0-9]{2,5}$/i.test(safeName)) return safeName;
+  return `${safeName}.${extension}`;
+}
+
+function downloadFileFromBlob(blob, filename) {
+  const objectUrl = URL.createObjectURL(blob);
+  const anchor = document.createElement('a');
+  anchor.href = objectUrl;
+  anchor.download = filename;
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+  window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1200);
+}
+
+async function downloadAsset(item, fallbackName = 'fzac-imagen') {
+  const src = assetUrl(item);
+  if (!src) return;
+
+  const baseName = filenameFromUrl(src, fallbackName);
+  try {
+    const response = await fetch(src, { mode: 'cors' });
+    if (!response.ok) throw new Error('No se pudo descargar la imagen.');
+    const blob = await response.blob();
+    downloadFileFromBlob(blob, normalizeDownloadName(baseName, extensionFromMime(blob.type)));
+  } catch {
+    const anchor = document.createElement('a');
+    anchor.href = src;
+    anchor.download = normalizeDownloadName(baseName);
+    anchor.target = '_blank';
+    anchor.rel = 'noreferrer';
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+  }
 }
 
 function arrToText(value) {
@@ -376,6 +449,8 @@ function FileInput({
           {previews.map((item, index) => {
             const src = assetUrl(item);
             if (!src) return null;
+            const downloadName = `${label}-${index + 1}`;
+            const downloadLabel = previewType === 'video' ? 'Descargar video' : 'Descargar foto';
             return (
             <span className="admin-upload-preview__item" key={`${src}-${index}`}>
               <span className="admin-upload-preview__position">{index + 1}</span>
@@ -383,6 +458,19 @@ function FileInput({
                 ? <video src={src} preload="metadata" muted />
                 : <img src={src} alt={`${label} ${index + 1}`} loading="lazy" />}
               <span className="admin-upload-preview__actions">
+              <button
+                className="admin-download-action"
+                type="button"
+                onClick={(event) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  downloadAsset(item, downloadName);
+                }}
+                title={downloadLabel}
+                aria-label={downloadLabel}
+              >
+                <Download size={15} />
+              </button>
               {onMovePreview && (
                 <>
                   <button type="button" onClick={(event) => { event.preventDefault(); event.stopPropagation(); onMovePreview(index, -1); }} disabled={index === 0} title="Mover a la izquierda" aria-label="Mover a la izquierda"><ArrowLeft size={15} /></button>
@@ -605,7 +693,7 @@ function UnassignedGalleryEditor({ form, setForm }) {
           return (
             <article className="admin-unassigned-image" key={`${key}-${src}-${imageIndex}`}>
               <img src={src} alt={item?.alt || `Foto sin asignar ${imageIndex + 1}`} loading="lazy" />
-              <div>
+              <div className="admin-unassigned-image__body">
                 <span>{label}</span>
                 <select
                   defaultValue=""
@@ -622,7 +710,10 @@ function UnassignedGalleryEditor({ form, setForm }) {
                   ))}
                 </select>
               </div>
-              <button type="button" onClick={() => removeImage(key, imageIndex)} title="Eliminar foto sin asignar" aria-label="Eliminar foto sin asignar"><Trash2 size={16} /></button>
+              <div className="admin-unassigned-image__actions">
+                <button className="admin-download-action" type="button" onClick={() => downloadAsset(item, `${label}-${imageIndex + 1}`)} title="Descargar foto sin asignar" aria-label="Descargar foto sin asignar"><Download size={16} /></button>
+                <button type="button" onClick={() => removeImage(key, imageIndex)} title="Eliminar foto sin asignar" aria-label="Eliminar foto sin asignar"><Trash2 size={16} /></button>
+              </div>
             </article>
           );
         }))}

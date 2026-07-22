@@ -4809,17 +4809,18 @@ a[href*="wa.me"] {
 }
 
 .admin-upload-preview__actions {
-  display: grid;
-  grid-template-columns: repeat(3, 32px);
-  gap: 6px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  align-items: center;
 }
 
 .admin-upload-preview__item .admin-upload-preview__actions button {
   position: static;
   display: inline-grid;
   place-items: center;
-  width: 32px;
-  min-height: 32px;
+  width: 34px;
+  min-height: 34px;
   padding: 0;
   border-radius: 6px;
   background: rgba(240,190,93,.92);
@@ -4834,6 +4835,12 @@ a[href*="wa.me"] {
 .admin-icon-danger {
   color: #fff;
   background: #8d2f2f;
+}
+
+.admin-upload-preview__item .admin-upload-preview__actions .admin-download-action,
+.admin-unassigned-image__actions .admin-download-action {
+  color: #171512;
+  background: linear-gradient(180deg, #f6c76a, var(--color-primary));
 }
 
 .admin-upload-preview__stage,
@@ -5055,7 +5062,7 @@ a[href*="wa.me"] {
 
 .admin-unassigned-image {
   display: grid;
-  grid-template-columns: 72px minmax(0, 1fr) 36px;
+  grid-template-columns: 72px minmax(0, 1fr) auto;
   align-items: center;
   gap: 10px;
   min-width: 0;
@@ -5072,7 +5079,7 @@ a[href*="wa.me"] {
   object-fit: cover;
 }
 
-.admin-unassigned-image > div {
+.admin-unassigned-image__body {
   display: grid;
   gap: 6px;
   min-width: 0;
@@ -5094,7 +5101,13 @@ a[href*="wa.me"] {
   background: #171512;
 }
 
-.admin-unassigned-image > button {
+.admin-unassigned-image__actions {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.admin-unassigned-image__actions button {
   display: inline-grid;
   place-items: center;
   width: 36px;
@@ -8506,5 +8519,180 @@ a[href*="wa.me"] {
 
   .mobile-nav__inner {
     padding-top: 10px;
+  }
+}
+
+/* Admin CRUD polish */
+.admin-section__grid,
+.admin-list--projects {
+  gap: 22px !important;
+}
+
+.admin-card,
+.admin-media-panel,
+.admin-branches-editor,
+.admin-branch-card,
+.admin-unassigned-gallery,
+.admin-item--project {
+  border-radius: 8px !important;
+}
+
+.admin-card--form {
+  display: grid;
+  gap: 24px;
+}
+
+.admin-card__header {
+  padding-bottom: 18px;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+}
+
+.admin-media-panel,
+.admin-branches-editor {
+  gap: 22px;
+  padding: clamp(18px, 2.4vw, 28px);
+}
+
+.admin-upload-grid {
+  gap: 22px !important;
+  padding: clamp(16px, 2vw, 24px) !important;
+  border-radius: 8px !important;
+  align-items: start;
+}
+
+.admin-upload-box {
+  align-content: start;
+  place-items: stretch;
+  min-height: 168px;
+  padding: 22px !important;
+}
+
+.admin-upload-box.is-disabled {
+  pointer-events: auto !important;
+}
+
+.admin-upload-box.is-disabled input[type="file"] {
+  pointer-events: none;
+}
+
+.admin-upload-box__icon,
+.admin-upload-box > strong,
+.admin-upload-box > small,
+.admin-upload-box > em {
+  justify-self: center;
+  text-align: center;
+}
+
+.admin-upload-preview {
+  gap: 14px;
+  margin-top: 16px;
+}
+
+.admin-upload-preview__item {
+  gap: 10px;
+  padding: 10px;
+  border-color: rgba(240,190,93,.18);
+  background: rgba(7,7,7,.44);
+}
+
+.admin-upload-preview__actions,
+.admin-upload-preview__stage,
+.admin-upload-preview__alt {
+  position: relative;
+  z-index: 3;
+}
+
+.admin-upload-preview__item .admin-upload-preview__actions button,
+.admin-unassigned-image__actions button,
+.admin-branch-card__actions button {
+  transition: transform .18s ease, border-color .18s ease, filter .18s ease;
+}
+
+.admin-upload-preview__item .admin-upload-preview__actions button:hover:not(:disabled),
+.admin-unassigned-image__actions button:hover,
+.admin-branch-card__actions button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  filter: brightness(1.08);
+}
+
+.admin-upload-preview__alt {
+  resize: vertical;
+}
+
+.admin-branch-tabs {
+  gap: 12px;
+  padding-bottom: 12px;
+}
+
+.admin-branch-tab {
+  min-height: 96px;
+  padding: 14px;
+}
+
+.admin-branch-card {
+  gap: 20px;
+  padding: clamp(16px, 2vw, 24px);
+}
+
+.admin-unassigned-image {
+  grid-template-columns: 82px minmax(0, 1fr) auto;
+  gap: 12px;
+  padding: 12px;
+}
+
+.admin-unassigned-image img {
+  width: 82px;
+  height: 66px;
+}
+
+.admin-item--project {
+  padding: 18px;
+  border: 1px solid rgba(255,255,255,.08);
+}
+
+@media (max-width: 760px) {
+  .admin-card,
+  .admin-media-panel,
+  .admin-branches-editor,
+  .admin-branch-card {
+    padding: 16px !important;
+  }
+
+  .admin-upload-grid {
+    gap: 16px !important;
+    padding: 14px !important;
+  }
+
+  .admin-unassigned-image {
+    grid-template-columns: 70px minmax(0, 1fr);
+  }
+
+  .admin-unassigned-image__actions {
+    grid-column: 1 / -1;
+    justify-content: flex-end;
+  }
+
+  .admin-unassigned-image img {
+    width: 70px;
+    height: 58px;
+  }
+}
+
+@media (max-width: 440px) {
+  .admin-unassigned-image {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-unassigned-image img {
+    width: 100%;
+    height: 170px;
+  }
+
+  .admin-unassigned-image__actions {
+    justify-content: stretch;
+  }
+
+  .admin-unassigned-image__actions button {
+    width: 100%;
   }
 }
