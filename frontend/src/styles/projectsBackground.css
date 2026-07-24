@@ -1,0 +1,127 @@
+/* FZAC: fondo fotográfico para el explorador de Obras */
+.portfolio-workscape {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  padding-top: clamp(54px, 7vw, 86px) !important;
+  padding-bottom: clamp(76px, 9vw, 128px) !important;
+  background-color: #08090b;
+}
+
+.portfolio-workscape::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -3;
+  background-image: url('/assets/img/obras/sliders-rosas/sliders-rosas-final-04.jpg');
+  background-size: cover;
+  background-position: center 46%;
+  background-repeat: no-repeat;
+  transform: scale(1.035);
+  filter: saturate(0.92) contrast(1.08) brightness(0.78);
+}
+
+.portfolio-workscape::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background:
+    radial-gradient(circle at 18% 8%, rgba(217, 164, 65, 0.22), transparent 26%),
+    linear-gradient(180deg, rgba(5, 6, 8, 0.72) 0%, rgba(5, 6, 8, 0.84) 42%, rgba(5, 6, 8, 0.94) 100%),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.82) 0%, rgba(0, 0, 0, 0.48) 48%, rgba(0, 0, 0, 0.84) 100%);
+}
+
+.portfolio-workscape > .container {
+  position: relative;
+  z-index: 1;
+}
+
+.portfolio-workscape__intro {
+  width: min(100%, 920px);
+  margin: 0 0 24px;
+  padding: 18px 20px;
+  border: 1px solid rgba(217, 164, 65, 0.18);
+  border-radius: 10px;
+  background: linear-gradient(90deg, rgba(11, 12, 14, 0.82), rgba(11, 12, 14, 0.46));
+  box-shadow: 0 18px 52px rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.portfolio-workscape__intro span {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  color: var(--color-primary-strong);
+  font-size: 0.74rem;
+  font-weight: 850;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.portfolio-workscape__intro span::before {
+  content: "";
+  width: 26px;
+  height: 1px;
+  background: linear-gradient(90deg, var(--color-primary), transparent);
+}
+
+.portfolio-workscape__intro p {
+  margin: 7px 0 0;
+  max-width: 720px;
+  color: rgba(255, 255, 255, 0.82);
+  line-height: 1.65;
+}
+
+.portfolio-workscape .portfolio-toolbar {
+  background: rgba(13, 14, 17, 0.82) !important;
+  border-color: rgba(217, 164, 65, 0.26) !important;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.34) !important;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.portfolio-workscape .portfolio-grid,
+.portfolio-workscape .obra-status-sections,
+.portfolio-workscape .empty-state {
+  position: relative;
+  z-index: 1;
+}
+
+.portfolio-workscape .obra-status-section {
+  padding: clamp(18px, 3vw, 28px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  background: rgba(8, 9, 11, 0.44);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.portfolio-workscape .project-card,
+.portfolio-workscape .project-card--premium,
+.portfolio-workscape .project-card-skeleton {
+  box-shadow: 0 22px 58px rgba(0, 0, 0, 0.36);
+  background-color: rgba(12, 13, 16, 0.94) !important;
+}
+
+@media (max-width: 760px) {
+  .portfolio-workscape {
+    padding-top: 42px !important;
+  }
+
+  .portfolio-workscape::before {
+    background-position: center top;
+    transform: scale(1.08);
+  }
+
+  .portfolio-workscape__intro {
+    margin-bottom: 18px;
+    padding: 15px;
+  }
+
+  .portfolio-workscape__intro p {
+    font-size: 0.92rem;
+  }
+}
