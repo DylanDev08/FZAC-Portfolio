@@ -6,6 +6,7 @@ import Seo from '../components/Seo.jsx';
 import { filterProjects, getProjectTypes, groupProjectsByStatus } from '../lib/portfolio.js';
 import { getTrabajos } from '../services/contentService.js';
 import { getProjects } from '../services/projectsService.js';
+import '../styles/projectsBackground.css';
 
 export default function Projects() {
   const [projects, setProjects] = useState([]);
@@ -52,8 +53,13 @@ export default function Projects() {
         </div>
       </section>
 
-      <section className="section portfolio-controls-section">
+      <section className="section portfolio-controls-section portfolio-workscape">
         <div className="container">
+          <div className="portfolio-workscape__intro" aria-hidden="true">
+            <span>FZAC en obra</span>
+            <p>Registro real del equipo, herramientas y proceso constructivo.</p>
+          </div>
+
           <PortfolioToolbar
             search={search}
             onSearchChange={setSearch}
