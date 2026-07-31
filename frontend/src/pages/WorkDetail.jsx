@@ -1,7 +1,8 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation, useParams } from 'react-router-dom';
+import { ProjectGallery } from '../components/ProjectGallery.jsx';
 import Seo from '../components/Seo.jsx';
-import { imagesFromSource, uniqueImages } from '../lib/gallery.js';
+import { buildGalleryGroupsFromSource, imagesFromSource, uniqueImages } from '../lib/gallery.js';
 import { getTrabajos } from '../services/contentService.js';
 
 function slugFromText(value) {
@@ -13,101 +14,73 @@ function slugFromText(value) {
     .replace(/(^-|-$)/g, '');
 }
 
-function RubroCarousel({ id, title, description, images, onOpen }) {
-  const cleanImages = useMemo(() => uniqueImages(images), [images]);
-  const [activeIndex, setActiveIndex] = useState(0);
-  const [isKeyboardActive, setIsKeyboardActive] = useState(false);
-  const safeActiveIndex = cleanImages.length ? Math.min(activeIndex, cleanImages.length - 1) : 0;
-  const active = cleanImages[safeActiveIndex] || '';
+function sectionImages(section = {}) {
+  return uniqueImages([
+    ...(Array.isArray(section.images) ? section.images : []),
+    ...imagesFromSource(section),
+  ]);
+}
 
-  const goTo = useCallback((nextIndex) => {
-    if (!cleanImages.length) return;
-    setActiveIndex((nextIndex + cleanImages.length) % cleanImages.length);
-  }, [cleanImages.length]);
+function galleryGroupsFromSection(section = {}, description = '') {
+  const stageGroups = buildGalleryGroupsFromSource(section);
+  if (stageGroups.length) return stageGroups;
 
-  useEffect(() => {
-    setActiveIndex(0);
-    setIsKeyboardActive(false);
-  }, [title, cleanImages.length]);
+  const images = sectionImages(section);
+  return images.length
+    ? [{
+      title: 'Galería',
+      text: description || 'Registro visual de trabajos realizados por Fortaleza Construcciones.',
+      images,
+      altByUrl: {},
+    }]
+    : [];
+}
 
-  useEffect(() => {
-    if (!isKeyboardActive || cleanImages.length <= 1) return undefined;
+function normalizeWorkSection(section = {}, fallbackTitle = 'Trabajo') {
+  const title = section.titulo || section.nombre || section.title || fallbackTitle;
+  const description = section.descripcion || section.description || '';
 
-    const handleKeyDown = (event) => {
-      if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
-      const activeElement = document.activeElement;
-      const isTyping = activeElement && ['INPUT', 'TEXTAREA', 'SELECT'].includes(activeElement.tagName);
-      if (isTyping) return;
-      event.preventDefault();
-      goTo(safeActiveIndex + (event.key === 'ArrowRight' ? 1 : -1));
-    };
+  return {
+    id: section.slug || section.id || slugFromText(title),
+    title,
+    description,
+    images: sectionImages(section),
+    galleryGroups: galleryGroupsFromSection(section, description),
+  };
+}
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [cleanImages.length, goTo, isKeyboardActive, safeActiveIndex]);
-
-  if (!cleanImages.length) {
+function WorkRubroGallery({ section, index, total, onOpen }) {
+  if (!section.galleryGroups.length) {
     return (
-      <article id={id} className="trabajos-rubro-card reveal is-visible" tabIndex={0}>
-        <div className="trabajos-rubro-card__header">
-          <div>
-            <span className="eyebrow">Rubro</span>
-            <h2>{title}</h2>
-            {description && <p>{description}</p>}
-          </div>
-          <strong>0 / 0</strong>
+      <article id={section.id} className="obra-branch-block trabajos-rubro-block trabajos-rubro-block--empty reveal is-visible">
+        <div className="obra-branch-block__header trabajos-rubro-block__header">
+          <span>Rubro {index + 1} de {total}</span>
+          <h3>{section.title}</h3>
+          {section.description && <p>{section.description}</p>}
         </div>
-        <div className="trabajos-carousel trabajos-carousel--empty">
-          <p>Sin imágenes publicadas para este rubro.</p>
+        <div className="trabajos-gallery-empty">
+          <strong>Sin imágenes publicadas</strong>
+          <p>Este rubro queda listo para cargar fotos desde el panel administrativo.</p>
         </div>
       </article>
     );
   }
 
   return (
-    <article
-      id={id}
-      className={`trabajos-rubro-card reveal is-visible ${isKeyboardActive ? 'is-keyboard-active' : ''}`}
-      tabIndex={0}
-      onFocus={() => setIsKeyboardActive(true)}
-      onClick={() => setIsKeyboardActive(true)}
-      onMouseEnter={() => setIsKeyboardActive(true)}
-      aria-label={`Galería seleccionada de ${title}. Usá las flechas izquierda y derecha del teclado para navegar.`}
-    >
-      <div className="trabajos-rubro-card__header">
-        <div>
-          <span className="eyebrow">Rubro</span>
-          <h2>{title}</h2>
-          {description && <p>{description}</p>}
-        </div>
-        <strong>{safeActiveIndex + 1} / {cleanImages.length}</strong>
+    <article id={section.id} className="obra-branch-block trabajos-rubro-block reveal is-visible">
+      <div className="obra-branch-block__header trabajos-rubro-block__header">
+        <span>Rubro {index + 1} de {total}</span>
+        <h3>{section.title}</h3>
+        {section.description && <p>{section.description}</p>}
       </div>
-
-      <div className="trabajos-carousel" aria-label={`Galería de ${title}`}>
-        {cleanImages.length > 1 && (
-          <button className="trabajos-carousel__arrow trabajos-carousel__arrow--left" type="button" onClick={() => goTo(safeActiveIndex - 1)} aria-label="Foto anterior">
-            &lsaquo;
-          </button>
-        )}
-        <button className="trabajos-carousel__image" type="button" onClick={() => onOpen(cleanImages, safeActiveIndex)} aria-label={`Ampliar ${title}`}>
-          <img src={active} alt={`${title} - imagen ${safeActiveIndex + 1}`} loading="lazy" />
-        </button>
-        {cleanImages.length > 1 && (
-          <button className="trabajos-carousel__arrow trabajos-carousel__arrow--right" type="button" onClick={() => goTo(safeActiveIndex + 1)} aria-label="Foto siguiente">
-            &rsaquo;
-          </button>
-        )}
-      </div>
-
-      {cleanImages.length > 1 && (
-        <div className="trabajos-carousel__thumbs" aria-label={`Miniaturas de ${title}`}>
-          {cleanImages.map((src, index) => (
-            <button key={`${src}-${index}`} type="button" className={index === safeActiveIndex ? 'is-active' : ''} onClick={() => setActiveIndex(index)} aria-label={`Ver imagen ${index + 1} de ${title}`}>
-              <img src={src} alt="" loading="lazy" />
-            </button>
-          ))}
-        </div>
-      )}
+      <ProjectGallery
+        groups={section.galleryGroups}
+        projectName={`Trabajos varios - ${section.title}`}
+        onOpen={onOpen}
+        sectionTitle="Galería del rubro"
+        sectionIntro={section.description || 'Registro fotográfico de trabajos ejecutados por Fortaleza Construcciones.'}
+        compact
+      />
     </article>
   );
 }
@@ -128,16 +101,11 @@ export default function WorkDetail() {
   const sections = useMemo(() => {
     if (!item) return [];
     if (Array.isArray(item.secciones) && item.secciones.length) {
-      return item.secciones.map((section) => ({
-        id: section.slug || section.id || slugFromText(section.titulo || section.nombre),
-        title: section.titulo || section.nombre || 'Trabajo',
-        description: section.descripcion || '',
-        images: imagesFromSource(section),
-      }));
+      return item.secciones.map((section) => normalizeWorkSection(section));
     }
 
-    return [{ title: item.nombre, description: item.descripcion, images: imagesFromSource(item) }]
-      .filter((section) => section.images.length);
+    return [normalizeWorkSection(item, item.nombre || 'Trabajo')]
+      .filter((section) => section.images.length || section.galleryGroups.length);
   }, [item]);
 
   useEffect(() => {
@@ -181,7 +149,7 @@ export default function WorkDetail() {
     );
   }
 
-  const cover = item.portada || sections[0]?.images?.[0] || '/assets/img/obras/trabajos-varios/instalacion-ceramicos/instalacionCeramicos-final-03.jpg';
+  const cover = item.portada || sections[0]?.images?.[0] || sections[0]?.galleryGroups?.[0]?.images?.[0] || '/assets/img/obras/trabajos-varios/instalacion-ceramicos/instalacionCeramicos-final-03.jpg';
 
   return (
     <main>
@@ -210,31 +178,40 @@ export default function WorkDetail() {
       </section>
 
       <section className="section trabajos-detail-section trabajos-detail-section--rubros">
-        <div className="container trabajos-rubros-layout">
-          <div className="section-heading reveal is-visible trabajos-rubros-heading">
-            <span className="eyebrow">Galerías por rubro</span>
-            <h2>Nuestros trabajos, rubro por rubro</h2>
-            <p>Recorré una selección de trabajos terminados y soluciones aplicadas en obras comerciales y residenciales.</p>
-          </div>
+        <div className="container obra-layout obra-layout--single trabajos-rubros-layout">
+          <section className="obra-branches-gallery trabajos-rubros-gallery" aria-label={`Rubros de ${item.nombre}`}>
+            <div className="obra-branches-gallery__head trabajos-rubros-heading reveal is-visible">
+              <span className="eyebrow">Galerías por rubro</span>
+              <h2>Nuestros trabajos, rubro por rubro</h2>
+              <p>Recorré una selección de trabajos terminados y soluciones aplicadas en obras comerciales y residenciales.</p>
+            </div>
 
-          <div className="trabajos-rubros-list">
-            {sections.map((section, index) => (
-              <RubroCarousel
-                key={`${section.title}-${index}`}
-                id={section.id}
-                title={section.title}
-                description={section.description}
-                images={section.images}
-                onOpen={(images, idx) => setLightbox({ images, index: idx })}
-              />
-            ))}
-          </div>
+            {sections.length > 0 ? (
+              <div className="obra-branches-gallery__list trabajos-rubros-list">
+                {sections.map((section, index) => (
+                  <WorkRubroGallery
+                    key={`${section.id}-${section.title}-${index}`}
+                    section={section}
+                    index={index}
+                    total={sections.length}
+                    onOpen={(images, idx) => setLightbox({ images, index: idx })}
+                  />
+                ))}
+              </div>
+            ) : (
+              <article className="obra-gallery-empty reveal is-visible">
+                <span className="eyebrow">Galería</span>
+                <h2>Registro fotográfico próximamente</h2>
+                <p>Estamos preparando las imágenes de este apartado para incorporarlas al sitio.</p>
+              </article>
+            )}
+          </section>
         </div>
       </section>
 
       {lightbox && (
         <div className="lightbox lightbox--carousel" role="dialog" aria-modal="true" onClick={() => setLightbox(null)}>
-          <button className="lightbox__close" type="button" aria-label="Cerrar imagen" onClick={() => setLightbox(null)}>×</button>
+          <button className="lightbox__close" type="button" aria-label="Cerrar imagen" onClick={() => setLightbox(null)}>&times;</button>
           {lightbox.images.length > 1 && <button className="lightbox__arrow lightbox__arrow--left" type="button" onClick={(event) => { event.stopPropagation(); moveLightbox(-1); }} aria-label="Imagen anterior">&lsaquo;</button>}
           <img src={lightbox.images[lightbox.index]} alt="Vista ampliada" onClick={(event) => event.stopPropagation()} />
           <span className="lightbox__counter">{lightbox.index + 1} / {lightbox.images.length}</span>
