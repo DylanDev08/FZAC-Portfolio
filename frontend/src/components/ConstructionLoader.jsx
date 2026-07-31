@@ -1,7 +1,8 @@
 import React from 'react';
 import { CheckCircle2 } from 'lucide-react';
 
-const BUILD_STAGES = ['Planificación', 'Ejecución', 'Entrega'];
+const BUILD_STAGES = ['Base', 'Estructura', 'Terminaciones'];
+const BRICKS = Array.from({ length: 18 });
 
 export default function ConstructionLoader({ ready = false }) {
   return (
@@ -12,32 +13,46 @@ export default function ConstructionLoader({ ready = false }) {
       aria-label={ready ? 'Sitio listo' : 'Cargando Fortaleza Construcciones'}
     >
       <div className="construction-loader__inner">
-        <div className="construction-loader__brand">
-          <img src="/assets/img/logo/fzac-logo.jpg" alt="Fortaleza Construcciones" width="58" height="58" />
-          <div>
-            <strong>Fortaleza Construcciones</strong>
-            <span>Obras y servicios integrales</span>
+        <section className="construction-loader__copy">
+          <div className="construction-loader__brand">
+            <img src="/assets/img/logo/fzac-logo.jpg" alt="Fortaleza Construcciones" width="64" height="64" />
+            <div>
+              <strong>Fortaleza Construcciones</strong>
+              <span>FZAC · Obras y servicios integrales</span>
+            </div>
           </div>
-        </div>
 
-        <div className="construction-loader__headline">
-          <span>FZAC · Rosario, Santa Fe</span>
-          <p>Construimos espacios<br /><strong>listos para crecer.</strong></p>
-        </div>
-
-        <div className="construction-loader__plan" aria-hidden="true">
-          <span className="construction-loader__plan-label">Proyecto / 01</span>
-          <div className="construction-loader__plan-mark">
-            <i>F</i>
-            <i>Z</i>
-            <i>A</i>
-            <i>C</i>
+          <div className="construction-loader__headline">
+            <span>Portfolio institucional · Rosario, Santa Fe</span>
+            <h1>Levantando la obra digital</h1>
+            <p>Preparando galerías, obras y contenido para una navegación rápida y prolija.</p>
           </div>
-          <span className="construction-loader__measure construction-loader__measure--top" />
-          <span className="construction-loader__measure construction-loader__measure--side" />
-        </div>
 
-        <div className="construction-loader__stages" aria-hidden="true">
+          <div className="construction-loader__socials" aria-label="Redes y contacto de FZAC">
+            <span>@fzaconstrucciones</span>
+            <span>Fortaleza Construcciones</span>
+          </div>
+        </section>
+
+        <section className="construction-loader__site" aria-hidden="true">
+          <div className="construction-loader__crane">
+            <span />
+            <i />
+          </div>
+
+          <div className="construction-loader__wall">
+            {BRICKS.map((_, index) => (
+              <span key={index} style={{ '--delay': `${index * 55}ms` }} />
+            ))}
+          </div>
+
+          <div className="construction-loader__foundation">
+            <span>FZAC</span>
+            <i />
+          </div>
+        </section>
+
+        <div className="construction-loader__stages">
           {BUILD_STAGES.map((stage, index) => (
             <span key={stage}><i>{String(index + 1).padStart(2, '0')}</i>{stage}</span>
           ))}
@@ -45,8 +60,9 @@ export default function ConstructionLoader({ ready = false }) {
 
         <div className="construction-loader__status">
           {ready && <CheckCircle2 aria-hidden="true" size={18} strokeWidth={2} />}
-          <span>{ready ? 'Todo listo' : 'Preparando el sitio'}</span>
+          <span>{ready ? 'Listo para construir' : 'Preparando estructura visual'}</span>
         </div>
+
         <div className="construction-loader__progress" aria-hidden="true">
           <span />
         </div>

@@ -9,7 +9,7 @@ const adtechServices = [
   'Identidad de marca',
   'Meta Ads y Google Ads',
   'Landings, e-commerce y app webs',
-  'CRM, ERP y bases de datos'
+  'CRM, ERP y bases de datos',
 ];
 
 export default function Footer() {
@@ -23,7 +23,10 @@ export default function Footer() {
     <footer className="site-footer site-footer--clean">
       <div className="container site-footer__container site-footer__container--balanced">
         <section className="site-footer__column site-footer__brand">
-          <span className="site-footer__label">Fortaleza Construcciones</span>
+          <div className="site-footer__brand-head">
+            <img src="/assets/img/logo/fzac-logo.webp" alt="FZAC" width="46" height="46" />
+            <span className="site-footer__label">Fortaleza Construcciones</span>
+          </div>
           <h3>Construimos tu proyecto de principio a fin</h3>
           <p>
             Obras comerciales y residenciales con planificación, coordinación
