@@ -18,10 +18,8 @@ export default function App() {
 
   useEffect(() => {
     const readyTimeout = globalThis.setTimeout(() => setBootPhase('ready'), 650);
-    const completeTimeout = globalThis.setTimeout(() => setBootPhase('complete'), 950);
     return () => {
       globalThis.clearTimeout(readyTimeout);
-      globalThis.clearTimeout(completeTimeout);
     };
   }, []);
 
@@ -53,7 +51,7 @@ export default function App() {
           </Routes>
         </Suspense>
       </BrowserRouter>
-      {isBooting && <ConstructionLoader ready={bootPhase === 'ready'} />}
+      {isBooting && <ConstructionLoader ready={bootPhase === 'ready'} onEnter={() => setBootPhase('complete')} />}
     </>
   );
 }

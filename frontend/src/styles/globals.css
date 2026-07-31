@@ -9856,3 +9856,70 @@ a[href*="wa.me"] {
     grid-template-columns: 1fr;
   }
 }
+
+/* =========================================================
+   FZAC FINAL - ingreso manual desde loader
+   ========================================================= */
+.construction-loader__inner {
+  gap: clamp(14px, 2.4vw, 22px) !important;
+}
+
+.construction-loader__headline p {
+  max-width: 620px !important;
+}
+
+.construction-loader__status {
+  min-height: 26px !important;
+}
+
+.construction-loader__enter {
+  width: fit-content;
+  min-width: 170px;
+  min-height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 22px;
+  border: 1px solid rgba(240,190,93,.42);
+  border-radius: 999px;
+  background: linear-gradient(180deg, var(--color-primary-strong), var(--color-primary));
+  color: #111;
+  font-weight: 950;
+  cursor: pointer;
+  box-shadow: 0 18px 38px rgba(0,0,0,.30);
+  transition: transform .2s ease, filter .2s ease, opacity .2s ease;
+}
+
+.construction-loader__enter:hover:not(:disabled) {
+  transform: translateY(-1px);
+  filter: brightness(1.04);
+}
+
+.construction-loader__enter:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 4px;
+}
+
+.construction-loader__enter:disabled {
+  cursor: wait;
+  opacity: .58;
+  filter: saturate(.75);
+}
+
+.construction-loader__hint {
+  max-width: 520px;
+  margin: -6px 0 0;
+  color: rgba(255,255,255,.62);
+  font-size: .88rem;
+  line-height: 1.5;
+}
+
+.construction-loader.is-ready .construction-loader__progress {
+  opacity: .72;
+}
+
+@media (max-width: 640px) {
+  .construction-loader__enter {
+    width: 100%;
+  }
+}

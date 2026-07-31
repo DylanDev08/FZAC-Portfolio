@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { CheckCircle2, Instagram, Mail, MapPin, Phone } from 'lucide-react';
 
 const CONTACT_ITEMS = [
@@ -8,7 +8,13 @@ const CONTACT_ITEMS = [
   { label: 'Zona de trabajo', value: 'Rosario, Santa Fe', Icon: MapPin },
 ];
 
-export default function ConstructionLoader({ ready = false }) {
+export default function ConstructionLoader({ ready = false, onEnter }) {
+  const enterButtonRef = useRef(null);
+
+  useEffect(() => {
+    if (ready) enterButtonRef.current?.focus({ preventScroll: true });
+  }, [ready]);
+
   return (
     <main
       className={`construction-loader${ready ? ' is-ready' : ''}`}
@@ -28,7 +34,7 @@ export default function ConstructionLoader({ ready = false }) {
         <div className="construction-loader__headline">
           <span>FZAC · Rosario, Santa Fe</span>
           <h1>{ready ? 'Listo para construir' : 'Cargando portfolio'}</h1>
-          <p>Preparando obras, galerías y servicios para mostrar el trabajo de Fortaleza Construcciones.</p>
+          <p>Obras, galerías y servicios de Fortaleza Construcciones en un recorrido simple y profesional.</p>
         </div>
 
         <div className="construction-loader__socials" aria-label="Datos de contacto de FZAC">
@@ -43,8 +49,22 @@ export default function ConstructionLoader({ ready = false }) {
 
         <div className="construction-loader__status">
           {ready && <CheckCircle2 aria-hidden="true" size={18} strokeWidth={2} />}
-          <span>{ready ? 'Listo para construir' : 'Preparando el sitio'}</span>
+          <span>{ready ? 'La presentación está lista' : 'Preparando el sitio'}</span>
         </div>
+
+        <button
+          ref={enterButtonRef}
+          className="construction-loader__enter"
+          type="button"
+          disabled={!ready}
+          onClick={onEnter}
+        >
+          {ready ? 'Ingresar' : 'Preparando...'}
+        </button>
+
+        <p className="construction-loader__hint">
+          {ready ? 'Tocá ingresar para ver el portfolio.' : 'Un momento, estamos cargando el contenido principal.'}
+        </p>
 
         <div className="construction-loader__progress" aria-hidden="true">
           <span />
