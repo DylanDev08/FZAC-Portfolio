@@ -104,6 +104,30 @@ const IMAGE_STAGE_OPTIONS = [
 ];
 
 const BRANCH_IMAGE_KEYS = IMAGE_STAGE_OPTIONS.map(({ value }) => value);
+const PHOTO_ACCEPT = 'image/*,.jpg,.jpeg,.jfif,.png,.webp,.gif,.avif,.heic,.heif,.bmp,.tif,.tiff';
+
+const GALLERY_STAGE_META = {
+  portada: {
+    label: 'Portada',
+    help: 'Primera imagen visible en cards y detalle.',
+  },
+  imagenes: {
+    label: 'General',
+    help: 'Fotos de apoyo que completan el recorrido visual.',
+  },
+  imagenesAntes: {
+    label: 'Antes',
+    help: 'Estado inicial, estructura vacia o relevamiento.',
+  },
+  imagenesProceso: {
+    label: 'Proceso',
+    help: 'Avances, estructura, obra gris y etapas intermedias.',
+  },
+  imagenesFinal: {
+    label: 'Final',
+    help: 'Resultado terminado y fotos para mostrar el cierre.',
+  },
+};
 
 const TIPOS_OBRA = [
   'Local gastronómico',
@@ -317,6 +341,57 @@ function getOptions(kind) {
   return TIPOS_OBRA;
 }
 
+function firstGalleryImage(source = {}) {
+  const cover = assetUrl(source.portada);
+  if (cover) return cover;
+
+  for (const key of ['imagenesFinal', 'imagenes', 'imagenesAntes', 'imagenesProceso']) {
+    const match = toArray(source[key]).map(assetUrl).find(Boolean);
+    if (match) return match;
+  }
+
+  return '';
+}
+
+function galleryStageCount(source = {}, key) {
+  if (key === 'portada') return assetUrl(source.portada) ? 1 : 0;
+  return toArray(source[key]).map(assetUrl).filter(Boolean).length;
+}
+
+function GalleryOverview({ source, title = 'Resumen de galeria' }) {
+  const stages = [
+    { key: 'portada', ...GALLERY_STAGE_META.portada },
+    ...IMAGE_STAGE_OPTIONS.map(({ value }) => ({ key: value, ...GALLERY_STAGE_META[value] })),
+  ];
+  const total = uniqueImageCount(source?.portada, source?.imagenes, source?.imagenesAntes, source?.imagenesProceso, source?.imagenesFinal);
+
+  return (
+    <div className="admin-gallery-overview" aria-label={title}>
+      <div className="admin-gallery-overview__head">
+        <div>
+          <span className="eyebrow">Orden visual</span>
+          <strong>{title}</strong>
+        </div>
+        <span>{total} foto{total === 1 ? '' : 's'} unica{total === 1 ? '' : 's'}</span>
+      </div>
+      <div className="admin-gallery-overview__grid">
+        {stages.map(({ key, label, help }) => {
+          const count = galleryStageCount(source, key);
+          return (
+            <article className={`admin-gallery-overview__item ${count ? 'has-images' : ''}`} key={key}>
+              <strong>{count}</strong>
+              <div>
+                <span>{label}</span>
+                <small>{help}</small>
+              </div>
+            </article>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 function normalizeForForm(item = {}) {
   const workImages = Array.isArray(item.workImages) ? item.workImages : [];
   const bySection = (section, fallback) => {
@@ -431,19 +506,21 @@ function FileInput({
   const previews = Array.isArray(previewItems) ? previewItems.filter(Boolean) : [];
 
   return (
-    <label className={`admin-upload-box ${disabled ? 'is-disabled' : ''}`}>
-      <input
-        type="file"
-        accept={accept}
-        multiple={multiple}
-        disabled={disabled}
-        onClick={(e) => { e.currentTarget.value = ''; }}
-        onChange={(e) => onChange(e.target.files)}
-      />
-      <span className="admin-upload-box__icon">+</span>
-      <strong>{label}</strong>
-      {help && <small>{help}</small>}
-      <em>Hacé clic para seleccionar desde tu equipo</em>
+    <div className={`admin-upload-box ${disabled ? 'is-disabled' : ''} ${previews.length ? 'has-previews' : ''}`}>
+      <label className="admin-upload-dropzone">
+        <input
+          type="file"
+          accept={accept}
+          multiple={multiple}
+          disabled={disabled}
+          onClick={(e) => { e.currentTarget.value = ''; }}
+          onChange={(e) => onChange(e.target.files)}
+        />
+        <span className="admin-upload-box__icon">+</span>
+        <strong>{label}</strong>
+        {help && <small>{help}</small>}
+        <em>{previews.length ? 'Sumar nuevas fotos' : 'Hacé clic para seleccionar desde tu equipo'}</em>
+      </label>
       {previews.length > 0 && (
         <div className="admin-upload-preview">
           {previews.map((item, index) => {
@@ -452,7 +529,7 @@ function FileInput({
             const downloadName = `${label}-${index + 1}`;
             const downloadLabel = previewType === 'video' ? 'Descargar video' : 'Descargar foto';
             return (
-            <span className="admin-upload-preview__item" key={`${src}-${index}`}>
+            <article className="admin-upload-preview__item" key={`${src}-${index}`}>
               <span className="admin-upload-preview__position">{index + 1}</span>
               {previewType === 'video'
                 ? <video src={src} preload="metadata" muted />
@@ -501,11 +578,11 @@ function FileInput({
               {previewType === 'image' && onEditPreview && (
                 <input className="admin-upload-preview__alt" value={item?.alt || ''} onClick={(event) => event.stopPropagation()} onChange={(event) => onEditPreview(index, { alt: event.target.value })} placeholder="Descripcion de la foto" aria-label="Descripcion de la foto" />
               )}
-            </span>
+            </article>
           ); })}
         </div>
       )}
-    </label>
+    </div>
   );
 }
 
@@ -574,6 +651,7 @@ function BranchGalleryEditor({ form, setForm, onUpload, uploading }) {
         <div className="admin-branch-tabs" role="tablist" aria-label="Galerías por dirección">
           {branches.map((branch, branchIndex) => {
             const count = uniqueImageCount(branch.portada, branch.imagenes, branch.imagenesAntes, branch.imagenesProceso, branch.imagenesFinal);
+            const preview = firstGalleryImage(branch);
             return (
               <button
                 className={`admin-branch-tab ${activeIndex === branchIndex ? 'is-active' : ''}`}
@@ -584,9 +662,14 @@ function BranchGalleryEditor({ form, setForm, onUpload, uploading }) {
                 key={branch.id || `${branch.nombre}-${branchIndex}`}
                 onClick={() => setActiveBranchIndex(branchIndex)}
               >
-                <span>{branch.direccion || `Dirección ${branchIndex + 1}`}</span>
-                <small>{branch.nombre || `Sucursal ${branchIndex + 1}`}</small>
-                <strong>{count} foto{count === 1 ? '' : 's'}</strong>
+                <span className="admin-branch-tab__thumb">
+                  {preview ? <img src={preview} alt="" loading="lazy" /> : <Images size={18} aria-hidden="true" />}
+                </span>
+                <span className="admin-branch-tab__body">
+                  <span>{branch.direccion || `Dirección ${branchIndex + 1}`}</span>
+                  <small>{branch.nombre || `Sucursal ${branchIndex + 1}`}</small>
+                  <strong>{count} foto{count === 1 ? '' : 's'}</strong>
+                </span>
               </button>
             );
           })}
@@ -611,6 +694,7 @@ function BranchGalleryEditor({ form, setForm, onUpload, uploading }) {
             label={activeBranch.direccion || 'Galería del local'}
             count={uniqueImageCount(activeBranch.portada, activeBranch.imagenes, activeBranch.imagenesAntes, activeBranch.imagenesProceso, activeBranch.imagenesFinal)}
           />
+          <GalleryOverview source={activeBranch} title="Distribución de fotos del local" />
           <div className="admin-form__grid">
             <Field label="Nombre del local" value={activeBranch.nombre} onChange={(value) => updateBranch(activeIndex, { nombre: value })} placeholder="Ej. Pellegrini" />
             <Field label="Dirección" value={activeBranch.direccion} onChange={(value) => updateBranch(activeIndex, { direccion: value })} placeholder="Calle, número, ciudad" />
@@ -618,7 +702,7 @@ function BranchGalleryEditor({ form, setForm, onUpload, uploading }) {
           <div className="admin-upload-grid admin-upload-grid--branches">
             <FileInput
               label="Portada del local"
-              accept="image/*,.jpg,.jpeg,.jfif,.png,.webp,.gif,.avif,.heic,.heif,.bmp,.tif,.tiff"
+              accept={PHOTO_ACCEPT}
               disabled={uploading || !isStorageUploadReady}
               previewItems={activeBranch.portada ? [activeBranch.portada] : []}
               onRemovePreview={() => updateBranch(activeIndex, { portada: '' })}
@@ -628,7 +712,7 @@ function BranchGalleryEditor({ form, setForm, onUpload, uploading }) {
               <FileInput
                 key={key}
                 label={label}
-                accept="image/*,.jpg,.jpeg,.jfif,.png,.webp,.gif,.avif,.heic,.heif,.bmp,.tif,.tiff"
+                accept={PHOTO_ACCEPT}
                 multiple
                 disabled={uploading || !isStorageUploadReady}
                 previewItems={activeBranch[key]}
@@ -820,16 +904,23 @@ function ContentForm({ kind, form, setForm, onSubmit, onClear, onUpload, uploadi
           </div>
 
           {isObra && !hasBranchGalleries && (
-            <GalleryBalance
-              label="Galería principal"
-              count={uniqueImageCount(form.portada, form.imagenes, form.imagenesAntes, form.imagenesProceso, form.imagenesFinal)}
-            />
+            <>
+              <GalleryBalance
+                label="Galería principal"
+                count={uniqueImageCount(form.portada, form.imagenes, form.imagenesAntes, form.imagenesProceso, form.imagenesFinal)}
+              />
+              <GalleryOverview source={form} title="Distribución de fotos de la obra" />
+            </>
           )}
+
+          <p className="admin-media-save-hint">
+            Las fotos se agregan al formulario al subirlas. Para que queden publicadas en el sitio, presioná Guardar cambios al final.
+          </p>
 
           <div className="admin-upload-grid">
             <FileInput
               label="Subir portada"
-              accept="image/*,.jpg,.jpeg,.jfif,.png,.webp,.gif,.avif,.heic,.heif,.bmp,.tif,.tiff"
+              accept={PHOTO_ACCEPT}
               help="Imagen principal para la card y el detalle. Se admiten fotos comunes de celular y cámara."
               disabled={uploading || !isStorageUploadReady}
               previewItems={form.portada ? [form.portada] : []}
@@ -840,7 +931,7 @@ function ContentForm({ kind, form, setForm, onSubmit, onClear, onUpload, uploadi
               <>
             <FileInput
               label="Subir galería general"
-              accept="image/*,.jpg,.jpeg,.jfif,.png,.webp,.gif,.avif,.heic,.heif,.bmp,.tif,.tiff"
+              accept={PHOTO_ACCEPT}
               multiple
               help="Fotos visibles en el registro visual general."
               disabled={uploading || !isStorageUploadReady}
@@ -857,7 +948,7 @@ function ContentForm({ kind, form, setForm, onSubmit, onClear, onUpload, uploadi
               <>
                 <FileInput
                   label="Subir fotos: antes"
-                  accept="image/*,.jpg,.jpeg,.jfif,.png,.webp,.gif,.avif,.heic,.heif,.bmp,.tif,.tiff"
+                  accept={PHOTO_ACCEPT}
                   multiple
                   help="Estado inicial o relevamiento de la obra."
                   disabled={uploading || !isStorageUploadReady}
@@ -872,7 +963,7 @@ function ContentForm({ kind, form, setForm, onSubmit, onClear, onUpload, uploadi
                 />
                 <FileInput
                   label="Subir fotos: en proceso"
-                  accept="image/*,.jpg,.jpeg,.jfif,.png,.webp,.gif,.avif,.heic,.heif,.bmp,.tif,.tiff"
+                  accept={PHOTO_ACCEPT}
                   multiple
                   help="Avances, ejecución y etapas intermedias."
                   disabled={uploading || !isStorageUploadReady}
@@ -887,7 +978,7 @@ function ContentForm({ kind, form, setForm, onSubmit, onClear, onUpload, uploadi
                 />
                 <FileInput
                   label="Subir fotos: finalizada"
-                  accept="image/*,.jpg,.jpeg,.jfif,.png,.webp,.gif,.avif,.heic,.heif,.bmp,.tif,.tiff"
+                  accept={PHOTO_ACCEPT}
                   multiple
                   help="Resultado final para mostrar el cierre de obra."
                   disabled={uploading || !isStorageUploadReady}
