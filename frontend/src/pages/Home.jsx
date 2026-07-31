@@ -73,7 +73,8 @@ export default function Home() {
       <Seo
         title="Fortaleza Construcciones | Obras, Steel Framing y Construcción en Seco"
         description="Fortaleza Construcciones desarrolla obras comerciales y residenciales, Steel Framing, Drywall, construcción húmeda, plomería, electricidad, pintura, herrería y terminaciones en Rosario y Santa Fe."
-        image="/assets/img/logo/fzac-logo.jpg"
+        keywords="Fortaleza Construcciones, FZAC, constructora Rosario, obras comerciales Rosario, reformas Rosario, Steel Framing Rosario, Drywall Rosario, construcción en seco, construcción húmeda, plomería, electricidad, pintura, herrería, locales comerciales"
+        image="/assets/img/logo/fzac-logo.webp"
         canonicalPath="/"
       />
       <section className="hero-section" id="inicio">

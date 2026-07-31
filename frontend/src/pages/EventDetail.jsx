@@ -45,6 +45,7 @@ export default function EventDetail() {
         title={`${event.nombre} | Eventos FZAC`}
         description={event.descripcion}
         image={event.portada}
+        keywords={`${event.nombre}, Fortaleza Construcciones eventos, FZAC, montaje técnico, obras comerciales, eventos gastronómicos, Rosario, Santa Fe`}
         type="article"
         canonicalPath={`/eventos/${event.slug}`}
       />

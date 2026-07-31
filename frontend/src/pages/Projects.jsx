@@ -42,6 +42,7 @@ export default function Projects() {
       <Seo
         title="Obras y proyectos | Fortaleza Construcciones"
         description="Portfolio de obras de Fortaleza Construcciones: locales gastronómicos, proyectos comerciales, residenciales, Steel Framing, Drywall y construcción tradicional."
+        keywords="obras Fortaleza Construcciones, portfolio constructora Rosario, locales gastronómicos Rosario, Marvel Food obra, Burger House obra, Sliders Hamburgers obra, Fichines Rosario, Flama Rosario, reformas comerciales"
         image="/assets/img/obras/marvel-pellegrini/marvel-pellegrini-02.jpg"
         canonicalPath="/proyectos"
       />

@@ -15,6 +15,7 @@ export default function Events() {
       <Seo
         title="Eventos y participaciones | Fortaleza Construcciones"
         description="Participaciones y registros de Fortaleza Construcciones en eventos, locales y espacios comerciales con armado técnico y presencia operativa."
+        keywords="Fortaleza Construcciones eventos, FZAC Burgerland, montaje eventos gastronómicos, armado locales gastronómicos, soporte técnico eventos, obras comerciales eventos"
         image="/assets/img/eventos/burgerland/burgerland-01.jpg"
         canonicalPath="/eventos"
       />

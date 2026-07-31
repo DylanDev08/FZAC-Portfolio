@@ -157,6 +157,7 @@ export default function WorkDetail() {
         title={`${item.nombre} | Fortaleza Construcciones`}
         description={item.descripcion}
         image={cover}
+        keywords={`${item.nombre}, Fortaleza Construcciones, trabajos varios Rosario, Steel Framing, Drywall, plomería, electricidad, pisos, revestimientos, cielorrasos, construcción en seco, construcción húmeda`}
         type="article"
         canonicalPath={`/trabajos/${item.slug || item.id}`}
       />

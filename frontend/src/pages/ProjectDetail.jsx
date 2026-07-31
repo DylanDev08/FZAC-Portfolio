@@ -98,6 +98,7 @@ export default function ProjectDetail() {
         title={`${project.nombre} | Fortaleza Construcciones`}
         description={`${project.descripcion} Servicio de obra comercial y residencial con planificación, ejecución y terminaciones profesionales.`}
         image={cover}
+        keywords={`${project.nombre}, Fortaleza Construcciones, FZAC, obra comercial Rosario, reforma comercial, construcción en seco, Steel Framing, Drywall, construcción húmeda, Santa Fe`}
         type="article"
         canonicalPath={`/obra/${project.slug}`}
       />
