@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Download, Images, Plus, Trash2 } from 'lucide-react';
+import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, BarChart3, Briefcase, CalendarDays, Download, Eye, Folder, Images, Plus, Tags, Trash2, Type } from 'lucide-react';
 import { deleteProject, getAdminProjects, saveProject, syncProjectCatalog, updateProjectStatus } from '../services/projectsService.js';
 import { logout } from '../services/authService.js';
 import { slugify } from '../services/utils.js';
@@ -1409,16 +1409,16 @@ export default function Admin() {
           <div className="admin-session-card"><p>Sesión activa</p><strong>Administrador autorizado</strong></div>
 
           <nav className="admin-nav">
-            <button className={`admin-nav__btn ${tab === 'dashboard' ? 'is-active' : ''}`} onClick={() => setTab('dashboard')} type="button">Dashboard</button>
-            <button className={`admin-nav__btn ${tab === 'obras' ? 'is-active' : ''}`} onClick={() => setTab('obras')} type="button">Obras</button>
-            <button className={`admin-nav__btn ${tab === 'categorias' ? 'is-active' : ''}`} onClick={() => setTab('categorias')} type="button">Categorías</button>
-            <button className={`admin-nav__btn ${tab === 'textos' ? 'is-active' : ''}`} onClick={() => setTab('textos')} type="button">Textos</button>
-            <button className={`admin-nav__btn ${tab === 'trabajos' ? 'is-active' : ''}`} onClick={() => setTab('trabajos')} type="button">Trabajos varios</button>
-            <button className={`admin-nav__btn ${tab === 'eventos' ? 'is-active' : ''}`} onClick={() => setTab('eventos')} type="button">Eventos</button>
+            <button className={`admin-nav__btn ${tab === 'dashboard' ? 'is-active' : ''}`} onClick={() => setTab('dashboard')} type="button"><BarChart3 size={18} aria-hidden="true" /><span>Dashboard</span></button>
+            <button className={`admin-nav__btn ${tab === 'obras' ? 'is-active' : ''}`} onClick={() => setTab('obras')} type="button"><Folder size={18} aria-hidden="true" /><span>Obras</span></button>
+            <button className={`admin-nav__btn ${tab === 'categorias' ? 'is-active' : ''}`} onClick={() => setTab('categorias')} type="button"><Tags size={18} aria-hidden="true" /><span>Categorías</span></button>
+            <button className={`admin-nav__btn ${tab === 'textos' ? 'is-active' : ''}`} onClick={() => setTab('textos')} type="button"><Type size={18} aria-hidden="true" /><span>Textos</span></button>
+            <button className={`admin-nav__btn ${tab === 'trabajos' ? 'is-active' : ''}`} onClick={() => setTab('trabajos')} type="button"><Briefcase size={18} aria-hidden="true" /><span>Trabajos varios</span></button>
+            <button className={`admin-nav__btn ${tab === 'eventos' ? 'is-active' : ''}`} onClick={() => setTab('eventos')} type="button"><CalendarDays size={18} aria-hidden="true" /><span>Eventos</span></button>
           </nav>
 
           <div className="admin-sidebar__footer">
-            <Link to="/" className="btn btn--ghost btn--full" style={{ marginBottom: 10 }}>Ver sitio →</Link>
+            <Link to="/" className="btn btn--ghost btn--full" style={{ marginBottom: 10 }}><Eye size={17} aria-hidden="true" /> Ver sitio</Link>
             <button className="btn btn--ghost btn--full" type="button" onClick={handleLogout}>Cerrar sesión</button>
           </div>
         </aside>

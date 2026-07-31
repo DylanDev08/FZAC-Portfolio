@@ -8696,3 +8696,196 @@ a[href*="wa.me"] {
     width: 100%;
   }
 }
+
+/* Admin visual refactor */
+.admin-page {
+  background:
+    radial-gradient(circle at 12% 0%, rgba(240,190,93,.08), transparent 30%),
+    linear-gradient(180deg, #080808 0%, #0b0b0b 100%) !important;
+}
+
+.admin-shell {
+  width: min(calc(100% - 28px), 1760px) !important;
+  min-height: calc(100vh - var(--header-height)) !important;
+  grid-template-columns: 258px minmax(0, 1fr) !important;
+  gap: 24px !important;
+  padding: 24px 0 56px !important;
+  margin: 0 auto !important;
+}
+
+.admin-sidebar {
+  position: sticky !important;
+  top: calc(var(--header-height) + 18px) !important;
+  max-height: calc(100svh - var(--header-height) - 36px);
+  overflow: auto;
+  border: 1px solid rgba(240,190,93,.14) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 24px 70px rgba(0,0,0,.22);
+}
+
+.admin-nav__btn {
+  display: flex !important;
+  align-items: center;
+  justify-content: flex-start !important;
+  gap: 10px;
+  min-height: 46px;
+  border-radius: 8px !important;
+}
+
+.admin-nav__btn svg,
+.admin-sidebar__footer .btn svg {
+  flex: 0 0 auto;
+}
+
+.admin-sidebar__footer .btn {
+  gap: 8px;
+}
+
+.admin-content {
+  display: grid;
+  align-content: start;
+  gap: 24px;
+  min-width: 0;
+}
+
+.admin-topbar {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 18px;
+  padding: clamp(22px, 2.6vw, 34px) !important;
+  border: 1px solid rgba(240,190,93,.14);
+  border-radius: 8px !important;
+  background:
+    linear-gradient(135deg, rgba(240,190,93,.085), rgba(255,255,255,.03) 42%, rgba(255,255,255,.018));
+}
+
+.admin-topbar .admin-feedback--top {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+
+.admin-dashboard {
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)) !important;
+  gap: 18px !important;
+}
+
+.admin-stat {
+  min-height: 150px;
+  border-radius: 8px !important;
+  border: 1px solid rgba(255,255,255,.08);
+  background:
+    radial-gradient(circle at 100% 0, rgba(240,190,93,.11), transparent 30%),
+    rgba(255,255,255,.035);
+}
+
+.admin-card {
+  border-color: rgba(255,255,255,.08) !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.048), rgba(255,255,255,.018)),
+    rgba(12,12,12,.86) !important;
+}
+
+.admin-card__header--row {
+  align-items: flex-start !important;
+}
+
+.admin-card__header-actions {
+  justify-content: flex-end;
+}
+
+.admin-list--projects {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 520px), 1fr));
+  gap: 16px !important;
+}
+
+.admin-item--project {
+  grid-template-columns: 128px minmax(0, 1fr) !important;
+  align-items: stretch;
+  min-height: 160px;
+  padding: 16px !important;
+}
+
+.admin-item__thumb {
+  width: 128px !important;
+  height: 128px !important;
+  align-self: start;
+}
+
+.admin-item__content {
+  min-width: 0;
+}
+
+.admin-item__actions {
+  margin-top: 14px;
+}
+
+.admin-form__grid {
+  grid-template-columns: repeat(3, minmax(210px, 1fr)) !important;
+}
+
+.admin-media-panel .admin-upload-grid,
+.admin-upload-grid--branches {
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)) !important;
+}
+
+.admin-upload-preview {
+  grid-template-columns: repeat(auto-fit, minmax(185px, 1fr)) !important;
+}
+
+@media (max-width: 1120px) {
+  .admin-topbar {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-shell {
+    grid-template-columns: 1fr !important;
+  }
+
+  .admin-sidebar {
+    position: relative !important;
+    top: auto !important;
+    max-height: none;
+  }
+
+  .admin-nav {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .admin-form__grid {
+    grid-template-columns: repeat(2, minmax(210px, 1fr)) !important;
+  }
+}
+
+@media (max-width: 760px) {
+  .admin-nav,
+  .admin-form__grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .admin-topbar {
+    padding: 18px !important;
+  }
+
+  .admin-item--project {
+    grid-template-columns: 96px minmax(0, 1fr) !important;
+    min-height: 0;
+  }
+
+  .admin-item__thumb {
+    width: 96px !important;
+    height: 96px !important;
+  }
+}
+
+@media (max-width: 460px) {
+  .admin-item--project {
+    grid-template-columns: 1fr !important;
+  }
+
+  .admin-item__thumb {
+    width: 100% !important;
+    height: 180px !important;
+  }
+}

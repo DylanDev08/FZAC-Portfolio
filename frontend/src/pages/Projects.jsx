@@ -46,10 +46,17 @@ export default function Projects() {
         canonicalPath="/proyectos"
       />
       <section className="page-hero projects-hero">
-        <div className="container">
-          <span className="eyebrow">Obras</span>
-          <h1>Obras comerciales y residenciales</h1>
-          <p>Conocé proyectos finalizados, obras en ejecución y próximos desarrollos de Fortaleza Construcciones.</p>
+        <div className="container projects-hero__content">
+          <div>
+            <span className="eyebrow">Obras</span>
+            <h1>Obras comerciales y residenciales</h1>
+            <p>Conocé proyectos finalizados, obras en ejecución y próximos desarrollos de Fortaleza Construcciones.</p>
+          </div>
+          <div className="projects-hero__signals" aria-label="Resumen de obras">
+            <span>Locales comerciales</span>
+            <span>Viviendas</span>
+            <span>Servicios integrales</span>
+          </div>
         </div>
       </section>
 

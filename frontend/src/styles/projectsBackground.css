@@ -1,9 +1,76 @@
-/* FZAC: fondo fotográfico para el explorador de Obras */
+/* FZAC: fondo fotografico para el explorador de Obras */
+.projects-hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  min-height: clamp(360px, 46vw, 560px);
+  display: grid;
+  align-items: end;
+  padding: clamp(128px, 16vw, 190px) 0 clamp(46px, 7vw, 84px) !important;
+  border-bottom: 1px solid rgba(240,190,93,.16);
+  background:
+    linear-gradient(90deg, rgba(7,7,7,.92) 0%, rgba(7,7,7,.72) 46%, rgba(7,7,7,.36) 100%),
+    linear-gradient(0deg, rgba(7,7,7,.94) 0%, rgba(7,7,7,.34) 48%, rgba(7,7,7,.72) 100%),
+    url('/assets/img/obras/trabajos-varios/construccion-en-seco/IMG-20210509-WA0007-1-.jpeg') center 43% / cover no-repeat;
+}
+
+.projects-hero::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  height: 38%;
+  z-index: 0;
+  background: linear-gradient(180deg, transparent, var(--color-bg));
+  pointer-events: none;
+}
+
+.projects-hero__content {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 360px);
+  gap: clamp(22px, 5vw, 64px);
+  align-items: end;
+}
+
+.projects-hero__content h1 {
+  max-width: 900px;
+  text-shadow: 0 18px 46px rgba(0,0,0,.56);
+}
+
+.projects-hero__content p {
+  max-width: 760px;
+  color: rgba(244,241,232,.88);
+}
+
+.projects-hero__signals {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid rgba(240,190,93,.22);
+  border-radius: 8px;
+  background: rgba(7,7,7,.50);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.projects-hero__signals span {
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  padding: 0 13px;
+  border-radius: 6px;
+  color: var(--color-text);
+  background: rgba(255,255,255,.055);
+  font-size: .88rem;
+  font-weight: 850;
+}
+
 .portfolio-workscape {
   position: relative;
   isolation: isolate;
   overflow: hidden;
-  padding-top: clamp(54px, 7vw, 86px) !important;
+  padding-top: clamp(34px, 5vw, 62px) !important;
   padding-bottom: clamp(76px, 9vw, 128px) !important;
   background-color: #08090b;
 }
@@ -13,9 +80,9 @@
   position: absolute;
   inset: 0;
   z-index: -3;
-  background-image: url('/assets/img/obras/sliders-rosas/sliders-rosas-final-04.jpg');
+  background-image: url('/assets/img/obras/trabajos-varios/construccion-en-seco/IMG-20210509-WA0007-1-.jpeg');
   background-size: cover;
-  background-position: center 46%;
+  background-position: center 43%;
   background-repeat: no-repeat;
   transform: scale(1.035);
   filter: saturate(0.92) contrast(1.08) brightness(0.78);
@@ -75,11 +142,44 @@
 }
 
 .portfolio-workscape .portfolio-toolbar {
-  background: rgba(13, 14, 17, 0.82) !important;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  padding: clamp(18px, 2.6vw, 28px) !important;
+  background:
+    linear-gradient(90deg, rgba(17,18,20,.96), rgba(17,18,20,.90) 56%, rgba(17,18,20,.62)),
+    url('/assets/img/obras/fichines/fichines-final-fachada.jpeg') right 18% center / min(34vw, 360px) auto no-repeat !important;
   border-color: rgba(217, 164, 65, 0.26) !important;
   box-shadow: 0 24px 70px rgba(0, 0, 0, 0.34) !important;
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
+}
+
+.portfolio-workscape .portfolio-toolbar::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background:
+    radial-gradient(circle at 84% 32%, rgba(240,190,93,.16), transparent 24%),
+    linear-gradient(180deg, rgba(0,0,0,.12), rgba(0,0,0,.38));
+  pointer-events: none;
+}
+
+.portfolio-workscape .portfolio-toolbar__header,
+.portfolio-workscape .portfolio-toolbar__controls,
+.portfolio-workscape .portfolio-toolbar__status {
+  position: relative;
+  z-index: 1;
+}
+
+.portfolio-workscape .portfolio-toolbar__search > div,
+.portfolio-workscape .portfolio-toolbar__type select,
+.portfolio-workscape .portfolio-toolbar__status button,
+.portfolio-workscape .portfolio-toolbar__clear {
+  background-color: rgba(9,10,12,.82) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 .portfolio-workscape .portfolio-grid,
@@ -107,6 +207,24 @@
 }
 
 @media (max-width: 760px) {
+  .projects-hero {
+    min-height: 420px;
+    padding-top: 118px !important;
+    background-position: center top;
+  }
+
+  .projects-hero__content {
+    grid-template-columns: 1fr;
+  }
+
+  .projects-hero__signals {
+    grid-template-columns: 1fr;
+  }
+
+  .projects-hero__signals span {
+    min-height: 38px;
+  }
+
   .portfolio-workscape {
     padding-top: 42px !important;
   }
@@ -123,5 +241,11 @@
 
   .portfolio-workscape__intro p {
     font-size: 0.92rem;
+  }
+
+  .portfolio-workscape .portfolio-toolbar {
+    background:
+      linear-gradient(180deg, rgba(17,18,20,.96), rgba(17,18,20,.88)),
+      url('/assets/img/obras/fichines/fichines-final-fachada.jpeg') center top / cover no-repeat !important;
   }
 }
