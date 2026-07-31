@@ -1,8 +1,12 @@
 import React from 'react';
-import { CheckCircle2 } from 'lucide-react';
+import { CheckCircle2, Instagram, Mail, MapPin, Phone } from 'lucide-react';
 
-const BUILD_STAGES = ['Base', 'Estructura', 'Terminaciones'];
-const BRICKS = Array.from({ length: 18 });
+const CONTACT_ITEMS = [
+  { label: 'Instagram', value: '@fzaconstrucciones', Icon: Instagram },
+  { label: 'WhatsApp', value: '+54 9 341 584 7000', Icon: Phone },
+  { label: 'Email', value: 'fortalezaconstruccionesrosario@gmail.com', Icon: Mail },
+  { label: 'Zona de trabajo', value: 'Rosario, Santa Fe', Icon: MapPin },
+];
 
 export default function ConstructionLoader({ ready = false }) {
   return (
@@ -13,54 +17,33 @@ export default function ConstructionLoader({ ready = false }) {
       aria-label={ready ? 'Sitio listo' : 'Cargando Fortaleza Construcciones'}
     >
       <div className="construction-loader__inner">
-        <section className="construction-loader__copy">
-          <div className="construction-loader__brand">
-            <img src="/assets/img/logo/fzac-logo.jpg" alt="Fortaleza Construcciones" width="64" height="64" />
-            <div>
-              <strong>Fortaleza Construcciones</strong>
-              <span>FZAC · Obras y servicios integrales</span>
-            </div>
+        <div className="construction-loader__brand">
+          <img src="/assets/img/logo/fzac-logo.webp" alt="Fortaleza Construcciones" width="82" height="82" />
+          <div>
+            <strong>Fortaleza Construcciones</strong>
+            <span>Portfolio profesional de obras</span>
           </div>
+        </div>
 
-          <div className="construction-loader__headline">
-            <span>Portfolio institucional · Rosario, Santa Fe</span>
-            <h1>Levantando la obra digital</h1>
-            <p>Preparando galerías, obras y contenido para una navegación rápida y prolija.</p>
-          </div>
+        <div className="construction-loader__headline">
+          <span>FZAC · Rosario, Santa Fe</span>
+          <h1>{ready ? 'Listo para construir' : 'Cargando portfolio'}</h1>
+          <p>Preparando obras, galerías y servicios para mostrar el trabajo de Fortaleza Construcciones.</p>
+        </div>
 
-          <div className="construction-loader__socials" aria-label="Redes y contacto de FZAC">
-            <span>@fzaconstrucciones</span>
-            <span>Fortaleza Construcciones</span>
-          </div>
-        </section>
-
-        <section className="construction-loader__site" aria-hidden="true">
-          <div className="construction-loader__crane">
-            <span />
-            <i />
-          </div>
-
-          <div className="construction-loader__wall">
-            {BRICKS.map((_, index) => (
-              <span key={index} style={{ '--delay': `${index * 55}ms` }} />
-            ))}
-          </div>
-
-          <div className="construction-loader__foundation">
-            <span>FZAC</span>
-            <i />
-          </div>
-        </section>
-
-        <div className="construction-loader__stages">
-          {BUILD_STAGES.map((stage, index) => (
-            <span key={stage}><i>{String(index + 1).padStart(2, '0')}</i>{stage}</span>
+        <div className="construction-loader__socials" aria-label="Datos de contacto de FZAC">
+          {CONTACT_ITEMS.map(({ label, value, Icon }) => (
+            <span key={label}>
+              <Icon size={16} aria-hidden="true" />
+              <small>{label}</small>
+              <strong>{value}</strong>
+            </span>
           ))}
         </div>
 
         <div className="construction-loader__status">
           {ready && <CheckCircle2 aria-hidden="true" size={18} strokeWidth={2} />}
-          <span>{ready ? 'Listo para construir' : 'Preparando estructura visual'}</span>
+          <span>{ready ? 'Listo para construir' : 'Preparando el sitio'}</span>
         </div>
 
         <div className="construction-loader__progress" aria-hidden="true">

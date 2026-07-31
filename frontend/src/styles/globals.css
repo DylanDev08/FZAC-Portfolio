@@ -9675,3 +9675,184 @@ a[href*="wa.me"] {
     border-bottom: 0 !important;
   }
 }
+
+/* =========================================================
+   FZAC FINAL - loader simple con fondo de obra
+   ========================================================= */
+.construction-loader {
+  padding: max(18px, env(safe-area-inset-top)) clamp(14px, 4vw, 44px) max(18px, env(safe-area-inset-bottom)) !important;
+  background:
+    linear-gradient(90deg, rgba(5,5,5,.92), rgba(5,5,5,.70), rgba(5,5,5,.9)),
+    linear-gradient(180deg, rgba(5,5,5,.18), rgba(5,5,5,.84)),
+    url('/assets/img/obras/trabajos-varios/construccion-en-seco/construccion-seco-01.jpg') center / cover no-repeat !important;
+}
+
+.construction-loader::before {
+  opacity: .18 !important;
+  background-size: 42px 42px !important;
+  background-image:
+    linear-gradient(rgba(255,255,255,.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.06) 1px, transparent 1px) !important;
+}
+
+.construction-loader::after {
+  display: none !important;
+}
+
+.construction-loader__inner {
+  width: min(760px, 100%) !important;
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  grid-template-areas: none !important;
+  gap: clamp(18px, 3vw, 26px) !important;
+  padding: clamp(22px, 4vw, 38px) !important;
+  border: 1px solid rgba(240,190,93,.20) !important;
+  border-radius: 8px !important;
+  background:
+    linear-gradient(180deg, rgba(12,12,12,.86), rgba(6,6,6,.82)) !important;
+  box-shadow: 0 28px 80px rgba(0,0,0,.46) !important;
+}
+
+.construction-loader__brand {
+  display: flex !important;
+  align-items: center !important;
+  gap: 15px !important;
+}
+
+.construction-loader__brand img {
+  width: 82px !important;
+  height: 82px !important;
+  border: 2px solid rgba(240,190,93,.45) !important;
+  border-radius: 999px !important;
+  background: #050505 !important;
+  object-fit: cover !important;
+  box-shadow: 0 18px 38px rgba(0,0,0,.38) !important;
+}
+
+.construction-loader__brand strong {
+  color: #fff !important;
+  font-size: clamp(1.05rem, 2.4vw, 1.35rem) !important;
+  letter-spacing: 0 !important;
+}
+
+.construction-loader__brand span {
+  color: rgba(255,255,255,.68) !important;
+  font-size: .92rem !important;
+}
+
+.construction-loader__headline {
+  display: grid !important;
+  gap: 10px !important;
+}
+
+.construction-loader__headline > span {
+  width: fit-content;
+  padding: 7px 11px;
+  border: 1px solid rgba(240,190,93,.22);
+  border-radius: 999px;
+  background: rgba(240,190,93,.09);
+  color: var(--color-primary-strong) !important;
+  font-size: .82rem !important;
+  font-weight: 900 !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+}
+
+.construction-loader__headline h1 {
+  max-width: 640px;
+  margin: 0;
+  color: #fff;
+  font-family: var(--font-title);
+  font-size: clamp(2rem, 5vw, 3.3rem);
+  font-weight: 950;
+  line-height: 1.02;
+  letter-spacing: 0 !important;
+}
+
+.construction-loader__headline p {
+  max-width: 580px;
+  margin: 0;
+  color: rgba(255,255,255,.75) !important;
+  font-size: 1rem !important;
+  line-height: 1.68 !important;
+  letter-spacing: 0 !important;
+}
+
+.construction-loader__socials {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px !important;
+}
+
+.construction-loader__socials span {
+  display: grid !important;
+  grid-template-columns: 22px minmax(0, 1fr);
+  grid-template-areas:
+    "icon label"
+    "icon value";
+  gap: 2px 9px !important;
+  min-height: 58px !important;
+  align-items: center !important;
+  padding: 11px 12px !important;
+  border: 1px solid rgba(255,255,255,.12) !important;
+  border-radius: 8px !important;
+  background: rgba(255,255,255,.055) !important;
+  color: rgba(255,255,255,.86) !important;
+}
+
+.construction-loader__socials svg {
+  grid-area: icon;
+  color: var(--color-primary-strong);
+}
+
+.construction-loader__socials small {
+  grid-area: label;
+  color: rgba(255,255,255,.56);
+  font-size: .72rem;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.construction-loader__socials strong {
+  grid-area: value;
+  color: #fff;
+  font-size: .92rem;
+  font-weight: 900;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.construction-loader__status {
+  grid-area: auto !important;
+  margin: 0 !important;
+  color: rgba(255,255,255,.82) !important;
+  font-size: .88rem !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+}
+
+.construction-loader__progress {
+  grid-area: auto !important;
+  height: 8px !important;
+  margin: 0 !important;
+  border-radius: 999px;
+}
+
+.construction-loader__progress span {
+  background: linear-gradient(90deg, var(--color-primary), var(--color-primary-strong)) !important;
+}
+
+@media (max-width: 640px) {
+  .construction-loader__brand {
+    align-items: flex-start !important;
+  }
+
+  .construction-loader__brand img {
+    width: 68px !important;
+    height: 68px !important;
+  }
+
+  .construction-loader__socials {
+    grid-template-columns: 1fr;
+  }
+}
