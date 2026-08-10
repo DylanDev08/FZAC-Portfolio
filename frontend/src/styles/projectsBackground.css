@@ -1,24 +1,28 @@
-/* FZAC: fondo fotografico para el explorador de Obras */
+/* FZAC: portada fotografica del explorador de Obras */
 .projects-hero {
   position: relative;
   isolation: isolate;
   overflow: hidden;
-  min-height: clamp(360px, 46vw, 560px);
+  min-height: clamp(520px, 62vw, 780px);
   display: grid;
   align-items: end;
   padding: clamp(128px, 16vw, 190px) 0 clamp(46px, 7vw, 84px) !important;
   border-bottom: 1px solid rgba(240,190,93,.16);
-  background:
-    linear-gradient(90deg, rgba(7,7,7,.92) 0%, rgba(7,7,7,.72) 46%, rgba(7,7,7,.36) 100%),
-    linear-gradient(0deg, rgba(7,7,7,.94) 0%, rgba(7,7,7,.34) 48%, rgba(7,7,7,.72) 100%),
-    url('/assets/img/obras/trabajos-varios/construccion-en-seco/IMG-20210509-WA0007-1-.jpeg') center 43% / cover no-repeat;
+  background-color: #08090b;
+  background-image:
+    linear-gradient(90deg, rgba(7,7,7,.72) 0%, rgba(7,7,7,.40) 44%, rgba(7,7,7,.12) 100%),
+    linear-gradient(0deg, rgba(7,7,7,.88) 0%, rgba(7,7,7,.14) 55%, rgba(7,7,7,.28) 100%),
+    url('/assets/img/obras/trabajos-varios/construccion-en-seco/IMG-20210509-WA0007-1-.jpeg');
+  background-size: 100% 100%, 100% 100%, contain;
+  background-position: center, center, center;
+  background-repeat: no-repeat;
 }
 
 .projects-hero::after {
   content: "";
   position: absolute;
   inset: auto 0 0;
-  height: 38%;
+  height: 30%;
   z-index: 0;
   background: linear-gradient(180deg, transparent, var(--color-bg));
   pointer-events: none;
@@ -33,15 +37,8 @@
   align-items: end;
 }
 
-.projects-hero__content h1 {
-  max-width: 900px;
-  text-shadow: 0 18px 46px rgba(0,0,0,.56);
-}
-
-.projects-hero__content p {
-  max-width: 760px;
-  color: rgba(244,241,232,.88);
-}
+.projects-hero__content h1 { max-width: 900px; text-shadow: 0 18px 46px rgba(0,0,0,.7); }
+.projects-hero__content p { max-width: 760px; color: rgba(244,241,232,.92); text-shadow: 0 4px 18px rgba(0,0,0,.9); }
 
 .projects-hero__signals {
   display: grid;
@@ -49,203 +46,33 @@
   padding: 14px;
   border: 1px solid rgba(240,190,93,.22);
   border-radius: 8px;
-  background: rgba(7,7,7,.50);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-}
-
-.projects-hero__signals span {
-  min-height: 42px;
-  display: flex;
-  align-items: center;
-  padding: 0 13px;
-  border-radius: 6px;
-  color: var(--color-text);
-  background: rgba(255,255,255,.055);
-  font-size: .88rem;
-  font-weight: 850;
-}
-
-.portfolio-workscape {
-  position: relative;
-  isolation: isolate;
-  overflow: hidden;
-  padding-top: clamp(34px, 5vw, 62px) !important;
-  padding-bottom: clamp(76px, 9vw, 128px) !important;
-  background-color: #08090b;
-}
-
-.portfolio-workscape::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -3;
-  background-image: url('/assets/img/obras/trabajos-varios/construccion-en-seco/IMG-20210509-WA0007-1-.jpeg');
-  background-size: cover;
-  background-position: center 43%;
-  background-repeat: no-repeat;
-  transform: scale(1.035);
-  filter: saturate(0.92) contrast(1.08) brightness(0.78);
-}
-
-.portfolio-workscape::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -2;
-  background:
-    radial-gradient(circle at 18% 8%, rgba(217, 164, 65, 0.22), transparent 26%),
-    linear-gradient(180deg, rgba(5, 6, 8, 0.72) 0%, rgba(5, 6, 8, 0.84) 42%, rgba(5, 6, 8, 0.94) 100%),
-    linear-gradient(90deg, rgba(0, 0, 0, 0.82) 0%, rgba(0, 0, 0, 0.48) 48%, rgba(0, 0, 0, 0.84) 100%);
-}
-
-.portfolio-workscape > .container {
-  position: relative;
-  z-index: 1;
-}
-
-.portfolio-workscape__intro {
-  width: min(100%, 920px);
-  margin: 0 0 24px;
-  padding: 18px 20px;
-  border: 1px solid rgba(217, 164, 65, 0.18);
-  border-radius: 10px;
-  background: linear-gradient(90deg, rgba(11, 12, 14, 0.82), rgba(11, 12, 14, 0.46));
-  box-shadow: 0 18px 52px rgba(0, 0, 0, 0.28);
+  background: rgba(7,7,7,.46);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
 }
+.projects-hero__signals span { min-height:42px; display:flex; align-items:center; padding:0 13px; border-radius:6px; color:var(--color-text); background:rgba(255,255,255,.055); font-size:.88rem; font-weight:850; }
 
-.portfolio-workscape__intro span {
-  display: inline-flex;
-  align-items: center;
-  gap: 9px;
-  color: var(--color-primary-strong);
-  font-size: 0.74rem;
-  font-weight: 850;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-}
+.portfolio-workscape { position:relative; isolation:isolate; overflow:hidden; padding-top:clamp(34px,5vw,62px)!important; padding-bottom:clamp(76px,9vw,128px)!important; background:#08090b; }
+.portfolio-workscape::before { content:""; position:absolute; inset:0; z-index:-3; background-image:url('/assets/img/obras/trabajos-varios/construccion-en-seco/IMG-20210509-WA0007-1-.jpeg'); background-size:contain; background-position:center top; background-repeat:no-repeat; opacity:.24; }
+.portfolio-workscape::after { content:""; position:absolute; inset:0; z-index:-2; background:linear-gradient(180deg,rgba(5,6,8,.62) 0%,rgba(5,6,8,.88) 35%,rgba(5,6,8,.98) 100%); }
+.portfolio-workscape>.container { position:relative; z-index:1; }
 
-.portfolio-workscape__intro span::before {
-  content: "";
-  width: 26px;
-  height: 1px;
-  background: linear-gradient(90deg, var(--color-primary), transparent);
-}
+.portfolio-workscape__intro { width:min(100%,920px); margin:0 0 24px; padding:18px 20px; border:1px solid rgba(217,164,65,.18); border-radius:10px; background:rgba(11,12,14,.70); box-shadow:0 18px 52px rgba(0,0,0,.28); backdrop-filter:blur(8px); }
+.portfolio-workscape__intro span { display:inline-flex; align-items:center; gap:9px; color:var(--color-primary-strong); font-size:.74rem; font-weight:850; letter-spacing:.18em; text-transform:uppercase; }
+.portfolio-workscape__intro span::before { content:""; width:26px; height:1px; background:linear-gradient(90deg,var(--color-primary),transparent); }
+.portfolio-workscape__intro p { margin:7px 0 0; max-width:720px; color:rgba(255,255,255,.82); line-height:1.65; }
 
-.portfolio-workscape__intro p {
-  margin: 7px 0 0;
-  max-width: 720px;
-  color: rgba(255, 255, 255, 0.82);
-  line-height: 1.65;
-}
+.portfolio-workscape .portfolio-toolbar { background:rgba(13,14,17,.88)!important; border-color:rgba(217,164,65,.26)!important; box-shadow:0 24px 70px rgba(0,0,0,.34)!important; backdrop-filter:blur(10px); }
+.portfolio-workscape .portfolio-grid,.portfolio-workscape .obra-status-sections,.portfolio-workscape .empty-state { position:relative; z-index:1; }
+.portfolio-workscape .obra-status-section { padding:clamp(18px,3vw,28px); border:1px solid rgba(255,255,255,.08); border-radius:14px; background:rgba(8,9,11,.72); box-shadow:0 24px 70px rgba(0,0,0,.28); backdrop-filter:blur(8px); }
+.portfolio-workscape .project-card,.portfolio-workscape .project-card--premium,.portfolio-workscape .project-card-skeleton { box-shadow:0 22px 58px rgba(0,0,0,.36); background-color:rgba(12,13,16,.94)!important; }
 
-.portfolio-workscape .portfolio-toolbar {
-  position: relative;
-  isolation: isolate;
-  overflow: hidden;
-  padding: clamp(18px, 2.6vw, 28px) !important;
-  background:
-    linear-gradient(90deg, rgba(17,18,20,.96), rgba(17,18,20,.90) 56%, rgba(17,18,20,.62)),
-    url('/assets/img/obras/fichines/fichines-final-fachada.jpeg') right 18% center / min(34vw, 360px) auto no-repeat !important;
-  border-color: rgba(217, 164, 65, 0.26) !important;
-  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.34) !important;
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-}
-
-.portfolio-workscape .portfolio-toolbar::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  background:
-    radial-gradient(circle at 84% 32%, rgba(240,190,93,.16), transparent 24%),
-    linear-gradient(180deg, rgba(0,0,0,.12), rgba(0,0,0,.38));
-  pointer-events: none;
-}
-
-.portfolio-workscape .portfolio-toolbar__header,
-.portfolio-workscape .portfolio-toolbar__controls,
-.portfolio-workscape .portfolio-toolbar__status {
-  position: relative;
-  z-index: 1;
-}
-
-.portfolio-workscape .portfolio-toolbar__search > div,
-.portfolio-workscape .portfolio-toolbar__type select,
-.portfolio-workscape .portfolio-toolbar__status button,
-.portfolio-workscape .portfolio-toolbar__clear {
-  background-color: rgba(9,10,12,.82) !important;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-}
-
-.portfolio-workscape .portfolio-grid,
-.portfolio-workscape .obra-status-sections,
-.portfolio-workscape .empty-state {
-  position: relative;
-  z-index: 1;
-}
-
-.portfolio-workscape .obra-status-section {
-  padding: clamp(18px, 3vw, 28px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 14px;
-  background: rgba(8, 9, 11, 0.44);
-  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.28);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-}
-
-.portfolio-workscape .project-card,
-.portfolio-workscape .project-card--premium,
-.portfolio-workscape .project-card-skeleton {
-  box-shadow: 0 22px 58px rgba(0, 0, 0, 0.36);
-  background-color: rgba(12, 13, 16, 0.94) !important;
-}
-
-@media (max-width: 760px) {
-  .projects-hero {
-    min-height: 420px;
-    padding-top: 118px !important;
-    background-position: center top;
-  }
-
-  .projects-hero__content {
-    grid-template-columns: 1fr;
-  }
-
-  .projects-hero__signals {
-    grid-template-columns: 1fr;
-  }
-
-  .projects-hero__signals span {
-    min-height: 38px;
-  }
-
-  .portfolio-workscape {
-    padding-top: 42px !important;
-  }
-
-  .portfolio-workscape::before {
-    background-position: center top;
-    transform: scale(1.08);
-  }
-
-  .portfolio-workscape__intro {
-    margin-bottom: 18px;
-    padding: 15px;
-  }
-
-  .portfolio-workscape__intro p {
-    font-size: 0.92rem;
-  }
-
-  .portfolio-workscape .portfolio-toolbar {
-    background:
-      linear-gradient(180deg, rgba(17,18,20,.96), rgba(17,18,20,.88)),
-      url('/assets/img/obras/fichines/fichines-final-fachada.jpeg') center top / cover no-repeat !important;
-  }
+@media(max-width:760px){
+  .projects-hero { min-height:640px; padding-top:110px!important; background-size:100% 100%,100% 100%,contain; background-position:center,center,center 78px; }
+  .projects-hero__content { grid-template-columns:1fr; }
+  .projects-hero__signals { display:none; }
+  .portfolio-workscape { padding-top:42px!important; }
+  .portfolio-workscape::before { background-size:contain; background-position:center top; }
+  .portfolio-workscape__intro { margin-bottom:18px; padding:15px; }
+  .portfolio-workscape__intro p { font-size:.92rem; }
 }
