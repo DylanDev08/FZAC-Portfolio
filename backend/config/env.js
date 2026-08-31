@@ -6,6 +6,12 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const envPath = path.join(__dirname, '..', '.env');
 
+const DEFAULT_ADMIN_EMAILS = [
+  'fortalezaconstruccionesrosario@gmail.com',
+  'materialezfzacecommerce@gmail.com',
+  'dylansalcedo333@gmail.com',
+];
+
 function loadLocalEnv() {
   if (!fs.existsSync(envPath)) return;
 
@@ -19,7 +25,7 @@ function loadLocalEnv() {
     const rawValue = trimmed.slice(index + 1).trim();
     if (!key || process.env[key] !== undefined) continue;
 
-    process.env[key] = rawValue.replace(/^['"]|['"]$/g, '');
+    process.env[key] = rawValue.replace(/^[ '\"]|['\"]$/g, '');
   }
 }
 
@@ -46,12 +52,17 @@ function emailListFromValue(value) {
 }
 
 function uniqueEmailList(items) {
-  return [...new Set(items)];
+  return [...new Set(items.filter(Boolean))];
 }
 
-const allowedAdminEmails = uniqueEmailList([
+const configuredAdminEmails = uniqueEmailList([
   ...emailListFromValue(process.env.ADMIN_EMAILS),
   ...emailListFromValue(process.env.ADMIN_EMAIL),
+]);
+
+const allowedAdminEmails = uniqueEmailList([
+  ...DEFAULT_ADMIN_EMAILS,
+  ...configuredAdminEmails,
 ]);
 
 const DEFAULT_PHOTO_MIME_TYPES = [
@@ -84,6 +95,7 @@ const configuredCorsOrigins = uniqueEmailList([
 export const env = {
   port: numberFromEnv('PORT', 4000),
   adminEmails: allowedAdminEmails,
+  configuredAdminEmails,
   supabaseUrl: String(process.env.SUPABASE_URL || '').replace(/\/rest\/v1\/?$/i, '').replace(/\/$/, ''),
   supabaseAnonKey: String(process.env.SUPABASE_ANON_KEY || ''),
   supabaseServiceRoleKey: String(process.env.SUPABASE_SERVICE_ROLE_KEY || ''),
@@ -103,9 +115,10 @@ export function validateEnvironment() {
     'SUPABASE_URL',
     'SUPABASE_ANON_KEY',
     'SUPABASE_SERVICE_ROLE_KEY',
-    'ADMIN_EMAILS',
   ];
   const missing = required.filter((key) => !String(process.env[key] || '').trim());
+
+  if (!env.adminEmails.length) missing.push('ADMIN_EMAILS');
 
   if (process.env.NODE_ENV === 'production' && missing.length) {
     throw new Error(`Faltan variables de entorno requeridas: ${missing.join(', ')}`);
