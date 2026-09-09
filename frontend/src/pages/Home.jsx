@@ -18,7 +18,6 @@ const services = [
   { title: 'Gestión de obra', tag: 'Planificación', text: 'Coordinación de etapas, equipos y materiales para cumplir objetivos, tiempos y calidad de ejecución.', points: ['Planificación', 'Seguimiento', 'Coordinación'], workHash: 'trabajos-institucionales' },
 ];
 
-
 const processSteps = [
   ['01', 'Relevamiento', 'Analizamos el espacio, las necesidades y el alcance de la intervención.'],
   ['02', 'Planificación', 'Definimos etapas, materiales, recursos y tiempos de trabajo.'],
@@ -31,6 +30,7 @@ export default function Home() {
   const [trabajos, setTrabajos] = useState([]);
   const [eventos, setEventos] = useState([]);
   const [siteTexts, setSiteTexts] = useState(DEFAULT_SITE_TEXTS);
+
   useEffect(() => {
     Promise.all([getProjects(), getTrabajos(), getEventos(), getPublicSiteTexts()])
       .then(([projectList, trabajosList, eventosList, nextSiteTexts]) => {
@@ -46,11 +46,16 @@ export default function Home() {
       });
   }, []);
 
+  useEffect(() => {
+    if (window.location.hash !== '#obras-destacadas') return;
+    const timer = window.setTimeout(() => {
+      document.getElementById('obras-destacadas')?.scrollIntoView({ block: 'start' });
+    }, 350);
+    return () => window.clearTimeout(timer);
+  }, [projects]);
+
   const featuredProjects = useMemo(() => {
     const base = projects.length ? projects : [];
-
-    // Obras destacadas: solo proyectos principales.
-    // "Trabajos varios" queda en su sección propia para no mezclarse con obras completas.
     const preferredSlugs = ['sliders-hamburger', 'marvel', 'burger-house'];
     const selected = preferredSlugs
       .map((slug) => base.find((project) => project.slug === slug))
@@ -125,7 +130,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="section featured-projects-section">
+      <section className="section featured-projects-section" id="obras-destacadas">
         <div className="container">
           <div className="section-heading reveal is-visible">
             <span className="eyebrow">Obras destacadas</span>
