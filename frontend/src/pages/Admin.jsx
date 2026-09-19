@@ -5,7 +5,7 @@ import { deleteProject, getAdminProjects, saveProject, syncProjectCatalog, updat
 import { logout } from '../services/authService.js';
 import { slugify } from '../services/utils.js';
 import { COLLECTIONS, deleteContentItem, getAdminEventos, getAdminTrabajos, saveContentItem } from '../services/contentService.js';
-import { deleteAsset, isStorageUploadReady, uploadAsset, uploadManyAssets } from '../services/storageService.js';
+import { isStorageUploadReady, uploadAsset, uploadManyAssets } from '../services/storageService.js';
 import { deleteCategory, deleteSiteText, getCategories, getSiteTexts, saveCategory, saveSiteText } from '../services/adminContentService.js';
 import { subscribeAdminCrud } from '../services/realtimeService.js';
 
@@ -705,11 +705,7 @@ function BranchGalleryEditor({ form, setForm, onUpload, uploading }) {
               accept={PHOTO_ACCEPT}
               disabled={uploading || !isStorageUploadReady}
               previewItems={activeBranch.portada ? [activeBranch.portada] : []}
-              onRemovePreview={async () => {
-                const item = activeBranch.portada;
-                updateBranch(activeIndex, { portada: '' });
-                try { await deleteAsset(item); } catch (error) { console.warn('[FZAC] No se pudo borrar la portada de sucursal fisicamente.', error); }
-              }}
+              onRemovePreview={() => updateBranch(activeIndex, { portada: '' })}
               onChange={(files) => onUpload({ branchIndex: activeIndex, target: 'portada' }, files)}
             />
             {IMAGE_STAGE_OPTIONS.map(({ value: key, label }) => (
@@ -720,11 +716,7 @@ function BranchGalleryEditor({ form, setForm, onUpload, uploading }) {
                 multiple
                 disabled={uploading || !isStorageUploadReady}
                 previewItems={activeBranch[key]}
-                onRemovePreview={async (index) => {
-                  const item = toArray(activeBranch[key])[index];
-                  updateMedia(activeIndex, key, (items) => items.filter((_, itemIndex) => itemIndex !== index));
-                  try { await deleteAsset(item); } catch (error) { console.warn('[FZAC] No se pudo borrar la foto de sucursal fisicamente.', error); }
-                }}
+                onRemovePreview={(index) => updateMedia(activeIndex, key, (items) => items.filter((_, itemIndex) => itemIndex !== index))}
                 onMovePreview={(index, direction) => updateMedia(activeIndex, key, (items) => moveArrayItem(items, index, direction))}
                 onEditPreview={(index, changes) => updateMedia(activeIndex, key, (items) => items.map((item, itemIndex) => itemIndex === index ? { ...editableImage(item), ...changes } : item))}
                 stageValue={key}
@@ -764,14 +756,10 @@ function UnassignedGalleryEditor({ form, setForm }) {
     });
   };
 
-  const removeImage = async (sourceKey, imageIndex) => {
-    const item = toArray(form[sourceKey])[imageIndex];
-    setForm((prev) => ({
-      ...prev,
-      [sourceKey]: toArray(prev[sourceKey]).filter((_, index) => index !== imageIndex),
-    }));
-    try { await deleteAsset(item); } catch (error) { console.warn('[FZAC] No se pudo borrar la foto sin asignar fisicamente.', error); }
-  };
+  const removeImage = (sourceKey, imageIndex) => setForm((prev) => ({
+    ...prev,
+    [sourceKey]: toArray(prev[sourceKey]).filter((_, index) => index !== imageIndex),
+  }));
 
   return (
     <section className="admin-unassigned-gallery">
@@ -831,15 +819,7 @@ function ContentForm({ kind, form, setForm, onSubmit, onClear, onUpload, uploadi
     return next;
   });
 
-  const removeFrom = async (key, index) => {
-    const item = toArray(form[key])[index];
-    set(key, toArray(form[key]).filter((_, i) => i !== index));
-    try {
-      await deleteAsset(item);
-    } catch (error) {
-      console.warn('[FZAC] No se pudo borrar el archivo fisico; el cambio de galeria se guardara igualmente.', error);
-    }
-  };
+  const removeFrom = (key, index) => set(key, toArray(form[key]).filter((_, i) => i !== index));
   const moveIn = (key, index, direction) => set(key, moveArrayItem(form[key], index, direction));
   const editIn = (key, index, changes) => setForm((prev) => ({
     ...prev,
@@ -944,11 +924,7 @@ function ContentForm({ kind, form, setForm, onSubmit, onClear, onUpload, uploadi
               help="Imagen principal para la card y el detalle. Se admiten fotos comunes de celular y cámara."
               disabled={uploading || !isStorageUploadReady}
               previewItems={form.portada ? [form.portada] : []}
-              onRemovePreview={async () => {
-                const item = form.portada;
-                set('portada', '');
-                try { await deleteAsset(item); } catch (error) { console.warn('[FZAC] No se pudo borrar la portada fisica.', error); }
-              }}
+              onRemovePreview={() => set('portada', '')}
               onChange={(files) => onUpload('portada', files)}
             />
             {!hasBranchGalleries && (
