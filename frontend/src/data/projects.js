@@ -198,12 +198,7 @@ const drywallGallery = unique([
   obra('trabajos-varios/drywall/drywall-final-03.jpg'),
 ]);
 
-const construccionSecoGallery = unique([
-  obra('trabajos-varios/construccion-en-seco/construccion-seco-01.jpg'),
-  obra('trabajos-varios/construccion-en-seco/construccion-seco-02.jpg'),
-  obra('trabajos-varios/construccion-en-seco/IMG-20210507-WA0196-1-.jpg'),
-  obra('trabajos-varios/construccion-en-seco/IMG-20210509-WA0007-1-.jpeg'),
-]);
+const construccionSecoGallery = [];
 
 const construccionHumedaGallery = unique([
   obra('trabajos-varios/construccion-humeda/construccion-humeda-01.jpg'),
