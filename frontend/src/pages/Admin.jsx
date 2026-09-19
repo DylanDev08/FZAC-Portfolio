@@ -705,7 +705,11 @@ function BranchGalleryEditor({ form, setForm, onUpload, uploading }) {
               accept={PHOTO_ACCEPT}
               disabled={uploading || !isStorageUploadReady}
               previewItems={activeBranch.portada ? [activeBranch.portada] : []}
-              onRemovePreview={() => updateBranch(activeIndex, { portada: '' })}
+              onRemovePreview={async () => {
+                const item = activeBranch.portada;
+                updateBranch(activeIndex, { portada: '' });
+                try { await deleteAsset(item); } catch (error) { console.warn('[FZAC] No se pudo borrar la portada de sucursal fisicamente.', error); }
+              }}
               onChange={(files) => onUpload({ branchIndex: activeIndex, target: 'portada' }, files)}
             />
             {IMAGE_STAGE_OPTIONS.map(({ value: key, label }) => (
@@ -716,7 +720,11 @@ function BranchGalleryEditor({ form, setForm, onUpload, uploading }) {
                 multiple
                 disabled={uploading || !isStorageUploadReady}
                 previewItems={activeBranch[key]}
-                onRemovePreview={(index) => updateMedia(activeIndex, key, (items) => items.filter((_, itemIndex) => itemIndex !== index))}
+                onRemovePreview={async (index) => {
+                  const item = toArray(activeBranch[key])[index];
+                  updateMedia(activeIndex, key, (items) => items.filter((_, itemIndex) => itemIndex !== index));
+                  try { await deleteAsset(item); } catch (error) { console.warn('[FZAC] No se pudo borrar la foto de sucursal fisicamente.', error); }
+                }}
                 onMovePreview={(index, direction) => updateMedia(activeIndex, key, (items) => moveArrayItem(items, index, direction))}
                 onEditPreview={(index, changes) => updateMedia(activeIndex, key, (items) => items.map((item, itemIndex) => itemIndex === index ? { ...editableImage(item), ...changes } : item))}
                 stageValue={key}
@@ -756,10 +764,14 @@ function UnassignedGalleryEditor({ form, setForm }) {
     });
   };
 
-  const removeImage = (sourceKey, imageIndex) => setForm((prev) => ({
-    ...prev,
-    [sourceKey]: toArray(prev[sourceKey]).filter((_, index) => index !== imageIndex),
-  }));
+  const removeImage = async (sourceKey, imageIndex) => {
+    const item = toArray(form[sourceKey])[imageIndex];
+    setForm((prev) => ({
+      ...prev,
+      [sourceKey]: toArray(prev[sourceKey]).filter((_, index) => index !== imageIndex),
+    }));
+    try { await deleteAsset(item); } catch (error) { console.warn('[FZAC] No se pudo borrar la foto sin asignar fisicamente.', error); }
+  };
 
   return (
     <section className="admin-unassigned-gallery">
