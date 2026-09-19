@@ -5,7 +5,7 @@ import { deleteProject, getAdminProjects, saveProject, syncProjectCatalog, updat
 import { logout } from '../services/authService.js';
 import { slugify } from '../services/utils.js';
 import { COLLECTIONS, deleteContentItem, getAdminEventos, getAdminTrabajos, saveContentItem } from '../services/contentService.js';
-import { isStorageUploadReady, uploadAsset, uploadManyAssets } from '../services/storageService.js';
+import { deleteAsset, isStorageUploadReady, uploadAsset, uploadManyAssets } from '../services/storageService.js';
 import { deleteCategory, deleteSiteText, getCategories, getSiteTexts, saveCategory, saveSiteText } from '../services/adminContentService.js';
 import { subscribeAdminCrud } from '../services/realtimeService.js';
 
@@ -819,7 +819,15 @@ function ContentForm({ kind, form, setForm, onSubmit, onClear, onUpload, uploadi
     return next;
   });
 
-  const removeFrom = (key, index) => set(key, toArray(form[key]).filter((_, i) => i !== index));
+  const removeFrom = async (key, index) => {
+    const item = toArray(form[key])[index];
+    set(key, toArray(form[key]).filter((_, i) => i !== index));
+    try {
+      await deleteAsset(item);
+    } catch (error) {
+      console.warn('[FZAC] No se pudo borrar el archivo fisico; el cambio de galeria se guardara igualmente.', error);
+    }
+  };
   const moveIn = (key, index, direction) => set(key, moveArrayItem(form[key], index, direction));
   const editIn = (key, index, changes) => setForm((prev) => ({
     ...prev,
@@ -924,7 +932,11 @@ function ContentForm({ kind, form, setForm, onSubmit, onClear, onUpload, uploadi
               help="Imagen principal para la card y el detalle. Se admiten fotos comunes de celular y cámara."
               disabled={uploading || !isStorageUploadReady}
               previewItems={form.portada ? [form.portada] : []}
-              onRemovePreview={() => set('portada', '')}
+              onRemovePreview={async () => {
+                const item = form.portada;
+                set('portada', '');
+                try { await deleteAsset(item); } catch (error) { console.warn('[FZAC] No se pudo borrar la portada fisica.', error); }
+              }}
               onChange={(files) => onUpload('portada', files)}
             />
             {!hasBranchGalleries && (
