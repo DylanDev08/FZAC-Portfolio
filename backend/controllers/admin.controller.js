@@ -20,7 +20,7 @@ import {
   updateWorkImage,
 } from '../models/admin.model.js';
 import { portfolioCatalog } from '../data/portfolio-catalog.js';
-import { uploadImageToStorage } from '../services/upload.service.js';
+import { deleteImageFromStorage, uploadImageToStorage } from '../services/upload.service.js';
 import { parseMultipartForm } from '../utils/multipart.js';
 
 function ok(res, status, data) {
@@ -50,6 +50,20 @@ export async function uploadController(req, res) {
     return ok(res, 201, uploaded);
   } catch (error) {
     return fail(res, error, 400);
+  }
+}
+
+export async function deleteUploadController(req, res) {
+  try {
+    const value = req.body?.path || req.body?.url || '';
+    if (!value) {
+      const error = new Error('Indicá path o url de la imagen a eliminar.');
+      error.status = 400;
+      throw error;
+    }
+    return ok(res, 200, await deleteImageFromStorage(value));
+  } catch (error) {
+    return fail(res, error, error.status || 400);
   }
 }
 
