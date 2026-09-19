@@ -194,3 +194,59 @@ export async function deleteImageFromStorage(value = '') {
   console.info(`[storage] deleted bucket=${env.supabaseStorageBucket} path=${path}`);
   return { deleted: true, skipped: false, path, bucket: env.supabaseStorageBucket };
 }
+
+
+export function collectManagedStoragePaths(value) {
+  const paths = new Set();
+  const visit = (item) => {
+    if (!item) return;
+    if (typeof item === 'string') {
+      const path = storagePathFromUrl(item);
+      if (path) paths.add(path);
+      return;
+    }
+    if (Array.isArray(item)) {
+      item.forEach(visit);
+      return;
+    }
+    if (typeof item === 'object') {
+      const candidates = [
+        item.path, item.imagePath, item.image_path,
+        item.url, item.publicUrl, item.imageUrl, item.image_url,
+        item.portada,
+      ];
+      candidates.forEach((candidate) => {
+        const path = storagePathFromUrl(candidate);
+        if (path) paths.add(path);
+      });
+      Object.entries(item).forEach(([key, nested]) => {
+        if (['path','imagePath','image_path','url','publicUrl','imageUrl','image_url','portada'].includes(key)) return;
+        if (Array.isArray(nested) || (nested && typeof nested === 'object')) visit(nested);
+      });
+    }
+  };
+  visit(value);
+  return paths;
+}
+
+export async function deleteStoragePaths(paths = []) {
+  const unique = [...new Set([...paths].filter(Boolean))];
+  if (!unique.length) return { deleted: 0, paths: [] };
+  const client = getServiceClient();
+  await ensureBucket(client);
+  const { error } = await client.storage.from(env.supabaseStorageBucket).remove(unique);
+  if (error) {
+    console.error(`[storage] batch delete failed bucket=${env.supabaseStorageBucket} count=${unique.length} message=${error.message || 'unknown'}`);
+    throw new Error(error.message || 'No se pudieron eliminar archivos antiguos de Supabase Storage.');
+  }
+  return { deleted: unique.length, paths: unique };
+}
+
+export async function deleteStoragePathsBestEffort(paths = []) {
+  try {
+    return await deleteStoragePaths(paths);
+  } catch (error) {
+    console.warn(`[storage] cleanup deferred: ${error.message || error}`);
+    return { deleted: 0, paths: [], error: error.message || String(error) };
+  }
+}
