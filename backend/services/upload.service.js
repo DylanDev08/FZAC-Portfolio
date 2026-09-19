@@ -161,3 +161,36 @@ export async function uploadImageToStorage(file, folder = 'uploads') {
     sizeBytes: file.buffer.length,
   };
 }
+
+
+export function storagePathFromUrl(value = '') {
+  const raw = String(value || '').trim();
+  if (!raw) return '';
+  const bucket = env.supabaseStorageBucket;
+  const publicMarker = `/storage/v1/object/public/${bucket}/`;
+  const signedMarker = `/storage/v1/object/sign/${bucket}/`;
+  const publicIndex = raw.indexOf(publicMarker);
+  if (publicIndex >= 0) return decodeURIComponent(raw.slice(publicIndex + publicMarker.length).split('?')[0]);
+  const signedIndex = raw.indexOf(signedMarker);
+  if (signedIndex >= 0) return decodeURIComponent(raw.slice(signedIndex + signedMarker.length).split('?')[0]);
+  // Only accept raw paths for our managed upload folders. Never delete arbitrary URLs.
+  if (!/^https?:\/\//i.test(raw) && !raw.startsWith('/assets/')) return sanitizeSegment(raw);
+  return '';
+}
+
+export async function deleteImageFromStorage(value = '') {
+  const path = storagePathFromUrl(value);
+  if (!path) return { deleted: false, skipped: true, reason: 'not-managed-storage' };
+
+  const client = getServiceClient();
+  await ensureBucket(client);
+  const { error } = await client.storage.from(env.supabaseStorageBucket).remove([path]);
+  if (error) {
+    console.error(`[storage] delete failed bucket=${env.supabaseStorageBucket} path=${path} message=${error.message || 'unknown'}`);
+    const deleteError = new Error(error.message || 'No se pudo eliminar la imagen de Supabase Storage.');
+    deleteError.status = 400;
+    throw deleteError;
+  }
+  console.info(`[storage] deleted bucket=${env.supabaseStorageBucket} path=${path}`);
+  return { deleted: true, skipped: false, path, bucket: env.supabaseStorageBucket };
+}
