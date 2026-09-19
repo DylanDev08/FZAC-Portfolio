@@ -1,4 +1,5 @@
 import { prisma } from '../db/prisma.js';
+import { collectManagedStoragePaths, deleteStoragePathsBestEffort } from '../services/upload.service.js';
 
 const delegates = {
   trabajos: prisma.trabajo,
@@ -120,6 +121,9 @@ export async function updateContent(kind, id, payload) {
     where: { id: existing.id },
     data,
   });
+  const previousPaths = collectManagedStoragePaths(toApi(existing));
+  const currentPaths = collectManagedStoragePaths(toApi(row));
+  await deleteStoragePathsBestEffort([...previousPaths].filter((path) => !currentPaths.has(path)));
   return toApi(row);
 }
 
@@ -127,6 +131,8 @@ export async function deleteContent(kind, id) {
   const delegate = getDelegate(kind);
   const existing = await findContent(kind, id);
   if (!existing) throw new Error('Contenido no encontrado');
+  const storagePaths = collectManagedStoragePaths(toApi(existing));
   await delegate.delete({ where: { id: existing.id } });
+  await deleteStoragePathsBestEffort(storagePaths);
   return { ok: true };
 }
