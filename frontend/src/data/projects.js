@@ -44,6 +44,8 @@ const slidersJujuy = makeGallery({
   final: [
     obra('sliders-jujuy/sliders-jujuy-final-02.jpg'),
     obra('sliders-jujuy/sliders-jujuy-final-03.jpg'),
+    // Movida desde Juan Manuel de Rosas: era la 7ma imagen renderizada allí.
+    obra('sliders-rosas/sliders-rosas-final-03.webp'),
   ],
 });
 
@@ -57,7 +59,6 @@ const slidersRosas = makeGallery({
   ],
   final: [
     obra('sliders-rosas/sliders-rosas-final-02.jpg'),
-    obra('sliders-rosas/sliders-rosas-final-03.webp'),
   ],
 });
 
@@ -70,8 +71,11 @@ const slidersFunes = makeGallery({
   final: [
     obra('sliders-funes/sliders-funes-final-01.jpg'),
     obra('sliders-funes/sliders-funes-final-02.jpg'),
-    obra('sliders-funes/sliders-funes-final-03.jpg'),
     obra('sliders-funes/sliders-funes-final-04.jpg'),
+  ],
+  // Movida desde Jujuy: era la 5ta imagen renderizada allí.
+  extra: [
+    obra('sliders-jujuy/sliders-jujuy-inicio-04.jpg'),
   ],
 });
 
@@ -79,7 +83,6 @@ const marvelPellegrini = makeGallery({
   portada: obra('marvel-pellegrini/marvel-pellegrini-02.jpg'),
   proceso: [obra('marvel-pellegrini/05.jpg')],
   final: [
-    obra('marvel-pellegrini/04.jpg'),
     obra('marvel-pellegrini/09.jpg'),
     obra('marvel-pellegrini/10.jpg'),
   ],
@@ -99,10 +102,8 @@ const marvelRondeau = makeGallery({
 });
 
 const marvelFunes = makeGallery({
-  portada: obra('marvel-funes/marvel-funes-frente.jpg'),
+  portada: obra('marvel-funes/marvel-funes-dibujos.jpg'),
   final: [
-    obra('marvel-funes/marvel-funes-dibujos.jpg'),
-    obra('marvel-funes/01.jpg'),
     obra('marvel-funes/03.jpg'),
   ],
 });
@@ -118,7 +119,6 @@ const marvelViamonte = makeGallery({
   final: [
     obra('marvel-viamonte/marvel-viamonte-final-01.jpg'),
     obra('marvel-viamonte/marvel-viamonte-final-02.jpg'),
-    obra('marvel-viamonte/marvel-viamonte-final-03.jpg'),
   ],
 });
 
