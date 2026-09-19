@@ -1,6 +1,7 @@
 import { Prisma } from '@prisma/client';
 import { prisma } from '../db/prisma.js';
 import { env } from '../config/env.js';
+import { collectManagedStoragePaths, deleteStoragePathsBestEffort } from '../services/upload.service.js';
 
 function clean(value) {
   return String(value || '').replace(/<[^>]*>/g, '').trim();
@@ -338,7 +339,7 @@ export async function createWork(payload, userEmail, userId) {
 }
 
 export async function updateWork(id, payload, userEmail, userId) {
-  const existing = await prisma.work.findFirst({ where: { OR: [{ id }, { slug: id }] } });
+  const existing = await prisma.work.findFirst({ where: { OR: [{ id }, { slug: id }] }, include: workInclude });
   if (!existing) throw new Error('Obra no encontrada.');
 
   const category = await resolveCategory(payload);
@@ -350,6 +351,11 @@ export async function updateWork(id, payload, userEmail, userId) {
     await replaceWorkImages(tx, existing.id, payload);
     return tx.work.findUnique({ where: { id: existing.id }, include: workInclude });
   });
+
+  const previousPaths = collectManagedStoragePaths(workToApi(existing));
+  const currentPaths = collectManagedStoragePaths(workToApi(row));
+  const stalePaths = [...previousPaths].filter((path) => !currentPaths.has(path));
+  await deleteStoragePathsBestEffort(stalePaths);
 
   return workToApi(row);
 }
@@ -381,9 +387,11 @@ export async function updateWorkStatus(id, status) {
 }
 
 export async function deleteWork(id) {
-  const existing = await prisma.work.findFirst({ where: { OR: [{ id }, { slug: id }] } });
+  const existing = await prisma.work.findFirst({ where: { OR: [{ id }, { slug: id }] }, include: workInclude });
   if (!existing) throw new Error('Obra no encontrada.');
+  const storagePaths = collectManagedStoragePaths(workToApi(existing));
   await prisma.work.delete({ where: { id: existing.id } });
+  await deleteStoragePathsBestEffort(storagePaths);
   return { id: existing.id };
 }
 
