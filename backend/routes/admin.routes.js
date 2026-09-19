@@ -8,6 +8,7 @@ import {
   deleteSiteTextController,
   deleteWorkController,
   deleteWorkImageController,
+  deleteUploadController,
   getWorkController,
   listCategoriesController,
   listSiteTextsController,
@@ -35,6 +36,7 @@ const router = Router();
 router.use(authMiddleware);
 
 router.post('/uploads', adminActionLimiter, uploadController);
+router.delete('/uploads', adminActionLimiter, deleteUploadController);
 
 router.get('/works', listWorksController);
 router.post('/works/sync-catalog', adminActionLimiter, syncWorksController);
