@@ -67,3 +67,28 @@ export async function uploadManyAssets(files, folder = 'uploads') {
     paths: uploaded.map((item) => item.path).filter(Boolean),
   };
 }
+
+
+export async function deleteAsset(asset) {
+  const path = typeof asset === 'string'
+    ? asset
+    : (asset?.path || asset?.image_path || asset?.imagePath || '');
+  const url = typeof asset === 'string'
+    ? asset
+    : (asset?.url || asset?.publicUrl || asset?.image_url || asset?.imageUrl || '');
+
+  // Local /assets files are part of the deploy and cannot be removed from Supabase.
+  // They still disappear from the website when removed from the saved project payload.
+  if ((!path || path.startsWith('/assets/')) && (!url || url.startsWith('/assets/'))) {
+    return { ok: true, skipped: true, reason: 'local-asset' };
+  }
+
+  const response = await import('./httpService.js').then(({ apiRequest }) =>
+    apiRequest('/admin/uploads', {
+      method: 'DELETE',
+      body: { path: path || undefined, url: url || undefined },
+      auth: true,
+    })
+  );
+  return { ok: true, status: response.status || 200, ...unwrapData(response) };
+}
