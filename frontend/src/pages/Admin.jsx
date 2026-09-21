@@ -1010,6 +1010,7 @@ function ContentForm({ kind, form, setForm, onSubmit, onClear, onUpload, uploadi
             help="Recomendado: MP4 para máxima compatibilidad."
             disabled={uploading || !isStorageUploadReady}
             previewItems={isEvent ? form.videos : form.galeriaVideo}
+            previewType="video"
             onRemovePreview={(index) => removeFrom(isEvent ? 'videos' : 'galeriaVideo', index)}
             onMovePreview={(index, direction) => moveIn(isEvent ? 'videos' : 'galeriaVideo', index, direction)}
             onChange={(files) => onUpload(isEvent ? 'videos' : 'galeriaVideo', files)}
