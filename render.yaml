@@ -38,6 +38,8 @@ services:
           type: web
           name: FZAC-Portfolio-1
           envVarKey: RENDER_EXTERNAL_URL
+      - key: ADDITIONAL_CORS_ORIGINS
+        value: https://fzac-portfolio-ntt3.vercel.app
       - key: JSON_LIMIT
         value: 2mb
       - key: RATE_LIMIT_MAX
@@ -74,7 +76,7 @@ services:
     headers:
       - path: /*
         name: Content-Security-Policy
-        value: "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https:; media-src 'self' blob: https:; connect-src 'self' https: http://localhost:* ws://localhost:*; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests"
+        value: "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https:; media-src 'self' blob: https:; connect-src 'self' https: wss://*.supabase.co http://localhost:* ws://localhost:*; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests"
       - path: /*
         name: X-Content-Type-Options
         value: nosniff
