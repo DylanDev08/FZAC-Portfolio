@@ -79,6 +79,10 @@ const DEFAULT_PHOTO_MIME_TYPES = [
   'image/x-ms-bmp',
   'image/tiff',
   'image/x-tiff',
+  'video/mp4',
+  'video/webm',
+  'video/quicktime',
+  'video/x-m4v',
 ];
 
 const uploadMimeTypes = uniqueEmailList([
