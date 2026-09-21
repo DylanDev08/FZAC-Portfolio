@@ -17,16 +17,13 @@ export const adminActionLimiter = rateLimit({
   message: { error: 'Demasiadas acciones administrativas. Intenta nuevamente en unos minutos.' },
 });
 
-export function protectRoutes(req, res, next) {
-  const token = req.headers.authorization || '';
-  const isValid = token.startsWith('Bearer ') && token.split(' ')[1]?.length;
-
-  if (!isValid) {
-    return res.status(401).json({ error: 'Token de autorizacion requerido' });
-  }
-
-  next();
-}
+export const contactSubmissionLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 8,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Demasiados mensajes enviados. Esperá unos minutos antes de volver a intentar.' },
+});
 
 export function sanitizeBody(req, res, next) {
   if (!req.body || typeof req.body !== 'object' || Array.isArray(req.body)) {
