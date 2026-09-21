@@ -1,4 +1,153 @@
 // Catálogo compartido con el fallback público. Mantener sincronizado con frontend/src/data/projects.js.
+// Estas definiciones hacen que el fallback del backend sea autosuficiente incluso antes de ejecutar catalog:sync.
+const unique = (items) => items.filter(Boolean).filter((item, index, array) => array.indexOf(item) === index);
+const obra = (assetPath) => `/assets/img/obras/${assetPath}`;
+
+const makeGallery = ({ portada, inicio = [], proceso = [], final = [], extra = [] }) => {
+  const cover = portada || inicio[0] || proceso[0] || final[0] || extra[0] || '';
+  const imagenesAntes = unique(inicio.filter((src) => src !== cover));
+  const imagenesProceso = unique(proceso.filter((src) => src !== cover));
+  const imagenesFinal = unique(final.filter((src) => src !== cover));
+  const imagenes = unique([cover, ...inicio, ...proceso, ...final, ...extra]);
+
+  return { portada: cover, imagenes, imagenesAntes, imagenesProceso, imagenesFinal };
+};
+
+const slidersJujuy = makeGallery({
+  portada: obra('sliders-jujuy/sliders-jujuy-final-01.jpg'),
+  inicio: [
+    obra('sliders-jujuy/sliders-jujuy-inicio-01.jpg'),
+    obra('sliders-jujuy/sliders-jujuy-inicio-02.jpg'),
+    obra('sliders-jujuy/sliders-jujuy-inicio-03.jpg'),
+    obra('sliders-jujuy/sliders-jujuy-inicio-04.jpg'),
+  ],
+  final: [
+    obra('sliders-jujuy/sliders-jujuy-final-02.jpg'),
+    obra('sliders-jujuy/sliders-jujuy-final-03.jpg'),
+    obra('sliders-rosas/sliders-rosas-final-03.webp'),
+  ],
+});
+
+const slidersRosas = makeGallery({
+  portada: obra('sliders-rosas/sliders-rosas-final-01.jpg'),
+  proceso: [
+    obra('sliders-rosas/sliders-rosas-inicio-02.jpg'),
+    obra('sliders-rosas/sliders-rosas-inicio-03.jpg'),
+    obra('sliders-rosas/sliders-rosas-inicio-01.jpg'),
+    obra('sliders-rosas/sliders-rosas-final-04.jpg'),
+  ],
+  final: [obra('sliders-rosas/sliders-rosas-final-02.jpg')],
+});
+
+const slidersFunes = makeGallery({
+  portada: obra('sliders-funes/sliders-funes-final-05.jpg'),
+  inicio: [
+    obra('sliders-funes/sliders-funes-inicio-01.jpg'),
+    obra('sliders-funes/sliders-funes-inicio-02.jpg'),
+  ],
+  final: [
+    obra('sliders-funes/sliders-funes-final-01.jpg'),
+    obra('sliders-funes/sliders-funes-final-02.jpg'),
+    obra('sliders-funes/sliders-funes-final-04.jpg'),
+  ],
+  extra: [obra('sliders-jujuy/sliders-jujuy-inicio-04.jpg')],
+});
+
+const marvelPellegrini = makeGallery({
+  portada: obra('marvel-pellegrini/marvel-pellegrini-02.jpg'),
+  proceso: [obra('marvel-pellegrini/05.jpg')],
+  final: [obra('marvel-pellegrini/09.jpg'), obra('marvel-pellegrini/10.jpg')],
+});
+
+const marvelRondeau = makeGallery({
+  portada: obra('marvel-rondeau/marvel-rondeau-final-01.jpg'),
+  proceso: [
+    obra('marvel-rondeau/marvel-rondeau-inicio-01.jpg'),
+    obra('marvel-rondeau/marvel-rondeau-inicio-02.jpg'),
+    obra('marvel-rondeau/marvel-rondeau-inicio-03.jpg'),
+    obra('marvel-rondeau/marvel-rondeau-final-02.jpg'),
+  ],
+  final: [obra('marvel-rondeau/marvel-rondeau-final-03.webp')],
+});
+
+const marvelFunes = makeGallery({
+  portada: obra('marvel-funes/marvel-funes-dibujos.jpg'),
+  final: [obra('marvel-funes/03.jpg')],
+});
+
+const marvelViamonte = makeGallery({
+  portada: obra('marvel-viamonte/00-portada-viamonte.jpg'),
+  inicio: [
+    obra('marvel-viamonte/marvel-viamonte-inicio-01.jpg'),
+    obra('marvel-viamonte/marvel-viamonte-inicio-02.jpg'),
+    obra('marvel-viamonte/marvel-viamonte-inicio-03.jpg'),
+    obra('marvel-viamonte/marvel-viamonte-inicio-04.jpg'),
+  ],
+  final: [
+    obra('marvel-viamonte/marvel-viamonte-final-01.jpg'),
+    obra('marvel-viamonte/marvel-viamonte-final-02.jpg'),
+  ],
+});
+
+const burgerPellegrini = makeGallery({
+  portada: obra('burger-house-pellegrini/BurgerHousePellegriniFinal01.webp'),
+  inicio: [
+    obra('burger-house-pellegrini/burger-pellegrini-inicio-01.jpg'),
+    obra('burger-house-pellegrini/burger-pellegrini-inicio-02.jpg'),
+    obra('burger-house-pellegrini/burger-pellegrini-inicio-03.jpg'),
+  ],
+  final: [
+    obra('burger-house-pellegrini/BurgerHousePellegriniFinal02.webp'),
+    obra('burger-house-pellegrini/BurgerHousePellegriniFinal03.webp'),
+  ],
+});
+
+const burgerFlorida = makeGallery({
+  portada: obra('burger-house-florida/burger-florida-final-01.jpg'),
+  inicio: [
+    obra('burger-house-florida/burger-florida-antes-01.jpg'),
+    obra('burger-house-florida/burger-florida-antes-02.jpg'),
+  ],
+  final: [
+    obra('burger-house-florida/burger-florida-final-02.jpg'),
+    obra('burger-house-florida/burger-florida-final-03.jpg'),
+    obra('burger-house-florida/burger-florida-final-04.webp'),
+  ],
+});
+
+const armstrong = makeGallery({
+  portada: obra('armstrong/05.jpg'),
+  proceso: [obra('armstrong/02.jpg')],
+  final: [obra('armstrong/08.jpg'), obra('armstrong/09.jpg'), obra('armstrong/11.jpg')],
+});
+
+const fichines = makeGallery({
+  portada: obra('fichines/fichines-final-fachada.jpeg'),
+  inicio: [
+    obra('fichines/fichines-clean-01.jpg'),
+    obra('fichines/fichines-antes-terraza.jpeg'),
+    obra('fichines/fichines-antes-interior.jpeg'),
+  ],
+  proceso: [obra('fichines/foto-3.jpg')],
+  final: [obra('fichines/fichines-final-maquinas.jpeg'), obra('fichines/fichines-final-pool.jpeg')],
+});
+
+const flama = makeGallery({});
+
+const roldan = makeGallery({
+  portada: obra('roldan/portada.jpg'),
+  inicio: [
+    obra('roldan/foto-1.jpg'),
+    obra('roldan/foto-2.jpg'),
+    obra('roldan/foto-3.jpg'),
+    obra('roldan/foto-4.jpg'),
+  ],
+});
+
+const slidersAll = unique([...slidersJujuy.imagenes, ...slidersRosas.imagenes, ...slidersFunes.imagenes]);
+const marvelAll = unique([...marvelPellegrini.imagenes, ...marvelRondeau.imagenes, ...marvelFunes.imagenes, ...marvelViamonte.imagenes]);
+const burgerAll = unique([...burgerPellegrini.imagenes, ...burgerFlorida.imagenes]);
+
 export const portfolioCatalog = [
   {
     id: 'sliders-hamburger',
