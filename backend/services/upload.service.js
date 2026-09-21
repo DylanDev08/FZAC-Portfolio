@@ -82,21 +82,28 @@ function mimeFromExtension(extension = '') {
     bmp: 'image/bmp',
     tif: 'image/tiff',
     tiff: 'image/tiff',
+    mp4: 'video/mp4',
+    webm: 'video/webm',
+    mov: 'video/quicktime',
+    m4v: 'video/x-m4v',
   };
   return map[extension] || 'image/jpeg';
 }
 
 const PHOTO_EXTENSIONS = new Set(['jpg', 'jpeg', 'jfif', 'png', 'webp', 'gif', 'avif', 'heic', 'heif', 'bmp', 'tif', 'tiff']);
+const VIDEO_EXTENSIONS = new Set(['mp4', 'webm', 'mov', 'm4v']);
 const BLOCKED_MIME_TYPES = new Set(['image/svg+xml']);
 const GENERIC_BINARY_MIME_TYPES = new Set(['', 'application/octet-stream']);
 
-function isAllowedPhoto(file) {
+function isAllowedMedia(file) {
   const contentType = String(file.contentType || '').toLowerCase();
   const extension = extensionFromName(file.filename || '');
   if (BLOCKED_MIME_TYPES.has(contentType)) return false;
   if (env.allowedUploadMimeTypes.includes(contentType)) return true;
-  if (GENERIC_BINARY_MIME_TYPES.has(contentType) && PHOTO_EXTENSIONS.has(extension)) return true;
-  return contentType.startsWith('image/') && PHOTO_EXTENSIONS.has(extension);
+  if (GENERIC_BINARY_MIME_TYPES.has(contentType) && (PHOTO_EXTENSIONS.has(extension) || VIDEO_EXTENSIONS.has(extension))) return true;
+  if (contentType.startsWith('image/')) return PHOTO_EXTENSIONS.has(extension);
+  if (contentType.startsWith('video/')) return VIDEO_EXTENSIONS.has(extension);
+  return false;
 }
 
 export function validateUploadFile(file) {
@@ -106,15 +113,15 @@ export function validateUploadFile(file) {
     throw error;
   }
 
-  if (!isAllowedPhoto(file)) {
-    const error = new Error(`Tipo de archivo no permitido: ${file.contentType || 'desconocido'}. Subí una foto raster válida; SVG no se admite por seguridad.`);
+  if (!isAllowedMedia(file)) {
+    const error = new Error(`Tipo de archivo no permitido: ${file.contentType || 'desconocido'}. Subí una imagen raster o video MP4/WebM/MOV/M4V válido; SVG no se admite por seguridad.`);
     error.status = 400;
     throw error;
   }
 
   const maxBytes = env.maxUploadSizeMb * 1024 * 1024;
   if (file.buffer.length > maxBytes) {
-    const error = new Error(`La imagen supera el máximo permitido de ${env.maxUploadSizeMb}MB.`);
+    const error = new Error(`El archivo supera el máximo permitido de ${env.maxUploadSizeMb}MB.`);
     error.status = 400;
     throw error;
   }
