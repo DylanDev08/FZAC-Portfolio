@@ -1,8 +1,9 @@
 import { uploadFormRequest, unwrapData } from './httpService.js';
 
-const MAX_IMAGE_SIZE = 25 * 1024 * 1024;
+const MAX_UPLOAD_SIZE = 25 * 1024 * 1024;
 const BLOCKED_IMAGE_TYPES = ['image/svg+xml'];
 const PHOTO_EXTENSIONS = ['jpg', 'jpeg', 'jfif', 'png', 'webp', 'gif', 'avif', 'heic', 'heif', 'bmp', 'tif', 'tiff'];
+const VIDEO_EXTENSIONS = ['mp4', 'webm', 'mov', 'm4v'];
 
 export const isStorageUploadReady = true;
 
@@ -19,13 +20,14 @@ function validateFile(file) {
   const mimeType = String(file.type || '').toLowerCase();
   const extension = String(file.name || '').split('.').pop()?.toLowerCase() || '';
   const looksLikePhoto = mimeType.startsWith('image/') || PHOTO_EXTENSIONS.includes(extension);
+  const looksLikeVideo = mimeType.startsWith('video/') || VIDEO_EXTENSIONS.includes(extension);
 
-  if (!looksLikePhoto || BLOCKED_IMAGE_TYPES.includes(mimeType)) {
-    throw uploadError('Formato no permitido. Subí una foto válida; SVG y archivos no fotográficos no se admiten por seguridad.');
+  if ((!looksLikePhoto && !looksLikeVideo) || BLOCKED_IMAGE_TYPES.includes(mimeType)) {
+    throw uploadError('Formato no permitido. Subí una imagen o un video MP4/WebM/MOV/M4V válido; SVG no se admite por seguridad.');
   }
 
-  if (file.size > MAX_IMAGE_SIZE) {
-    throw uploadError('La imagen es demasiado pesada. Usá una imagen menor a 25MB.');
+  if (file.size > MAX_UPLOAD_SIZE) {
+    throw uploadError('El archivo es demasiado pesado. Usá un archivo menor a 25MB.');
   }
 }
 
