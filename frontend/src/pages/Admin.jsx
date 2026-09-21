@@ -105,6 +105,7 @@ const IMAGE_STAGE_OPTIONS = [
 
 const BRANCH_IMAGE_KEYS = IMAGE_STAGE_OPTIONS.map(({ value }) => value);
 const PHOTO_ACCEPT = 'image/*,.jpg,.jpeg,.jfif,.png,.webp,.gif,.avif,.heic,.heif,.bmp,.tif,.tiff';
+const VIDEO_ACCEPT = 'video/mp4,video/webm,video/quicktime,video/x-m4v,.mp4,.webm,.mov,.m4v';
 
 const GALLERY_STAGE_META = {
   portada: {
@@ -996,6 +997,23 @@ function ContentForm({ kind, form, setForm, onSubmit, onClear, onUpload, uploadi
               </>
             )}
           </div>
+
+          <div className="admin-media-panel__head">
+            <span className="eyebrow">Videos</span>
+            <h3>Galería audiovisual</h3>
+            <p>Subí videos MP4, WebM, MOV o M4V. Se guardan en Supabase Storage y aparecen en el detalle de la obra junto al registro fotográfico.</p>
+          </div>
+          <FileInput
+            label="Subir videos"
+            accept={VIDEO_ACCEPT}
+            multiple
+            help="Recomendado: MP4 para máxima compatibilidad."
+            disabled={uploading || !isStorageUploadReady}
+            previewItems={isEvent ? form.videos : form.galeriaVideo}
+            onRemovePreview={(index) => removeFrom(isEvent ? 'videos' : 'galeriaVideo', index)}
+            onMovePreview={(index, direction) => moveIn(isEvent ? 'videos' : 'galeriaVideo', index, direction)}
+            onChange={(files) => onUpload(isEvent ? 'videos' : 'galeriaVideo', files)}
+          />
 
           {uploading && <p className="admin-uploading-state">Subiendo archivos. No cierres esta pestaña...</p>}
 
