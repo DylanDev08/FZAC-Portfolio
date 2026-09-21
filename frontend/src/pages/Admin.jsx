@@ -807,6 +807,65 @@ function UnassignedGalleryEditor({ form, setForm }) {
   );
 }
 
+function WorkSectionsEditor({ form, setForm, onUpload, uploading }) {
+  const sections = toArray(form.secciones);
+
+  const updateSection = (index, changes) => setForm((prev) => ({
+    ...prev,
+    secciones: toArray(prev.secciones).map((section, sectionIndex) => sectionIndex === index ? { ...section, ...changes } : section),
+  }));
+
+  const removeImage = (sectionIndex, imageIndex) => updateSection(sectionIndex, {
+    imagenes: toArray(sections[sectionIndex]?.imagenes).filter((_, index) => index !== imageIndex),
+  });
+
+  const moveImage = (sectionIndex, imageIndex, direction) => updateSection(sectionIndex, {
+    imagenes: moveArrayItem(sections[sectionIndex]?.imagenes, imageIndex, direction),
+  });
+
+  if (!sections.length) return null;
+
+  return (
+    <section className="admin-media-panel">
+      <div className="admin-media-panel__head">
+        <span className="eyebrow">Rubros</span>
+        <h3>Galerías de Trabajos varios</h3>
+        <p>Administrá cada rubro por separado. Las fotos que subas acá quedan asociadas únicamente a esa sección.</p>
+      </div>
+      <div className="admin-branch-list">
+        {sections.map((section, sectionIndex) => (
+          <article className="admin-branch-card" key={section.id || section.slug || sectionIndex}>
+            <div className="admin-branch-card__head">
+              <div>
+                <span className="eyebrow">Rubro {sectionIndex + 1}</span>
+                <h4>{section.titulo || section.nombre || section.slug}</h4>
+              </div>
+              <span>{toArray(section.imagenes).length} foto(s)</span>
+            </div>
+            <Area
+              label="Descripción"
+              value={section.descripcion || ''}
+              onChange={(value) => updateSection(sectionIndex, { descripcion: value })}
+              rows={3}
+            />
+            <FileInput
+              label={`Subir fotos a ${section.titulo || section.slug}`}
+              accept={PHOTO_ACCEPT}
+              multiple
+              help="Podés seleccionar varias fotos a la vez."
+              disabled={uploading || !isStorageUploadReady}
+              previewItems={section.imagenes}
+              onRemovePreview={(imageIndex) => removeImage(sectionIndex, imageIndex)}
+              onMovePreview={(imageIndex, direction) => moveImage(sectionIndex, imageIndex, direction)}
+              onChange={(files) => onUpload({ sectionIndex, sectionSlug: section.slug || section.id }, files)}
+            />
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 function ContentForm({ kind, form, setForm, onSubmit, onClear, onUpload, uploading, message, categories = [] }) {
   const cfg = RESOURCE_CONFIG[kind];
   const isEvent = kind === 'eventos';
@@ -1032,6 +1091,8 @@ function ContentForm({ kind, form, setForm, onSubmit, onClear, onUpload, uploadi
             <Area label="Videos extra" value={arrToText(isEvent ? form.videos : form.galeriaVideo)} onChange={(v) => set(isEvent ? 'videos' : 'galeriaVideo', v)} rows={4} placeholder="Una ruta o URL por línea" />
           </details>
         </div>
+
+        {isWork && <WorkSectionsEditor form={form} setForm={setForm} onUpload={onUpload} uploading={uploading} />}
 
         {isObra && <UnassignedGalleryEditor form={form} setForm={setForm} />}
         {isObra && <BranchGalleryEditor form={form} setForm={setForm} onUpload={onUpload} uploading={uploading} />}
@@ -1380,6 +1441,20 @@ export default function Admin() {
             : item),
         }));
         notify(`Status ${uploaded.status}: ${uploaded.urls.length} foto(s) cargada(s) en la sucursal. Guardá la obra para publicarlas.`);
+        return;
+      }
+
+      if (typeof target === 'object' && Number.isInteger(target.sectionIndex)) {
+        const section = toArray(form.secciones)[target.sectionIndex] || {};
+        const sectionSlug = slugify(target.sectionSlug || section.slug || section.titulo || `rubro-${target.sectionIndex + 1}`);
+        const uploaded = await uploadManyAssets(files, `${folder}/secciones/${sectionSlug}`);
+        setForm((prev) => ({
+          ...prev,
+          secciones: toArray(prev.secciones).map((item, index) => index === target.sectionIndex
+            ? { ...item, imagenes: [...toArray(item.imagenes), ...uploaded.items] }
+            : item),
+        }));
+        notify(`Status ${uploaded.status}: ${uploaded.urls.length} foto(s) cargada(s) en ${section.titulo || sectionSlug}. Guardá el contenido para publicarlas.`);
         return;
       }
 
