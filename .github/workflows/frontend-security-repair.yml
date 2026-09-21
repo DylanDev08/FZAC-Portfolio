@@ -10,6 +10,7 @@ permissions:
 
 jobs:
   repair:
+    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -26,6 +27,7 @@ jobs:
           npm ci
           npm audit fix || true
           npm install --save-dev vite@8.3.0 @vitejs/plugin-react@latest
+          npm install react-router-dom@7.18.4
           npm audit fix
           npm run build
           npm audit --audit-level=high
