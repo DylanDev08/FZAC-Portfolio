@@ -10,7 +10,7 @@ import {
 } from '../controllers/fzac.controller.js';
 import { makeContentController } from '../controllers/content.controller.js';
 import { authMiddleware } from '../middleware/auth.js';
-import { adminActionLimiter, sanitizeBody } from '../middleware/security.js';
+import { adminActionLimiter, validateSafeBody } from '../middleware/security.js';
 
 const router = Router();
 const trabajos = makeContentController('trabajos');
@@ -44,18 +44,18 @@ router.get('/obras', listObras);
 router.get('/works', listPortfolioWorks);
 router.get('/site-texts', listPublicSiteTexts);
 router.get('/obras/:id', getObra);
-router.post('/obras', adminActionLimiter, authMiddleware, sanitizeBody, validatePayload, createObraController);
-router.put('/obras/:id', adminActionLimiter, authMiddleware, sanitizeBody, validatePayload, updateObraController);
+router.post('/obras', adminActionLimiter, authMiddleware, validateSafeBody, validatePayload, createObraController);
+router.put('/obras/:id', adminActionLimiter, authMiddleware, validateSafeBody, validatePayload, updateObraController);
 router.delete('/obras/:id', adminActionLimiter, authMiddleware, deleteObraController);
 
 router.get('/trabajos', trabajos.list);
-router.post('/trabajos', adminActionLimiter, authMiddleware, sanitizeBody, validatePayload, trabajos.create);
-router.put('/trabajos/:id', adminActionLimiter, authMiddleware, sanitizeBody, validatePayload, trabajos.update);
+router.post('/trabajos', adminActionLimiter, authMiddleware, validateSafeBody, validatePayload, trabajos.create);
+router.put('/trabajos/:id', adminActionLimiter, authMiddleware, validateSafeBody, validatePayload, trabajos.update);
 router.delete('/trabajos/:id', adminActionLimiter, authMiddleware, trabajos.remove);
 
 router.get('/eventos', eventos.list);
-router.post('/eventos', adminActionLimiter, authMiddleware, sanitizeBody, validatePayload, eventos.create);
-router.put('/eventos/:id', adminActionLimiter, authMiddleware, sanitizeBody, validatePayload, eventos.update);
+router.post('/eventos', adminActionLimiter, authMiddleware, validateSafeBody, validatePayload, eventos.create);
+router.put('/eventos/:id', adminActionLimiter, authMiddleware, validateSafeBody, validatePayload, eventos.update);
 router.delete('/eventos/:id', adminActionLimiter, authMiddleware, eventos.remove);
 
 router.get('/:id', getObra);
