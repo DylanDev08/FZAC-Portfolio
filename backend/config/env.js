@@ -6,12 +6,6 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const envPath = path.join(__dirname, '..', '.env');
 
-const DEFAULT_ADMIN_EMAILS = [
-  'fortalezaconstruccionesrosario@gmail.com',
-  'materialezfzacecommerce@gmail.com',
-  'dylansalcedo333@gmail.com',
-];
-
 function loadLocalEnv() {
   if (!fs.existsSync(envPath)) return;
 
@@ -60,10 +54,7 @@ const configuredAdminEmails = uniqueEmailList([
   ...emailListFromValue(process.env.ADMIN_EMAIL),
 ]);
 
-const allowedAdminEmails = uniqueEmailList([
-  ...DEFAULT_ADMIN_EMAILS,
-  ...configuredAdminEmails,
-]);
+const allowedAdminEmails = configuredAdminEmails;
 
 const DEFAULT_PHOTO_MIME_TYPES = [
   'image/jpeg',
