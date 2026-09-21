@@ -28,6 +28,11 @@ function numberFromEnv(key, fallback) {
   return Number.isFinite(value) && value > 0 ? value : fallback;
 }
 
+function boundedNumberFromEnv(key, fallback, min, max) {
+  const value = numberFromEnv(key, fallback);
+  return Math.min(max, Math.max(min, value));
+}
+
 function valuesFromString(value) {
   return String(value || '')
     .split(/[,;\r\n]+/)
@@ -56,7 +61,7 @@ const configuredAdminEmails = uniqueEmailList([
 
 const allowedAdminEmails = configuredAdminEmails;
 
-const DEFAULT_PHOTO_MIME_TYPES = [
+const DEFAULT_UPLOAD_MIME_TYPES = [
   'image/jpeg',
   'image/png',
   'image/webp',
@@ -76,10 +81,11 @@ const DEFAULT_PHOTO_MIME_TYPES = [
   'video/x-m4v',
 ];
 
-const uploadMimeTypes = uniqueEmailList([
-  ...listFromEnv('ALLOWED_UPLOAD_MIME_TYPES'),
-  ...DEFAULT_PHOTO_MIME_TYPES,
-]);
+const configuredUploadMimeTypes = listFromEnv('ALLOWED_UPLOAD_MIME_TYPES')
+  .map((item) => item.toLowerCase());
+const uploadMimeTypes = configuredUploadMimeTypes.length
+  ? uniqueEmailList(configuredUploadMimeTypes)
+  : DEFAULT_UPLOAD_MIME_TYPES;
 
 const configuredCorsOrigins = uniqueEmailList([
   ...listFromEnv('CORS_ORIGINS'),
@@ -95,7 +101,7 @@ export const env = {
   supabaseAnonKey: String(process.env.SUPABASE_ANON_KEY || ''),
   supabaseServiceRoleKey: String(process.env.SUPABASE_SERVICE_ROLE_KEY || ''),
   supabaseStorageBucket: String(process.env.SUPABASE_STORAGE_BUCKET || 'crud-images'),
-  maxUploadSizeMb: Math.max(numberFromEnv('MAX_UPLOAD_SIZE_MB', 25), 25),
+  maxUploadSizeMb: boundedNumberFromEnv('MAX_UPLOAD_SIZE_MB', 25, 1, 25),
   allowedUploadMimeTypes: uploadMimeTypes,
   corsOrigins: configuredCorsOrigins,
   jsonLimit: String(process.env.JSON_LIMIT || '2mb'),
