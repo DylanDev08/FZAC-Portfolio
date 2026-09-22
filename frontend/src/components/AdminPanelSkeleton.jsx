@@ -1,6 +1,4 @@
 import React from 'react';
-import { Folder } from 'lucide-react';
-
 export default function AdminPanelSkeleton() {
   return (
     <main className="admin-page admin-page--loading" aria-busy="true" aria-label="Cargando panel administrativo">
@@ -49,7 +47,7 @@ export default function AdminPanelSkeleton() {
                 </div>
               </div>
             ))}
-            <span className="admin-skeleton__sr"><Folder size={1} aria-hidden="true" /> Cargando contenido</span>
+            <span className="admin-skeleton__sr">Cargando contenido</span>
           </div>
         </section>
       </div>
