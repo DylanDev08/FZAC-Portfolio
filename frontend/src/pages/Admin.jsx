@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, BarChart3, Briefcase, CalendarDays, Download, Eye, Folder, Images, Plus, Tags, Trash2, Type } from 'lucide-react';
+import { AlertTriangle, ArrowDown, ArrowLeft, ArrowRight, ArrowUp, BarChart3, Briefcase, CalendarDays, CheckCircle2, ChevronRight, Download, Eye, Folder, Images, LogOut, Plus, RefreshCw, Search, Settings2, Tags, Trash2, Type } from 'lucide-react';
 import { deleteProject, getAdminProjects, saveProject, syncProjectCatalog, updateProjectStatus } from '../services/projectsService.js';
 import { logout } from '../services/authService.js';
 import { slugify } from '../services/utils.js';
@@ -8,6 +8,7 @@ import { COLLECTIONS, deleteContentItem, getAdminEventos, getAdminTrabajos, save
 import { isStorageUploadReady, uploadAsset, uploadManyAssets } from '../services/storageService.js';
 import { deleteCategory, deleteSiteText, getCategories, getSiteTexts, saveCategory, saveSiteText } from '../services/adminContentService.js';
 import { subscribeAdminCrud } from '../services/realtimeService.js';
+import AdminPanelSkeleton from '../components/AdminPanelSkeleton.jsx';
 
 const EMPTY = {
   id: '',
@@ -155,6 +156,40 @@ const TIPOS_EVENTO = [
   'Participación comercial',
   'Armado de espacios',
 ];
+
+
+const TAB_META = {
+  dashboard: {
+    eyebrow: 'Resumen',
+    title: 'Centro de gestión',
+    description: 'Lo importante del portfolio en un vistazo, con accesos rápidos y contenido que necesita atención.',
+  },
+  obras: {
+    eyebrow: 'Contenido',
+    title: 'Obras',
+    description: 'Administrá proyectos, estados, galerías y publicaciones del portfolio.',
+  },
+  trabajos: {
+    eyebrow: 'Contenido',
+    title: 'Trabajos varios',
+    description: 'Gestioná trabajos por rubro, referencias visuales y piezas de servicio.',
+  },
+  eventos: {
+    eyebrow: 'Contenido',
+    title: 'Eventos',
+    description: 'Organizá participaciones, eventos y contenido destacado de FZAC.',
+  },
+  categorias: {
+    eyebrow: 'Configuración',
+    title: 'Categorías',
+    description: 'Ordená la clasificación interna y el menú de proyectos.',
+  },
+  textos: {
+    eyebrow: 'Configuración',
+    title: 'Textos del sitio',
+    description: 'Editá copies institucionales sin tocar código.',
+  },
+};
 
 function toArray(value) {
   return Array.isArray(value)
@@ -866,7 +901,7 @@ function WorkSectionsEditor({ form, setForm, onUpload, uploading }) {
   );
 }
 
-function ContentForm({ kind, form, setForm, onSubmit, onClear, onUpload, uploading, message, categories = [] }) {
+function ContentForm({ kind, form, setForm, onSubmit, onClear, onCancel, hasUnsavedChanges, onUpload, uploading, message, categories = [] }) {
   const cfg = RESOURCE_CONFIG[kind];
   const isEvent = kind === 'eventos';
   const isWork = kind === 'trabajos';
@@ -901,50 +936,72 @@ function ContentForm({ kind, form, setForm, onSubmit, onClear, onUpload, uploadi
 
   return (
     <article className="admin-card admin-card--form">
-      <div className="admin-card__header">
-        <span className="eyebrow">{cfg.label}</span>
-        <h2>{form.id ? `Editar ${cfg.singular}` : `Nuevo ${cfg.singular}`}</h2>
-        <p>Cargá el contenido desde acá. El sitio público se actualiza automáticamente y el panel se sincroniza en tiempo real.</p>
+      <div className="admin-card__header admin-editor-header">
+        <div>
+          <span className="eyebrow">{cfg.label}</span>
+          <h2>{form.id ? `Editar ${cfg.singular}` : `Nuevo ${cfg.singular}`}</h2>
+          <p>Completá lo esencial primero. Las opciones técnicas quedan separadas para que el flujo sea más simple.</p>
+        </div>
+        <button className="admin-editor-back" type="button" onClick={onCancel}>
+          <ArrowLeft size={16} aria-hidden="true" /> Volver a {cfg.label.toLowerCase()}
+        </button>
       </div>
 
       {message && <p className="admin-feedback" role="status">{message}</p>}
 
       <form className="admin-form" onSubmit={onSubmit}>
-        <div className="admin-form__grid">
-          <Field label="Nombre" value={form.nombre} onChange={(v) => set('nombre', v)} placeholder="Ej. Marvel Food Rosario" />
-          <Field label="Slug" value={form.slug} onChange={(v) => set('slug', v)} placeholder="marvel-food-rosario" />
-          <Select label="Tipo" value={form.tipo} onChange={(v) => set('tipo', v)} options={getOptions(kind)} />
-          {isObra && categories.length > 0 && (
-            <div className="form-row">
-              <label>Categoría</label>
-              <select value={form.categoryId || ''} onChange={(e) => set('categoryId', e.target.value)}>
-                <option value="">Seleccionar categoría</option>
-                {categories.map((category) => (
-                  <option key={category.id} value={category.id}>{category.name || category.nombre}</option>
-                ))}
-              </select>
+        <section className="admin-editor-section">
+          <div className="admin-editor-section__head">
+            <span>1</span>
+            <div>
+              <h3>Información principal</h3>
+              <p>Nombre, ubicación y estado. Es lo primero que necesitás para identificar el contenido.</p>
             </div>
-          )}
-          <Field label="Dirección" value={form.direccion} onChange={(v) => set('direccion', v)} placeholder="Jujuy 2254, Rosario, Santa Fe" />
-          <Field label="Ubicación" value={form.ubicacion} onChange={(v) => set('ubicacion', v)} placeholder="Rosario, Santa Fe" />
-          <Field label="Año" value={form.anio} onChange={(v) => set('anio', v)} placeholder="2026" />
-          <Field label="Orden" value={form.order} onChange={(v) => set('order', v)} type="number" />
-          {isObra && <Field label="Avance %" value={form.avance} onChange={(v) => set('avance', v)} type="number" />}
-          {isObra && (
-            <div className="form-row">
-              <label>Estado</label>
-              <select value={form.estado || 'finalizada'} onChange={(e) => set('estado', e.target.value)}>
-                {ESTADOS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
-              </select>
-            </div>
-          )}
-          {(isEvent || isWork) && <Field label="Categoría" value={form.categoria} onChange={(v) => set('categoria', v)} placeholder={isEvent ? 'Eventos y participaciones' : 'Trabajos varios'} />}
-        </div>
+          </div>
 
-        <label className="admin-check">
-          <input type="checkbox" checked={Boolean(form.destacado)} onChange={(e) => set('destacado', e.target.checked)} />
-          <span>Destacar en el sitio</span>
-        </label>
+          <div className="admin-form__grid">
+            <Field label="Nombre" value={form.nombre} onChange={(v) => set('nombre', v)} placeholder="Ej. Marvel Food Rosario" />
+            <Select label="Tipo" value={form.tipo} onChange={(v) => set('tipo', v)} options={getOptions(kind)} />
+            {isObra && categories.length > 0 && (
+              <div className="form-row">
+                <label>Categoría</label>
+                <select value={form.categoryId || ''} onChange={(e) => set('categoryId', e.target.value)}>
+                  <option value="">Seleccionar categoría</option>
+                  {categories.map((category) => (
+                    <option key={category.id} value={category.id}>{category.name || category.nombre}</option>
+                  ))}
+                </select>
+              </div>
+            )}
+            <Field label="Dirección" value={form.direccion} onChange={(v) => set('direccion', v)} placeholder="Jujuy 2254, Rosario, Santa Fe" />
+            <Field label="Ubicación" value={form.ubicacion} onChange={(v) => set('ubicacion', v)} placeholder="Rosario, Santa Fe" />
+            <Field label="Año" value={form.anio} onChange={(v) => set('anio', v)} placeholder="2026" />
+            {isObra && <Field label="Avance %" value={form.avance} onChange={(v) => set('avance', v)} type="number" />}
+            {isObra && (
+              <div className="form-row">
+                <label>Estado</label>
+                <select value={form.estado || 'finalizada'} onChange={(e) => set('estado', e.target.value)}>
+                  {ESTADOS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+                </select>
+              </div>
+            )}
+            {(isEvent || isWork) && <Field label="Categoría" value={form.categoria} onChange={(v) => set('categoria', v)} placeholder={isEvent ? 'Eventos y participaciones' : 'Trabajos varios'} />}
+          </div>
+
+          <label className="admin-check admin-check--featured">
+            <input type="checkbox" checked={Boolean(form.destacado)} onChange={(e) => set('destacado', e.target.checked)} />
+            <span><strong>Destacar en el sitio</strong><small>Mostralo con mayor prioridad cuando corresponda.</small></span>
+          </label>
+        </section>
+
+        <details className="admin-advanced admin-advanced--editor">
+          <summary><Settings2 size={16} aria-hidden="true" /> Opciones avanzadas</summary>
+          <p>Estas opciones se generan automáticamente en la mayoría de los casos.</p>
+          <div className="admin-form__grid">
+            <Field label="Slug / URL" value={form.slug} onChange={(v) => set('slug', v)} placeholder="marvel-food-rosario" />
+            <Field label="Orden manual" value={form.order} onChange={(v) => set('order', v)} type="number" />
+          </div>
+        </details>
 
         <div className="admin-media-panel">
           <div className="admin-media-panel__head">
@@ -1104,79 +1161,181 @@ function ContentForm({ kind, form, setForm, onSubmit, onClear, onUpload, uploadi
           </div>
         )}
 
+        <section className="admin-editor-section admin-editor-section--copy">
+          <div className="admin-editor-section__head">
+            <span>3</span>
+            <div>
+              <h3>Texto y publicación</h3>
+              <p>Contá qué se hizo y dejá la información lista para publicar.</p>
+            </div>
+          </div>
+        </section>
         <Area label="Descripción" value={form.descripcion} onChange={(v) => set('descripcion', v)} rows={4} placeholder="Texto profesional visible en el sitio." />
         {isObra && <Area label="Proceso" value={form.proceso} onChange={(v) => set('proceso', v)} rows={4} />}
         {isObra && <Area label="Finalización" value={form.finalizacion} onChange={(v) => set('finalizacion', v)} rows={4} />}
         <Area label={isEvent ? 'Puntos / rol (uno por línea)' : 'Etapas (una por línea)'} value={arrToText(isEvent ? form.puntos : form.stages)} onChange={(v) => set(isEvent ? 'puntos' : 'stages', v)} rows={4} />
 
-        <div className="admin-form__actions">
-          <button type="submit" className="btn btn--primary">{form.id ? 'Guardar cambios' : `Crear ${cfg.singular}`}</button>
-          <button type="button" className="btn btn--ghost" onClick={onClear}>Limpiar</button>
+        <div className={`admin-editor-savebar ${hasUnsavedChanges ? 'is-dirty' : ''}`}>
+          <div className="admin-editor-savebar__status">
+            {hasUnsavedChanges ? <AlertTriangle size={18} aria-hidden="true" /> : <CheckCircle2 size={18} aria-hidden="true" />}
+            <div>
+              <strong>{hasUnsavedChanges ? 'Tenés cambios sin guardar' : 'Todo está guardado'}</strong>
+              <span>{hasUnsavedChanges ? 'Guardalos antes de salir para no perder el trabajo.' : 'Podés seguir editando o volver al listado.'}</span>
+            </div>
+          </div>
+          <div className="admin-form__actions">
+            <button type="button" className="btn btn--ghost" onClick={onCancel}>Cancelar</button>
+            <button type="button" className="btn btn--ghost" onClick={onClear}>Limpiar</button>
+            <button type="submit" className="btn btn--primary" disabled={!hasUnsavedChanges || uploading}>
+              {form.id ? 'Guardar cambios' : `Crear ${cfg.singular}`}
+            </button>
+          </div>
         </div>
       </form>
     </article>
   );
 }
 
-function ContentList({ title, items, kind, onEdit, onDelete, onStatusChange, statusUpdatingId }) {
+
+function ContentList({ items, kind, onEdit, onDelete, onStatusChange, statusUpdatingId }) {
   const cfg = RESOURCE_CONFIG[kind];
-  if (!items.length) return <div className="admin-list__empty">No hay contenido cargado en {cfg.label.toLowerCase()}.</div>;
+  const [query, setQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+
+  const visibleItems = useMemo(() => {
+    const normalizedQuery = query.trim().toLowerCase();
+    return items.filter((item) => {
+      const haystack = [
+        item.nombre,
+        item.titulo,
+        item.tipo,
+        item.direccion,
+        item.ubicacion,
+        item.anio,
+      ].filter(Boolean).join(' ').toLowerCase();
+      const matchesQuery = !normalizedQuery || haystack.includes(normalizedQuery);
+      const matchesStatus = kind !== 'obras' || statusFilter === 'all' || item.estado === statusFilter;
+      return matchesQuery && matchesStatus;
+    });
+  }, [items, kind, query, statusFilter]);
+
+  if (!items.length) {
+    return (
+      <div className="admin-empty-state">
+        <Folder size={28} aria-hidden="true" />
+        <strong>Todavía no hay {cfg.label.toLowerCase()}</strong>
+        <span>Creá el primer contenido para empezar a completar esta sección.</span>
+      </div>
+    );
+  }
 
   return (
-    <div className="admin-list admin-list--projects">
-      {items.map((item) => (
-        <div className="admin-item admin-item--project" key={item.id}>
-          <img
-            className="admin-item__thumb"
-            src={assetUrl(item.portada) || assetUrl(item.imagenes?.[0]) || '/assets/img/logo/fzac-logo.jpg'}
-            alt={item.nombre || item.titulo}
-            loading="lazy"
-            onError={(event) => { event.currentTarget.src = '/assets/img/logo/fzac-logo.jpg'; }}
+    <>
+      <div className="admin-list-toolbar">
+        <label className="admin-search">
+          <Search size={17} aria-hidden="true" />
+          <input
+            type="search"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder={`Buscar en ${cfg.label.toLowerCase()}...`}
+            aria-label={`Buscar en ${cfg.label.toLowerCase()}`}
           />
-          <div className="admin-item__content">
-            <div className="admin-item__top">
-              <h3>{item.nombre || item.titulo}</h3>
-              {item.destacado && <span className="admin-featured-pill">Destacado</span>}
-            </div>
-            <div className="admin-item__meta">
-              <span>{item.tipo}</span>
-              {kind === 'obras' && (
-                <label className="admin-item__status-control">
-                  <span>Estado</span>
-                  <select
-                    value={item.estado || 'finalizada'}
-                    onChange={(event) => onStatusChange(item, event.target.value)}
-                    disabled={statusUpdatingId === item.id}
-                    aria-label={`Cambiar estado de ${item.nombre || item.titulo}`}
-                  >
-                    {ESTADOS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
-                  </select>
-                </label>
-              )}
-              {kind !== 'obras' && item.estado && <span>{item.estado}</span>}
-              {item.direccion && <span>{item.direccion}</span>}
-              {item.ubicacion && <span>{item.ubicacion}</span>}
-              {item.anio && <span>{item.anio}</span>}
-            </div>
-            {kind === 'obras' && (
-              <div className="admin-item__galleries" aria-label="Galerías de la obra">
-                <span className="admin-item__galleries-title"><Images size={16} aria-hidden="true" /> Galerías</span>
-                {gallerySummaries(item).map(({ label, count }, index) => (
-                  <span className="admin-item__gallery-pill" key={`${label}-${index}`}>
-                    {label} <strong>{count}</strong>
-                  </span>
-                ))}
+        </label>
+
+        {kind === 'obras' && (
+          <select
+            className="admin-list-filter"
+            value={statusFilter}
+            onChange={(event) => setStatusFilter(event.target.value)}
+            aria-label="Filtrar obras por estado"
+          >
+            <option value="all">Todos los estados</option>
+            {ESTADOS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+          </select>
+        )}
+
+        <span className="admin-list-count">{visibleItems.length} de {items.length}</span>
+      </div>
+
+      {visibleItems.length ? (
+        <div className="admin-list admin-list--projects">
+          {visibleItems.map((item) => {
+            const publicPath = item.slug
+              ? kind === 'obras'
+                ? `/obra/${item.slug}`
+                : kind === 'eventos'
+                  ? `/eventos/${item.slug}`
+                  : `/trabajos/${item.slug}`
+              : '';
+
+            return (
+              <div className="admin-item admin-item--project" key={item.id}>
+                <img
+                  className="admin-item__thumb"
+                  src={assetUrl(item.portada) || assetUrl(item.imagenes?.[0]) || '/assets/img/logo/fzac-logo.jpg'}
+                  alt={item.nombre || item.titulo}
+                  loading="lazy"
+                  onError={(event) => { event.currentTarget.src = '/assets/img/logo/fzac-logo.jpg'; }}
+                />
+                <div className="admin-item__content">
+                  <div className="admin-item__top">
+                    <h3>{item.nombre || item.titulo}</h3>
+                    {item.destacado && <span className="admin-featured-pill">Destacado</span>}
+                  </div>
+                  <div className="admin-item__meta">
+                    <span>{item.tipo}</span>
+                    {kind === 'obras' && (
+                      <label className="admin-item__status-control">
+                        <span>Estado</span>
+                        <select
+                          value={item.estado || 'finalizada'}
+                          onChange={(event) => onStatusChange(item, event.target.value)}
+                          disabled={statusUpdatingId === item.id}
+                          aria-label={`Cambiar estado de ${item.nombre || item.titulo}`}
+                        >
+                          {ESTADOS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+                        </select>
+                      </label>
+                    )}
+                    {kind !== 'obras' && item.estado && <span>{item.estado}</span>}
+                    {item.direccion && <span>{item.direccion}</span>}
+                    {item.ubicacion && <span>{item.ubicacion}</span>}
+                    {item.anio && <span>{item.anio}</span>}
+                  </div>
+                  {kind === 'obras' && (
+                    <div className="admin-item__galleries" aria-label="Galerías de la obra">
+                      <span className="admin-item__galleries-title"><Images size={16} aria-hidden="true" /> Galerías</span>
+                      {gallerySummaries(item).map(({ label, count }, index) => (
+                        <span className="admin-item__gallery-pill" key={`${label}-${index}`}>
+                          {label} <strong>{count}</strong>
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                  <p className="admin-item__desc">{item.descripcion}</p>
+                  <div className="admin-item__actions">
+                    <button className="admin-item__btn admin-item__btn--primary" type="button" onClick={() => onEdit(kind, item)}>Editar</button>
+                    {publicPath && (
+                      <Link className="admin-item__btn" to={publicPath} target="_blank" rel="noreferrer">
+                        <Eye size={14} aria-hidden="true" /> Ver
+                      </Link>
+                    )}
+                    <button className="admin-item__btn admin-item__btn--danger" type="button" onClick={() => onDelete(kind, item.id)}>Eliminar</button>
+                  </div>
+                </div>
               </div>
-            )}
-            <p className="admin-item__desc">{item.descripcion}</p>
-            <div className="admin-item__actions">
-              <button className="admin-item__btn" type="button" onClick={() => onEdit(kind, item)}>Editar</button>
-              <button className="admin-item__btn admin-item__btn--danger" type="button" onClick={() => onDelete(kind, item.id)}>Eliminar</button>
-            </div>
-          </div>
+            );
+          })}
         </div>
-      ))}
-    </div>
+      ) : (
+        <div className="admin-empty-state admin-empty-state--compact">
+          <Search size={24} aria-hidden="true" />
+          <strong>No encontramos coincidencias</strong>
+          <span>Probá con otro nombre, dirección o estado.</span>
+        </div>
+      )}
+    </>
   );
 }
 
@@ -1301,6 +1460,9 @@ export default function Admin() {
   const [uploading, setUploading] = useState(false);
   const [statusUpdatingId, setStatusUpdatingId] = useState('');
   const [realtimeTick, setRealtimeTick] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [formBaseline, setFormBaseline] = useState(JSON.stringify(EMPTY));
   const navigate = useNavigate();
 
   const stats = useMemo(() => {
@@ -1328,7 +1490,7 @@ export default function Admin() {
     };
   }, [items, categories, siteTexts]);
 
-  useEffect(() => { refresh(); }, []);
+  useEffect(() => { refresh({ initial: true }); }, []);
 
   useEffect(() => subscribeAdminCrud(() => {
     setRealtimeTick((value) => value + 1);
@@ -1342,6 +1504,9 @@ export default function Admin() {
   }
 
   async function refresh(options = {}) {
+    if (options.initial) setLoading(true);
+    if (options.manual) setRefreshing(true);
+
     try {
       const [obras, trabajos, eventos, nextCategories, nextSiteTexts] = await Promise.all([
         getAdminProjects(),
@@ -1353,20 +1518,27 @@ export default function Admin() {
       setItems({ obras, trabajos, eventos });
       setCategories(nextCategories);
       setSiteTexts(nextSiteTexts);
+      if (options.manual) notify('Datos actualizados.');
     } catch (error) {
       if (!options.silent) notify(error.message || 'No se pudieron cargar los datos.');
+    } finally {
+      if (options.initial) setLoading(false);
+      if (options.manual) setRefreshing(false);
     }
   }
 
   function openNew(nextKind) {
     setKind(nextKind);
     setForm(EMPTY);
+    setFormBaseline(JSON.stringify(EMPTY));
     setTab('editar');
   }
 
   function editItem(nextKind, item) {
+    const normalized = normalizeForForm(item);
     setKind(nextKind);
-    setForm(normalizeForForm(item));
+    setForm(normalized);
+    setFormBaseline(JSON.stringify(normalized));
     setTab('editar');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
@@ -1393,9 +1565,9 @@ export default function Admin() {
         ...current,
         obras: current.obras.map((work) => work.id === item.id ? result.item : work),
       }));
-      notify(`Status ${result.status}: estado de la obra actualizado.`);
+      notify('Estado de la obra actualizado.');
     } catch (error) {
-      notify(`Status ${error.status || 400}: ${error.message || 'No se pudo cambiar el estado.'}`);
+      notify(error.message || 'No se pudo cambiar el estado.');
     } finally {
       setStatusUpdatingId('');
     }
@@ -1406,7 +1578,7 @@ export default function Admin() {
     if (!files.length) return;
 
     if (!isStorageUploadReady) {
-      notify('Status 400: Supabase Storage no está listo. Mientras tanto podés pegar una ruta/URL en "Agregar enlace manual".');
+      notify('La carga de archivos no está disponible ahora. Podés usar “Agregar enlace manual”.');
       return;
     }
 
@@ -1429,7 +1601,7 @@ export default function Admin() {
             ...prev,
             sucursales: toArray(prev.sucursales).map((item, index) => index === target.branchIndex ? { ...item, portada: uploaded.url } : item),
           }));
-          notify(`Status ${uploaded.status}: portada de la sucursal cargada. Guardá la obra para publicarla.`);
+          notify('Portada de la sucursal cargada. Guardá los cambios para publicarla.');
           return;
         }
 
@@ -1440,7 +1612,7 @@ export default function Admin() {
             ? { ...item, [target.target]: [...toArray(item[target.target]), ...uploaded.items] }
             : item),
         }));
-        notify(`Status ${uploaded.status}: ${uploaded.urls.length} foto(s) cargada(s) en la sucursal. Guardá la obra para publicarlas.`);
+        notify(`${uploaded.urls.length} foto(s) cargada(s) en la sucursal. Guardá los cambios para publicarlas.`);
         return;
       }
 
@@ -1454,37 +1626,37 @@ export default function Admin() {
             ? { ...item, imagenes: [...toArray(item.imagenes), ...uploaded.items] }
             : item),
         }));
-        notify(`Status ${uploaded.status}: ${uploaded.urls.length} foto(s) cargada(s) en ${section.titulo || sectionSlug}. Guardá el contenido para publicarlas.`);
+        notify(`${uploaded.urls.length} foto(s) cargada(s) en ${section.titulo || sectionSlug}. Guardá los cambios para publicarlas.`);
         return;
       }
 
       if (target === 'portada') {
         const uploaded = await uploadAsset(files[0], `${folder}/portada`);
         setForm((prev) => ({ ...prev, portada: uploaded.url }));
-        notify(`Status ${uploaded.status}: portada cargada. Guardá el contenido para publicarla.`);
+        notify('Portada cargada. Guardá los cambios para publicarla.');
       }
 
       if (target === 'video') {
         const uploaded = await uploadAsset(files[0], `${folder}/videos`);
         setForm((prev) => ({ ...prev, video: uploaded.url }));
-        notify(`Status ${uploaded.status}: video cargado. Guardá el contenido para publicarlo.`);
+        notify('Video cargado. Guardá los cambios para publicarlo.');
       }
 
       if (['imagenes', 'imagenesAntes', 'imagenesProceso', 'imagenesFinal'].includes(target)) {
         const sectionFolder = target === 'imagenes' ? 'galeria' : target.replace('imagenes', '').toLowerCase();
         const uploaded = await uploadManyAssets(files, `${folder}/${sectionFolder}`);
         setForm((prev) => ({ ...prev, [target]: [...toArray(prev[target]), ...uploaded.items] }));
-        notify(`Status ${uploaded.status}: ${uploaded.urls.length} imagen(es) cargada(s). Guardá el contenido para publicarlas.`);
+        notify(`${uploaded.urls.length} imagen(es) cargada(s). Guardá los cambios para publicarlas.`);
       }
 
       if (target === 'videos' || target === 'galeriaVideo') {
         const uploaded = await uploadManyAssets(files, `${folder}/videos`);
         setForm((prev) => ({ ...prev, [target]: [...toArray(prev[target]), ...uploaded.urls] }));
-        notify(`Status ${uploaded.status}: ${uploaded.urls.length} video(s) cargado(s). Guardá el contenido para publicarlos.`);
+        notify(`${uploaded.urls.length} video(s) cargado(s). Guardá los cambios para publicarlos.`);
       }
     } catch (error) {
       console.warn('[FZAC] No se pudo subir el archivo:', error?.message || error);
-      notify(`Status ${error.status || 400}: ${error.message || 'No se pudo subir el archivo.'}`);
+      notify(error.message || 'No se pudo subir el archivo.');
     } finally {
       setUploading(false);
     }
@@ -1494,8 +1666,8 @@ export default function Admin() {
     event.preventDefault();
     const cfg = RESOURCE_CONFIG[kind];
     const payload = buildPayload(form, kind);
-    if (!payload.nombre) return notify('Status 400: El contenido necesita un nombre.');
-    if (!payload.descripcion) return notify('Status 400: Agregá una descripción profesional.');
+    if (!payload.nombre) return notify('El contenido necesita un nombre.');
+    if (!payload.descripcion) return notify('Agregá una descripción profesional.');
     if (kind === 'obras') {
       const unbalanced = gallerySummaries(payload).filter(({ count }) => count < 5 || count > 8);
       if (unbalanced.length) {
@@ -1509,13 +1681,13 @@ export default function Admin() {
 
     try {
       const result = await cfg.save({ ...payload, id: form.id });
-      const status = result?.status || (form.id ? 200 : 201);
-      notify(`Status ${status}: ${form.id ? 'Contenido actualizado correctamente.' : 'Contenido creado correctamente.'}`);
+      notify(form.id ? 'Cambios guardados correctamente.' : 'Contenido creado correctamente.');
       setForm(EMPTY);
+      setFormBaseline(JSON.stringify(EMPTY));
       setTab(kind);
       await refresh();
     } catch (error) {
-      notify(`Status ${error.status || 400}: ${error.message || 'No se pudo guardar el contenido.'}`);
+      notify(error.message || 'No se pudo guardar el contenido.');
     }
   }
 
@@ -1523,11 +1695,11 @@ export default function Admin() {
     event.preventDefault();
     try {
       const result = await saveCategory(categoryForm);
-      notify(`Status ${result.status}: categoría guardada correctamente.`);
+      notify('Categoría guardada correctamente.');
       setCategoryForm(EMPTY_CATEGORY);
       await refresh();
     } catch (error) {
-      notify(`Status ${error.status || 400}: ${error.message || 'No se pudo guardar la categoría.'}`);
+      notify(error.message || 'No se pudo guardar la categoría.');
     }
   }
 
@@ -1535,10 +1707,10 @@ export default function Admin() {
     if (!window.confirm('¿Eliminar esta categoría?')) return;
     try {
       const result = await deleteCategory(id);
-      notify(`Status ${result.status}: categoría eliminada.`);
+      notify('Categoría eliminada.');
       await refresh();
     } catch (error) {
-      notify(`Status ${error.status || 400}: ${error.message || 'No se pudo eliminar la categoría.'}`);
+      notify(error.message || 'No se pudo eliminar la categoría.');
     }
   }
 
@@ -1546,11 +1718,11 @@ export default function Admin() {
     event.preventDefault();
     try {
       const result = await saveSiteText(siteTextForm);
-      notify(`Status ${result.status}: texto guardado correctamente.`);
+      notify('Texto guardado correctamente.');
       setSiteTextForm(EMPTY_SITE_TEXT);
       await refresh();
     } catch (error) {
-      notify(`Status ${error.status || 400}: ${error.message || 'No se pudo guardar el texto.'}`);
+      notify(error.message || 'No se pudo guardar el texto.');
     }
   }
 
@@ -1558,27 +1730,85 @@ export default function Admin() {
     if (!window.confirm('¿Eliminar este texto?')) return;
     try {
       const result = await deleteSiteText(id);
-      notify(`Status ${result.status}: texto eliminado.`);
+      notify('Texto eliminado.');
       await refresh();
     } catch (error) {
-      notify(`Status ${error.status || 400}: ${error.message || 'No se pudo eliminar el texto.'}`);
+      notify(error.message || 'No se pudo eliminar el texto.');
     }
   }
 
   async function syncCatalog() {
     try {
       const result = await syncProjectCatalog();
-      notify(`Status ${result.status}: catálogo sincronizado. ${result.created || 0} obra(s) agregada(s).`);
+      notify(`Catálogo sincronizado. ${result.created || 0} obra(s) agregada(s).`);
       await refresh();
     } catch (error) {
-      notify(`Status ${error.status || 400}: ${error.message || 'No se pudo sincronizar el catálogo.'}`);
+      notify(error.message || 'No se pudo sincronizar el catálogo.');
     }
+  }
+
+  const hasUnsavedChanges = tab === 'editar' && JSON.stringify(form) !== formBaseline;
+
+  const attentionItems = useMemo(() => items.obras
+    .map((obra) => {
+      const issues = [];
+      if (!assetUrl(obra.portada)) issues.push('Falta portada');
+      if (!String(obra.descripcion || '').trim()) issues.push('Falta descripción');
+      const galleryCount = uniqueImageCount(
+        obra.portada,
+        obra.imagenes,
+        obra.imagenesAntes,
+        obra.imagenesProceso,
+        obra.imagenesFinal,
+      );
+      if (galleryCount < 5) issues.push(`Solo ${galleryCount} foto${galleryCount === 1 ? '' : 's'}`);
+      return { obra, issues };
+    })
+    .filter((entry) => entry.issues.length)
+    .slice(0, 5), [items.obras]);
+
+  const currentMeta = tab === 'editar'
+    ? {
+        eyebrow: form.id ? 'Edición' : 'Nuevo contenido',
+        title: form.id ? (form.nombre || form.titulo || `Editar ${RESOURCE_CONFIG[kind].singular}`) : `Nuevo ${RESOURCE_CONFIG[kind].singular}`,
+        description: hasUnsavedChanges ? 'Hay cambios pendientes de guardar.' : 'Completá los datos y publicá cuando esté listo.',
+      }
+    : TAB_META[tab] || TAB_META.dashboard;
+
+  useEffect(() => {
+    if (!hasUnsavedChanges) return undefined;
+    const warnBeforeUnload = (event) => {
+      event.preventDefault();
+      event.returnValue = '';
+    };
+    window.addEventListener('beforeunload', warnBeforeUnload);
+    return () => window.removeEventListener('beforeunload', warnBeforeUnload);
+  }, [hasUnsavedChanges]);
+
+  function goToTab(nextTab) {
+    if (tab === 'editar' && hasUnsavedChanges) {
+      const shouldLeave = window.confirm('Tenés cambios sin guardar. ¿Querés salir igualmente?');
+      if (!shouldLeave) return;
+    }
+    setTab(nextTab);
+  }
+
+  function cancelEditor() {
+    if (hasUnsavedChanges) {
+      const shouldLeave = window.confirm('Hay cambios sin guardar. ¿Descartarlos y volver al listado?');
+      if (!shouldLeave) return;
+    }
+    setForm(EMPTY);
+    setFormBaseline(JSON.stringify(EMPTY));
+    setTab(kind);
   }
 
   async function handleLogout() {
     await logout();
     navigate('/login');
   }
+
+  if (loading) return <AdminPanelSkeleton />;
 
   return (
     <main className="admin-page">
@@ -1587,62 +1817,194 @@ export default function Admin() {
           <div className="admin-sidebar__brand">
             <Link to="/" className="brand">
               <img src="/assets/img/logo/fzac-logo.jpg" className="brand__logo" alt="FZAC" />
-              <div className="brand__text"><span className="brand__name">FORTALEZA</span><span className="brand__sub">ADMIN</span></div>
+              <div className="brand__text">
+                <span className="brand__name">FORTALEZA</span>
+                <span className="brand__sub">PANEL DE GESTIÓN</span>
+              </div>
             </Link>
           </div>
 
-          <div className="admin-session-card"><p>Sesión activa</p><strong>Administrador autorizado</strong></div>
+          <div className="admin-session-card">
+            <span className="admin-session-card__dot" aria-hidden="true" />
+            <div>
+              <p>Sesión activa</p>
+              <strong>Administrador autorizado</strong>
+            </div>
+          </div>
 
-          <nav className="admin-nav">
-            <button className={`admin-nav__btn ${tab === 'dashboard' ? 'is-active' : ''}`} onClick={() => setTab('dashboard')} type="button"><BarChart3 size={18} aria-hidden="true" /><span>Dashboard</span></button>
-            <button className={`admin-nav__btn ${tab === 'obras' ? 'is-active' : ''}`} onClick={() => setTab('obras')} type="button"><Folder size={18} aria-hidden="true" /><span>Obras</span></button>
-            <button className={`admin-nav__btn ${tab === 'categorias' ? 'is-active' : ''}`} onClick={() => setTab('categorias')} type="button"><Tags size={18} aria-hidden="true" /><span>Categorías</span></button>
-            <button className={`admin-nav__btn ${tab === 'textos' ? 'is-active' : ''}`} onClick={() => setTab('textos')} type="button"><Type size={18} aria-hidden="true" /><span>Textos</span></button>
-            <button className={`admin-nav__btn ${tab === 'trabajos' ? 'is-active' : ''}`} onClick={() => setTab('trabajos')} type="button"><Briefcase size={18} aria-hidden="true" /><span>Trabajos varios</span></button>
-            <button className={`admin-nav__btn ${tab === 'eventos' ? 'is-active' : ''}`} onClick={() => setTab('eventos')} type="button"><CalendarDays size={18} aria-hidden="true" /><span>Eventos</span></button>
+          <nav className="admin-nav" aria-label="Navegación del panel">
+            <div className="admin-nav__group">
+              <span className="admin-nav__label">General</span>
+              <button className={`admin-nav__btn ${tab === 'dashboard' ? 'is-active' : ''}`} onClick={() => goToTab('dashboard')} type="button">
+                <span><BarChart3 size={18} aria-hidden="true" /> Inicio</span>
+                <ChevronRight size={15} aria-hidden="true" />
+              </button>
+            </div>
+
+            <div className="admin-nav__group">
+              <span className="admin-nav__label">Contenido</span>
+              <button className={`admin-nav__btn ${tab === 'obras' || (tab === 'editar' && kind === 'obras') ? 'is-active' : ''}`} onClick={() => goToTab('obras')} type="button">
+                <span><Folder size={18} aria-hidden="true" /> Obras</span>
+                <span className="admin-count-badge">{items.obras.length}</span>
+              </button>
+              <button className={`admin-nav__btn ${tab === 'trabajos' || (tab === 'editar' && kind === 'trabajos') ? 'is-active' : ''}`} onClick={() => goToTab('trabajos')} type="button">
+                <span><Briefcase size={18} aria-hidden="true" /> Trabajos varios</span>
+                <span className="admin-count-badge">{items.trabajos.length}</span>
+              </button>
+              <button className={`admin-nav__btn ${tab === 'eventos' || (tab === 'editar' && kind === 'eventos') ? 'is-active' : ''}`} onClick={() => goToTab('eventos')} type="button">
+                <span><CalendarDays size={18} aria-hidden="true" /> Eventos</span>
+                <span className="admin-count-badge">{items.eventos.length}</span>
+              </button>
+            </div>
+
+            <div className="admin-nav__group">
+              <span className="admin-nav__label">Configuración</span>
+              <button className={`admin-nav__btn ${tab === 'textos' ? 'is-active' : ''}`} onClick={() => goToTab('textos')} type="button">
+                <span><Type size={18} aria-hidden="true" /> Textos del sitio</span>
+                <ChevronRight size={15} aria-hidden="true" />
+              </button>
+              <button className={`admin-nav__btn ${tab === 'categorias' ? 'is-active' : ''}`} onClick={() => goToTab('categorias')} type="button">
+                <span><Tags size={18} aria-hidden="true" /> Categorías</span>
+                <ChevronRight size={15} aria-hidden="true" />
+              </button>
+            </div>
           </nav>
 
           <div className="admin-sidebar__footer">
-            <Link to="/" className="btn btn--ghost btn--full" style={{ marginBottom: 10 }}><Eye size={17} aria-hidden="true" /> Ver sitio</Link>
-            <button className="btn btn--ghost btn--full" type="button" onClick={handleLogout}>Cerrar sesión</button>
+            <Link to="/" className="admin-sidebar__link"><Eye size={17} aria-hidden="true" /> Ver sitio público</Link>
+            <button className="admin-sidebar__link admin-sidebar__link--danger" type="button" onClick={handleLogout}>
+              <LogOut size={17} aria-hidden="true" /> Cerrar sesión
+            </button>
           </div>
         </aside>
 
         <section className="admin-content">
-          <div className="admin-topbar">
-            <div>
-              <span className="eyebrow">Panel administrativo</span>
-              <h1>Gestión de contenido FZAC</h1>
-              <p>Administrá obras, trabajos varios, eventos, textos e imágenes desde un solo lugar.</p>
+          <header className="admin-topbar">
+            <div className="admin-topbar__copy">
+              <div className="admin-breadcrumb">
+                <span>Panel</span><ChevronRight size={14} aria-hidden="true" /><strong>{currentMeta.title}</strong>
+              </div>
+              <span className="eyebrow">{currentMeta.eyebrow}</span>
+              <h1>{currentMeta.title}</h1>
+              <p>{currentMeta.description}</p>
             </div>
-            <span className="admin-realtime-pill">CRUD en vivo {realtimeTick > 0 ? `+${realtimeTick}` : ''}</span>
+
+            <div className="admin-topbar__actions">
+              <span className="admin-realtime-pill">
+                <CheckCircle2 size={15} aria-hidden="true" />
+                {realtimeTick > 0 ? 'Actualizado en vivo' : 'Sincronizado'}
+              </span>
+              <button className="admin-icon-action" type="button" onClick={() => refresh({ manual: true })} disabled={refreshing} title="Actualizar datos">
+                <RefreshCw className={refreshing ? 'is-spinning' : ''} size={18} aria-hidden="true" />
+                <span>{refreshing ? 'Actualizando…' : 'Actualizar'}</span>
+              </button>
+              {tab !== 'editar' && (
+                <button className="btn btn--primary admin-topbar__new" type="button" onClick={() => openNew('obras')}>
+                  <Plus size={17} aria-hidden="true" /> Nueva obra
+                </button>
+              )}
+            </div>
+
             {msg && <p className="admin-feedback admin-feedback--top" role="status">{msg}</p>}
-          </div>
+          </header>
 
           {tab === 'dashboard' && (
-            <div className="admin-dashboard">
-              <article className="admin-stat"><span>Obras</span><strong>{stats.obras}</strong><p>Proyectos principales</p></article>
-              <article className="admin-stat"><span>Categorías</span><strong>{stats.categorias}</strong><p>Clasificación del portfolio</p></article>
-              <article className="admin-stat"><span>Textos</span><strong>{stats.textos}</strong><p>Copies editables del sitio</p></article>
-              <article className="admin-stat"><span>Trabajos</span><strong>{stats.trabajos}</strong><p>Referencias de servicios</p></article>
-              <article className="admin-stat"><span>Eventos</span><strong>{stats.eventos}</strong><p>Participaciones destacadas</p></article>
-              <article className="admin-stat"><span>Fotos</span><strong>{stats.fotos}</strong><p>Imágenes registradas en obras</p></article>
-              <article className="admin-stat"><span>Destacadas</span><strong>{stats.destacadas}</strong><p>Obras visibles como prioridad</p></article>
-              <article className="admin-stat"><span>En curso</span><strong>{stats.enCurso}</strong><p>Obras activas</p></article>
+            <div className="admin-dashboard-layout">
+              <section className="admin-quick-actions" aria-label="Acciones rápidas">
+                <button type="button" onClick={() => openNew('obras')}>
+                  <span className="admin-quick-actions__icon"><Plus size={22} aria-hidden="true" /></span>
+                  <span><strong>Nueva obra</strong><small>Crear un proyecto y empezar a cargar contenido.</small></span>
+                  <ChevronRight size={17} aria-hidden="true" />
+                </button>
+                <button type="button" onClick={() => goToTab('obras')}>
+                  <span className="admin-quick-actions__icon"><Images size={22} aria-hidden="true" /></span>
+                  <span><strong>Gestionar fotos</strong><small>Entrá a una obra para ordenar portada y galerías.</small></span>
+                  <ChevronRight size={17} aria-hidden="true" />
+                </button>
+                <Link to="/" target="_blank" rel="noreferrer">
+                  <span className="admin-quick-actions__icon"><Eye size={22} aria-hidden="true" /></span>
+                  <span><strong>Ver sitio</strong><small>Comprobá cómo se ve el contenido publicado.</small></span>
+                  <ChevronRight size={17} aria-hidden="true" />
+                </Link>
+              </section>
+
+              <div className="admin-dashboard admin-dashboard--primary">
+                <article className="admin-stat admin-stat--accent"><span>Obras</span><strong>{stats.obras}</strong><p>Proyectos principales</p></article>
+                <article className="admin-stat"><span>En curso</span><strong>{stats.enCurso}</strong><p>Obras activas ahora</p></article>
+                <article className="admin-stat"><span>Fotos</span><strong>{stats.fotos}</strong><p>Imágenes registradas</p></article>
+                <article className="admin-stat"><span>Destacadas</span><strong>{stats.destacadas}</strong><p>Prioridad en el portfolio</p></article>
+              </div>
+
+              <div className="admin-dashboard-columns">
+                <article className="admin-card admin-attention-card">
+                  <div className="admin-card__header admin-card__header--row">
+                    <div>
+                      <span className="eyebrow">Requieren atención</span>
+                      <h2>Contenido para completar</h2>
+                    </div>
+                    <span className={`admin-health-pill ${attentionItems.length ? 'needs-attention' : 'is-good'}`}>
+                      {attentionItems.length ? <AlertTriangle size={15} aria-hidden="true" /> : <CheckCircle2 size={15} aria-hidden="true" />}
+                      {attentionItems.length ? `${attentionItems.length} pendiente${attentionItems.length === 1 ? '' : 's'}` : 'Todo al día'}
+                    </span>
+                  </div>
+
+                  {attentionItems.length ? (
+                    <div className="admin-attention-list">
+                      {attentionItems.map(({ obra, issues }) => (
+                        <button type="button" key={obra.id} onClick={() => editItem('obras', obra)}>
+                          <img src={assetUrl(obra.portada) || '/assets/img/logo/fzac-logo.jpg'} alt="" />
+                          <span>
+                            <strong>{obra.nombre || obra.titulo}</strong>
+                            <small>{issues.join(' · ')}</small>
+                          </span>
+                          <ChevronRight size={17} aria-hidden="true" />
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="admin-empty-state admin-empty-state--success">
+                      <CheckCircle2 size={28} aria-hidden="true" />
+                      <strong>No hay pendientes importantes</strong>
+                      <span>Las obras tienen portada, descripción y una base visual suficiente.</span>
+                    </div>
+                  )}
+                </article>
+
+                <article className="admin-card admin-summary-card">
+                  <span className="eyebrow">Biblioteca</span>
+                  <h2>Contenido del sitio</h2>
+                  <div className="admin-summary-list">
+                    <button type="button" onClick={() => goToTab('trabajos')}><span><Briefcase size={17} /> Trabajos varios</span><strong>{stats.trabajos}</strong></button>
+                    <button type="button" onClick={() => goToTab('eventos')}><span><CalendarDays size={17} /> Eventos</span><strong>{stats.eventos}</strong></button>
+                    <button type="button" onClick={() => goToTab('categorias')}><span><Tags size={17} /> Categorías</span><strong>{stats.categorias}</strong></button>
+                    <button type="button" onClick={() => goToTab('textos')}><span><Type size={17} /> Textos editables</span><strong>{stats.textos}</strong></button>
+                  </div>
+                </article>
+              </div>
             </div>
           )}
 
           {['obras', 'trabajos', 'eventos'].includes(tab) && (
             <article className="admin-card">
               <div className="admin-card__header admin-card__header--row">
-                <div><span className="eyebrow">{RESOURCE_CONFIG[tab].label}</span><h2>Contenido cargado</h2></div>
+                <div>
+                  <span className="eyebrow">{RESOURCE_CONFIG[tab].label}</span>
+                  <h2>Contenido cargado</h2>
+                  <p>Buscá, filtrá y editá sin perder de vista el estado de cada publicación.</p>
+                </div>
                 <div className="admin-card__header-actions">
-                  {tab === 'obras' && <button className="btn btn--ghost" type="button" onClick={syncCatalog}>Sincronizar obras actuales</button>}
-                  <button className="btn btn--primary" type="button" onClick={() => openNew(tab)}>Nuevo</button>
+                  {tab === 'obras' && (
+                    <details className="admin-tools-menu">
+                      <summary><Settings2 size={16} aria-hidden="true" /> Herramientas</summary>
+                      <button type="button" onClick={syncCatalog}>Sincronizar obras actuales</button>
+                    </details>
+                  )}
+                  <button className="btn btn--primary" type="button" onClick={() => openNew(tab)}>
+                    <Plus size={17} aria-hidden="true" /> Nuevo
+                  </button>
                 </div>
               </div>
               <ContentList
-                title={RESOURCE_CONFIG[tab].label}
                 items={items[tab]}
                 kind={tab}
                 onEdit={editItem}
@@ -1694,9 +2056,20 @@ export default function Admin() {
           )}
 
           {tab === 'editar' && (
-            <ContentForm kind={kind} form={form} setForm={setForm} onSubmit={submitForm} onClear={() => setForm(EMPTY)} onUpload={upload} uploading={uploading} message={msg} categories={categories} />
+            <ContentForm
+              kind={kind}
+              form={form}
+              setForm={setForm}
+              onSubmit={submitForm}
+              onClear={() => setForm(EMPTY)}
+              onCancel={cancelEditor}
+              hasUnsavedChanges={hasUnsavedChanges}
+              onUpload={upload}
+              uploading={uploading}
+              message={msg}
+              categories={categories}
+            />
           )}
-
         </section>
       </div>
     </main>

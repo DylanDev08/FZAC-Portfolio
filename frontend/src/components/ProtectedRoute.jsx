@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
+import AdminPanelSkeleton from './AdminPanelSkeleton.jsx';
 import {
   bootstrapAdminProfile,
   clearToken,
@@ -40,16 +41,7 @@ export default function ProtectedRoute({ children }) {
     }
   }), []);
 
-  if (status === 'checking') {
-    return (
-      <main className="auth-loading">
-        <div className="container">
-          <span className="eyebrow">Validando acceso</span>
-          <h1>Cargando panel administrativo...</h1>
-        </div>
-      </main>
-    );
-  }
+  if (status === 'checking') return <AdminPanelSkeleton />;
 
   if (status === 'missing-config') {
     return (
