@@ -8,6 +8,7 @@ import { COLLECTIONS, deleteContentItem, getAdminEventos, getAdminTrabajos, save
 import { isStorageUploadReady, uploadAsset, uploadManyAssets } from '../services/storageService.js';
 import { deleteCategory, deleteSiteText, getCategories, getSiteTexts, saveCategory, saveSiteText } from '../services/adminContentService.js';
 import { subscribeAdminCrud } from '../services/realtimeService.js';
+import AdminPanelSkeleton from '../components/AdminPanelSkeleton.jsx';
 
 const EMPTY = {
   id: '',
@@ -1196,62 +1197,7 @@ function ContentForm({ kind, form, setForm, onSubmit, onClear, onCancel, hasUnsa
 }
 
 
-function AdminSkeleton() {
-  return (
-    <main className="admin-page admin-page--loading" aria-busy="true" aria-label="Cargando panel administrativo">
-      <div className="admin-shell">
-        <aside className="admin-sidebar admin-skeleton__sidebar">
-          <div className="admin-skeleton admin-skeleton--brand" />
-          <div className="admin-skeleton admin-skeleton--session" />
-          <div className="admin-skeleton__nav">
-            <div className="admin-skeleton admin-skeleton--label" />
-            {[0, 1, 2, 3].map((item) => <div className="admin-skeleton admin-skeleton--nav" key={item} />)}
-            <div className="admin-skeleton admin-skeleton--label" />
-            {[0, 1].map((item) => <div className="admin-skeleton admin-skeleton--nav" key={`settings-${item}`} />)}
-          </div>
-        </aside>
-
-        <section className="admin-content">
-          <div className="admin-topbar admin-skeleton__topbar">
-            <div className="admin-skeleton__copy">
-              <div className="admin-skeleton admin-skeleton--eyebrow" />
-              <div className="admin-skeleton admin-skeleton--title" />
-              <div className="admin-skeleton admin-skeleton--text" />
-            </div>
-            <div className="admin-skeleton admin-skeleton--button" />
-          </div>
-
-          <div className="admin-dashboard admin-dashboard--primary">
-            {[0, 1, 2, 3].map((item) => (
-              <article className="admin-stat admin-skeleton-card" key={item}>
-                <div className="admin-skeleton admin-skeleton--eyebrow" />
-                <div className="admin-skeleton admin-skeleton--metric" />
-                <div className="admin-skeleton admin-skeleton--text-short" />
-              </article>
-            ))}
-          </div>
-
-          <div className="admin-card admin-skeleton__panel">
-            <div className="admin-skeleton admin-skeleton--title-small" />
-            <div className="admin-skeleton admin-skeleton--text" />
-            {[0, 1, 2].map((item) => (
-              <div className="admin-skeleton-row" key={item}>
-                <div className="admin-skeleton admin-skeleton--thumb" />
-                <div className="admin-skeleton__row-copy">
-                  <div className="admin-skeleton admin-skeleton--title-small" />
-                  <div className="admin-skeleton admin-skeleton--text" />
-                  <div className="admin-skeleton admin-skeleton--text-short" />
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-      </div>
-    </main>
-  );
-}
-
-function ContentList({ title, items, kind, onEdit, onDelete, onStatusChange, statusUpdatingId }) {
+function ContentList({ items, kind, onEdit, onDelete, onStatusChange, statusUpdatingId }) {
   const cfg = RESOURCE_CONFIG[kind];
   const [query, setQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -1735,7 +1681,6 @@ export default function Admin() {
 
     try {
       const result = await cfg.save({ ...payload, id: form.id });
-      const status = result?.status || (form.id ? 200 : 201);
       notify(form.id ? 'Cambios guardados correctamente.' : 'Contenido creado correctamente.');
       setForm(EMPTY);
       setFormBaseline(JSON.stringify(EMPTY));
@@ -1863,7 +1808,7 @@ export default function Admin() {
     navigate('/login');
   }
 
-  if (loading) return <AdminSkeleton />;
+  if (loading) return <AdminPanelSkeleton />;
 
   return (
     <main className="admin-page">
@@ -2060,7 +2005,6 @@ export default function Admin() {
                 </div>
               </div>
               <ContentList
-                title={RESOURCE_CONFIG[tab].label}
                 items={items[tab]}
                 kind={tab}
                 onEdit={editItem}
