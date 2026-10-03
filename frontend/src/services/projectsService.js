@@ -7,6 +7,8 @@ const REMOVED_PUBLIC_IMAGES = new Set([
   '/assets/img/obras/marvel-funes/04.jpg',
 ]);
 
+const HIDDEN_PUBLIC_PROJECTS = new Set(['armstrong', 'amstrong', 'roldan']);
+
 const PRODUCTION_COPY_CUTOFF = Date.parse('2026-07-15T00:00:00.000Z');
 
 function normalizeBrandName(value = '') {
@@ -52,7 +54,9 @@ function applyProductionContent(project) {
 export async function getProjects() {
   try {
     const payload = await apiRequest('/fzac/works');
-    const remoteProjects = unwrapData(payload).map((item) => applyProductionContent(normalizeProject(item)));
+    const remoteProjects = unwrapData(payload)
+      .map((item) => applyProductionContent(normalizeProject(item)))
+      .filter((item) => !HIDDEN_PUBLIC_PROJECTS.has(item.slug));
     return remoteProjects.length ? orderProjects(remoteProjects) : orderProjects(fallbackProjects.map((item) => applyProductionContent(normalizeProject(item))));
   } catch (error) {
     console.warn('[FZAC] Backend/Supabase no disponible. Usando obras locales.', error.message);
