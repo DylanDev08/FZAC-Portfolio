@@ -12,7 +12,11 @@ const HIDDEN_PUBLIC_PROJECTS = new Set(['armstrong', 'amstrong', 'roldan']);
 const PRODUCTION_COPY_CUTOFF = Date.parse('2026-07-15T00:00:00.000Z');
 
 function normalizeBrandName(value = '') {
-  return String(value).replace(/Sliders Hamburger(?!s)/g, 'Sliders Hamburgers');
+  return String(value).replace(/Sliders Hamburger(?!s)/g, 'Sliders Hamburgers').replace(/Proyecto Obra Chuby|Proyecto Chuby/gi, 'Proyecto Obra Particular');
+}
+
+function firstImage(project = {}) {
+  return [project.portada, project.imagenPortada, project.coverImageUrl, ...(project.imagenes || []), ...(project.imagenesFinal || []), ...(project.imagenesProceso || []), ...(project.imagenesAntes || [])].find((value) => typeof value === 'string' && value.trim()) || '';
 }
 
 function cleanPublicImages(source = {}) {
@@ -123,10 +127,10 @@ export function normalizeProject(project) {
     ...project,
     id: project.id || safeSlug,
     slug: safeSlug,
-    nombre: normalizeBrandName(project.nombre || project.titulo || ''),
-    titulo: normalizeBrandName(project.titulo || ''),
+    nombre: safeSlug === 'proyecto-chuby' ? 'Proyecto Obra Particular' : normalizeBrandName(project.nombre || project.titulo || project.title || ''),
+    titulo: safeSlug === 'proyecto-chuby' ? 'Proyecto Obra Particular' : normalizeBrandName(project.titulo || project.title || ''),
     anio: project.anio || project.año || '',
-    portada: project.portada || project.imagenPortada || project.imagenes?.[0] || '',
+    portada: firstImage(project),
     imagenes: Array.isArray(project.imagenes) ? project.imagenes.filter(Boolean) : [],
     imagenesAntes: Array.isArray(project.imagenesAntes) ? project.imagenesAntes.filter(Boolean) : [],
     imagenesProceso: Array.isArray(project.imagenesProceso) ? project.imagenesProceso.filter(Boolean) : [],
@@ -136,7 +140,7 @@ export function normalizeProject(project) {
       ? project.sucursales.filter(Boolean).map((branch) => ({
           ...branch,
           nombre: normalizeBrandName(branch.nombre || ''),
-          portada: branch.portada || branch.imagenes?.[0] || '',
+          portada: firstImage(branch),
           imagenes: Array.isArray(branch.imagenes) ? branch.imagenes.filter(Boolean) : [],
           imagenesAntes: Array.isArray(branch.imagenesAntes) ? branch.imagenesAntes.filter(Boolean) : [],
           imagenesProceso: Array.isArray(branch.imagenesProceso) ? branch.imagenesProceso.filter(Boolean) : [],
