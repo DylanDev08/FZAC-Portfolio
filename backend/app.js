@@ -33,6 +33,8 @@ export function createApp() {
   app.use(rateLimit({
     windowMs: 15 * 60 * 1000,
     max: env.generalRateLimit,
+    // Render's liveness probe must not consume the public API's shared rate budget.
+    skip: (req) => req.path === '/health' && (req.method === 'GET' || req.method === 'HEAD'),
     standardHeaders: true,
     legacyHeaders: false,
     message: { error: 'Demasiadas solicitudes. Intentá nuevamente en unos minutos.' },
