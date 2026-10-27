@@ -12,7 +12,7 @@
   background-image:
     linear-gradient(90deg, rgba(7,7,7,.72) 0%, rgba(7,7,7,.40) 44%, rgba(7,7,7,.12) 100%),
     linear-gradient(0deg, rgba(7,7,7,.88) 0%, rgba(7,7,7,.14) 55%, rgba(7,7,7,.28) 100%),
-    url('/assets/img/obras/trabajos-varios/construccion-en-seco/IMG-20210509-WA0007-1-.jpeg');
+    url('/assets/img/obras/trabajos-varios/drywall/drywall-final-01.jpg');
   background-size: 100% 100%, 100% 100%, contain;
   background-position: center, center, center;
   background-repeat: no-repeat;
@@ -53,7 +53,7 @@
 .projects-hero__signals span { min-height:42px; display:flex; align-items:center; padding:0 13px; border-radius:6px; color:var(--color-text); background:rgba(255,255,255,.055); font-size:.88rem; font-weight:850; }
 
 .portfolio-workscape { position:relative; isolation:isolate; overflow:hidden; padding-top:clamp(34px,5vw,62px)!important; padding-bottom:clamp(76px,9vw,128px)!important; background:#08090b; }
-.portfolio-workscape::before { content:""; position:absolute; inset:0; z-index:-3; background-image:url('/assets/img/obras/trabajos-varios/construccion-en-seco/IMG-20210509-WA0007-1-.jpeg'); background-size:contain; background-position:center top; background-repeat:no-repeat; opacity:.24; }
+.portfolio-workscape::before { content:""; position:absolute; inset:0; z-index:-3; background-image:url('/assets/img/obras/trabajos-varios/drywall/drywall-final-01.jpg'); background-size:contain; background-position:center top; background-repeat:no-repeat; opacity:.24; }
 .portfolio-workscape::after { content:""; position:absolute; inset:0; z-index:-2; background:linear-gradient(180deg,rgba(5,6,8,.62) 0%,rgba(5,6,8,.88) 35%,rgba(5,6,8,.98) 100%); }
 .portfolio-workscape>.container { position:relative; z-index:1; }
 
