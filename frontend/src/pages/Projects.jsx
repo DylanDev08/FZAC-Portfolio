@@ -6,7 +6,7 @@ import Seo from '../components/Seo.jsx';
 import { filterProjects, getProjectTypes, groupProjectsByStatus } from '../lib/portfolio.js';
 import { getTrabajos } from '../services/contentService.js';
 import { getProjects } from '../services/projectsService.js';
-import '../styles/projectsBackground.css';
+// Project styles are loaded in main.jsx to prevent lazy CSS preload errors.
 
 export default function Projects() {
   const [projects, setProjects] = useState([]);
