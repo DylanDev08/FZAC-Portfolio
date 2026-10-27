@@ -4,6 +4,22 @@ import './styles/globals.css';
 import ErrorBoundary from './components/ErrorBoundary.jsx';
 import App from './App.jsx';
 
+// When a user opens a lazy route after a deploy, cached HTML may reference
+// CSS/JS chunks that are no longer available. Vite emits this specific event.
+// Try one page reload, while retaining the normal error boundary on failure.
+window.addEventListener('vite:preloadError', (event) => {
+  const key = 'fzac:preload-retry-at';
+  try {
+    const previous = Number(window.sessionStorage.getItem(key) || 0);
+    if (Date.now() - previous < 60_000) return;
+    window.sessionStorage.setItem(key, String(Date.now()));
+    event.preventDefault();
+    window.location.reload();
+  } catch {
+    // Keep standard error handling when browser storage is unavailable.
+  }
+});
+
 const rootElement = document.getElementById('root');
 
 function FatalFallback({ message }) {
