@@ -32,6 +32,13 @@ export default function ProjectCard({ project }) {
   const description = project.descripcion || 'Obra desarrollada por Fortaleza Construcciones.';
   const cover = project.portada || project.imagenes?.[0] || '';
   const hasCover = Boolean(cover);
+
+  const onImageError = (event) => {
+    const image = event.currentTarget;
+    if (image.dataset.fzacFallback === 'true') return;
+    image.dataset.fzacFallback = 'true';
+    image.src = '/assets/img/logo/fzac-logo.jpg';
+  };
   const projectPath = getProjectPath(project);
   const branchCount = Array.isArray(project.sucursales) ? project.sucursales.length : 0;
   const locationText = project.resumenPortada || (branchCount > 1
@@ -48,7 +55,7 @@ export default function ProjectCard({ project }) {
             alt={project.nombre}
             loading="lazy"
             decoding="async"
-            onError={(event) => { event.currentTarget.src = '/assets/img/logo/fzac-logo.jpg'; }}
+            onError={onImageError}
           />
         ) : (
           <span className="project-card__placeholder">Imagen no disponible</span>

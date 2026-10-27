@@ -22,8 +22,8 @@ export default class ErrorBoundary extends React.Component {
         <div className="container">
           <span className="eyebrow">Error de carga</span>
           <h1>No se pudo cargar el portfolio.</h1>
-          <p>{this.state.message}</p>
-          <p>Revisá la consola del navegador o reiniciá Vite con <strong>npm run dev</strong>.</p>
+          <p>Esta sección no se pudo cargar correctamente. Podés recargar el sitio e intentarlo de nuevo.</p>
+          <p><a href="/">Volver al inicio</a></p>
         </div>
       </main>
     );
