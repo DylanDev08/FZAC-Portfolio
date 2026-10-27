@@ -1,0 +1,78 @@
+name: One-time optimize oversized portfolio photos
+
+on:
+  push:
+    branches: [fix/portfolio-stability-gallery-20261027]
+    paths: [.github/workflows/optimize-portfolio-images.yml]
+
+permissions:
+  contents: write
+
+jobs:
+  optimize:
+    name: Compress eight large JPEG assets without resizing
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: true
+      - name: Install pinned image codec
+        run: python3 -m pip install --disable-pip-version-check Pillow==11.3.0
+      - name: Optimize large JPEGs with dimensions preserved
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          from PIL import Image
+          targets = [
+              "frontend/public/assets/img/obras/trabajos-varios/cielorraso/cielorras-fzac-04.jpg",
+              "frontend/public/assets/img/obras/trabajos-varios/cielorraso/cielorras-fzac-03.jpg",
+              "frontend/public/assets/img/obras/sliders-funes/sliders-funes-final-02.jpg",
+              "frontend/public/assets/img/obras/marvel-viamonte/marvel-viamonte-inicio-02.jpg",
+              "frontend/public/assets/img/obras/marvel-viamonte/marvel-viamonte-inicio-01.jpg",
+              "frontend/public/assets/img/obras/marvel-funes/01.jpg",
+              "frontend/public/assets/img/obras/sliders-funes/sliders-funes-final-04.jpg",
+              "frontend/public/assets/img/obras/sliders-funes/sliders-funes-final-01.jpg",
+          ]
+          before_total = after_total = 0
+          for name in targets:
+              path = Path(name)
+              before = path.stat().st_size
+              before_total += before
+              with Image.open(path) as image:
+                  if image.format != "JPEG":
+                      raise ValueError(f"Non-JPEG source: {name}")
+                  original_size = image.size
+                  params = {"format": "JPEG", "quality": 86, "optimize": True, "progressive": True, "subsampling": 2}
+                  if image.info.get("icc_profile"):
+                      params["icc_profile"] = image.info["icc_profile"]
+                  if image.info.get("exif"):
+                      params["exif"] = image.info["exif"]
+                  candidate = path.with_suffix(".fzac-opt.jpg")
+                  image.save(candidate, **params)
+              with Image.open(candidate) as result:
+                  assert result.size == original_size, f"Size changed: {name}"
+                  result.verify()
+              optimized = candidate.stat().st_size
+              if optimized < before * 0.75:
+                  candidate.replace(path)
+                  after = optimized
+              else:
+                  candidate.unlink()
+                  after = before
+              after_total += after
+              print(f"{name}: {before:,} -> {after:,} bytes ({100*(1-after/before):.1f}% reduction)")
+          print(f"TOTAL: {before_total:,} -> {after_total:,} bytes ({100*(1-after_total/before_total):.1f}% reduction)")
+          PY
+      - name: Commit image updates only to the current feature branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- frontend/public/assets/img/obras/
+          if git diff --cached --quiet; then
+            echo "No image met minimum savings threshold."
+            exit 0
+          fi
+          git commit -m "perf(portfolio): compress eight large JPEGs without resizing"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
