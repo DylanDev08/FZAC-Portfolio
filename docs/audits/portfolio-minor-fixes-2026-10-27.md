@@ -30,3 +30,14 @@ Revisión no destructiva de código y rutas públicas, sin modificar esquema de 
 3. Comprobar cambios de sucursal, flechas, miniaturas, ampliación y cierre con Escape.
 4. Abrir página tras un nuevo despliegue para comprobar recuperación de caché sin bucles de recarga.
 5. Revisar dominio canónico, sitemap y Search Console del portfolio si se desea indexarlo, sin confundir este sitio institucional con el e-commerce de materiales.
+
+## Segunda fase — build nuevo, móvil y optimización de fotos
+
+- Se construyó un **preview en Vercel** desde el PR #6 (deployment `dpl_HbPQyYJDDXKau4YSHjfMXESGigjY`): Vite terminó en estado READY y generó `dist/assets/Projects-Bfm2oPAD.css`. El preview está protegido por Vercel Authentication, por lo que su navegación pública no se pudo comprobar desde el navegador externo; no se modificó Deployment Protection.
+- Ese build identificó **dos referencias CSS a fotos ausentes**: `construccion-seco-01.jpg` y `IMG-20210509-WA0007-1-.jpeg`. Se corrigieron en `globals.css` y `projectsBackground.css`, usando una foto de drywall existente.
+- **Fotografías:** 128 archivos de imagen estáticos, 49,09 MB de peso total inicial. Se evaluaron las ocho de mayor peso (20.786.168 bytes). Cinco admitieron optimización JPEG progresiva sin cambio de dimensiones, sumando **6.379.699 bytes menos (30,7% de la muestra)**; tres se conservaron porque no llegaban al umbral mínimo del 25%. No se modificaron nombres, rutas, galerías ni portadas.
+- Se retiró el workflow temporal usado para comprimir fotografías, una vez realizado su commit. No quedaron tareas con permisos de escritura agregadas.
+- **Prueba móvil real sobre build aislado**: [GitHub Actions 40504963065](https://github.com/DylanDev08/FZAC-Portfolio/actions/runs/40504963065), Chromium, viewport `390×844`. Cuatro rutas evaluadas: `/`, `/proyectos`, `/obra/marvel`, `/obra/sliders-hamburger`. Las cuatro tuvieron HTTP 200, título y encabezado correctos, CSS cargado (incluida la hoja `Projects-Cn3hr9S3.css`), sin errores JS, sin respuestas 4xx de recursos `/assets/` y sin desbordamiento horizontal.
+- El workflow de Playwright se utilizó solo para la verificación y se eliminó después. El CI habitual del repositorio permanece sin cambios.
+- El resultado demuestra estabilidad del **build aislado** y de la ruta móvil, pero no sustituye una comprobación pública tras el despliegue; tampoco es una medición oficial de Lighthouse o Core Web Vitals.
+- El PR sigue separado de `main`. No se desplegó a producción ni se tocaron datos de obras, backend, hosting o Supabase.
