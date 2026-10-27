@@ -37,6 +37,13 @@ export function ProjectGallery({
   const sequence = useMemo(() => flattenGalleryGroups(groups), [groups]);
   const [activeIndex, setActiveIndex] = useState(0);
   const [isKeyboardActive, setIsKeyboardActive] = useState(false);
+
+  const useFallbackImage = (event) => {
+    const image = event.currentTarget;
+    if (image.dataset.fzacFallback === 'true') return;
+    image.dataset.fzacFallback = 'true';
+    image.src = '/assets/img/logo/fzac-logo.jpg';
+  };
   const safeActiveIndex = sequence.length ? Math.min(activeIndex, sequence.length - 1) : 0;
   const active = sequence[safeActiveIndex] || null;
 
@@ -61,7 +68,10 @@ export function ProjectGallery({
     const handleKeyDown = (event) => {
       if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
       const activeElement = document.activeElement;
-      const isTyping = activeElement && ['INPUT', 'TEXTAREA', 'SELECT'].includes(activeElement.tagName);
+      const isTyping = activeElement && (
+        ['INPUT', 'TEXTAREA', 'SELECT'].includes(activeElement.tagName) ||
+        activeElement.isContentEditable
+      );
       if (isTyping) return;
       event.preventDefault();
       goTo(safeActiveIndex + (event.key === 'ArrowRight' ? 1 : -1));
@@ -80,6 +90,10 @@ export function ProjectGallery({
       onFocus={() => setIsKeyboardActive(true)}
       onClick={() => setIsKeyboardActive(true)}
       onMouseEnter={() => setIsKeyboardActive(true)}
+      onMouseLeave={() => setIsKeyboardActive(false)}
+      onBlur={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget)) setIsKeyboardActive(false);
+      }}
       aria-label={`Galería seleccionada de ${projectName}. Usá las flechas izquierda y derecha del teclado para navegar.`}
     >
       <div className="obra-gallery-compact__top">
@@ -102,7 +116,7 @@ export function ProjectGallery({
             alt={active.alt || `${projectName} - imagen ${safeActiveIndex + 1}`}
             loading={safeActiveIndex === 0 ? 'eager' : 'lazy'}
             decoding="async"
-            onError={(event) => { event.currentTarget.src = '/assets/img/logo/fzac-logo.jpg'; }}
+            onError={useFallbackImage}
           />
           <span>{safeActiveIndex + 1}/{sequence.length}</span>
         </button>
@@ -120,9 +134,10 @@ export function ProjectGallery({
               type="button"
               className={`obra-gallery-miniatures__item ${index === safeActiveIndex ? 'is-active' : ''}`}
               onClick={() => setActiveIndex(index)}
+              aria-pressed={index === safeActiveIndex}
               aria-label={`Ver imagen ${index + 1}`}
             >
-              <img src={item.src} alt={item.alt || ''} loading="lazy" decoding="async" onError={(event) => { event.currentTarget.src = '/assets/img/logo/fzac-logo.jpg'; }} />
+              <img src={item.src} alt={item.alt || ''} loading="lazy" decoding="async" onError={useFallbackImage} />
             </button>
           ))}
         </div>
