@@ -1,6 +1,8 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import './styles/globals.css';
+// Load project styles once with the entry bundle to avoid CSS chunk preload failures.
+import './styles/projectsBackground.css';
 import ErrorBoundary from './components/ErrorBoundary.jsx';
 import App from './App.jsx';
 
